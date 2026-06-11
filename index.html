@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Energia AI — The New Standard in Building Energy</title>
+  <meta name="description" content="AI-driven HVAC optimization for commercial buildings. Energia AI tunes your building in real time to cut energy costs and protect comfort." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Archivo:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header class="site-header">
+    <nav class="header-left">
+      <a href="#platform">Our Platform</a>
+      <a href="#mission">Our Mission</a>
+    </nav>
+    <a class="logo" href="#top">ENERGIA<span>AI</span></a>
+    <div class="header-right">
+      <a class="btn btn-ghost" href="#cta">Log In</a>
+      <a class="btn btn-dark" href="#cta">Book a Demo</a>
+    </div>
+  </header>
+
+  <!-- ============ 3D SCROLL STAGE ============ -->
+  <section class="stage" id="top">
+    <div class="stage-sticky">
+      <canvas id="scene"></canvas>
+
+      <!-- Hero copy -->
+      <div class="hero">
+        <h1>The New Standard<br/>in Building Energy</h1>
+        <p>
+          AI-driven optimization. Engineering-grade control.<br/>
+          We tune the HVAC inside your commercial buildings in real time<br/>
+          to protect comfort and your bottom line.
+        </p>
+      </div>
+
+      <!-- Step panel (bottom-left) -->
+      <div class="steps" id="steps">
+        <div class="step" data-step="0">
+          <div class="step-row">
+            <span class="step-num">01</span>
+            <h3 class="step-title">Sense, instantly</h3>
+          </div>
+          <div class="step-body">
+            <p>
+              We connect to your BMS in days, not months. BACnet-native
+              integration streams every rooftop unit, chiller, and VAV box
+              into one live model of your building. No rip-and-replace.
+            </p>
+          </div>
+        </div>
+        <div class="step" data-step="1">
+          <div class="step-row">
+            <span class="step-num">02</span>
+            <h3 class="step-title">Learn the building</h3>
+          </div>
+          <div class="step-body">
+            <p>
+              Our AI learns your building's thermal dynamics — occupancy,
+              weather, and equipment behavior — and forecasts load hours
+              ahead, so every decision is made before demand hits.
+            </p>
+          </div>
+        </div>
+        <div class="step" data-step="2">
+          <div class="step-row">
+            <span class="step-num">03</span>
+            <h3 class="step-title">Optimize in real time</h3>
+          </div>
+          <div class="step-body">
+            <p>
+              Setpoints, staging, and schedules tuned continuously. Energia
+              writes optimal commands back to your air handlers and chiller
+              plant every few minutes — comfort always within spec.
+            </p>
+          </div>
+        </div>
+        <div class="step" data-step="3">
+          <div class="step-row">
+            <span class="step-num">04</span>
+            <h3 class="step-title">Savings, verified</h3>
+          </div>
+          <div class="step-body">
+            <p>
+              Measurement & verification built in. Track kWh, peak demand,
+              and carbon against your baseline — typically 15–30% HVAC
+              energy savings, reported transparently every month.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES ============ -->
+  <section class="features" id="platform">
+    <h2>Designed for today's buildings,<br/>beyond legacy controls.</h2>
+    <div class="features-grid">
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M32 6 8 20v24l24 14 24-14V20L32 6Z"/>
+            <path d="M8 20l24 14 24-14M32 34v24"/>
+            <circle cx="32" cy="22" r="5"/>
+          </svg>
+        </div>
+        <h3>Real-Time Optimization</h3>
+        <p>
+          We believe speed is a skill. Our platform recalculates optimal
+          setpoints every few minutes, steering chillers, air handlers, and
+          VAVs the moment conditions shift — not at the next scheduled tune-up.
+        </p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M6 50h52M10 50V30l10-6v26M28 50V18l10-6v38M46 50V26l10 6v18"/>
+            <path d="M6 12c8 6 14-4 22 2s14-4 22 2" stroke-dasharray="3 4"/>
+          </svg>
+        </div>
+        <h3>AI Load Forecasting</h3>
+        <p>
+          Weather is a core input. Our engine forecasts thermal load and
+          occupancy hours ahead, pre-cooling and pre-heating with cheap
+          off-peak energy first, filtered for cost and carbon.
+        </p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="28" cy="28" r="18"/>
+            <path d="M41 41l14 14M28 18v10l7 7"/>
+          </svg>
+        </div>
+        <h3>Fault Detection & Diagnostics</h3>
+        <p>
+          We use continuous diagnostics with secure API integrations to catch
+          stuck dampers, leaking valves, and short-cycling equipment — flagging
+          faults before they burn energy or comfort.
+        </p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M10 8h36v48H10zM18 20h20M18 30h20M18 40h12"/>
+            <path d="M46 16h8v40H22" stroke-dasharray="3 4"/>
+          </svg>
+        </div>
+        <h3>Verified Savings</h3>
+        <p>
+          We guarantee controlled outcomes by managing energy's biggest
+          variables — cost and comfort — with IPMVP-aligned measurement and
+          automated reporting for every building.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SPLIT / STANDARDS ============ -->
+  <section class="split" id="mission">
+    <div class="split-media">
+      <img
+        src="https://images.unsplash.com/photo-1581094271901-8022df4466f9?q=80&w=1400&auto=format&fit=crop"
+        alt="Engineers reviewing HVAC plant equipment in a commercial building"
+        loading="lazy"
+      />
+    </div>
+    <div class="split-copy">
+      <h2>Engineering-grade standards across every building.</h2>
+      <p>
+        Modeled on mission-critical environments, our process enforces
+        comfort compliance, protected setpoint limits, and zero-disruption
+        tolerance — your tenants never feel the optimization.
+      </p>
+      <a class="btn btn-dark btn-lg" href="#cta">Explore the Platform</a>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="faq">
+    <div class="faq-left">
+      <h2>How we work and how we deliver measurable savings.</h2>
+    </div>
+    <div class="faq-right">
+      <details open>
+        <summary>How fast can Energia AI be deployed?<span class="chev"></span></summary>
+        <p>
+          We move at the speed of your portfolio. Our platform connects to
+          your existing BMS over BACnet, eliminating the months wasted in
+          traditional retrofit cycles. One integration call activates our
+          optimization engine in days, not quarters — ensuring your most
+          critical buildings start saving immediately.
+        </p>
+      </details>
+      <details>
+        <summary>Does it work with my existing BMS?<span class="chev"></span></summary>
+        <p>
+          Yes. Energia AI is vendor-neutral and speaks BACnet, Modbus, and
+          Niagara natively. We layer intelligence on top of Johnson Controls,
+          Siemens, Honeywell, Schneider, and Trane systems without replacing
+          a single controller.
+        </p>
+      </details>
+      <details>
+        <summary>How much can we expect to save?<span class="chev"></span></summary>
+        <p>
+          Commercial buildings typically see 15–30% HVAC energy reduction in
+          the first year, plus peak-demand savings. Every kWh is measured
+          against an IPMVP-aligned baseline, so savings are verified — not
+          estimated.
+        </p>
+      </details>
+      <details>
+        <summary>How does Energia differ from a traditional BMS upgrade?<span class="chev"></span></summary>
+        <p>
+          A BMS executes fixed schedules; Energia thinks. We forecast load,
+          learn your building's thermal behavior, and continuously write
+          optimal commands back — a closed loop that gets smarter every day,
+          with no new hardware on the wall.
+        </p>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ DARK CTA + FOOTER ============ -->
+  <footer class="footer" id="cta">
+    <div class="footer-cta">
+      <h2>Cut your energy spend with AI,<br/>and comfort you can rely on.</h2>
+      <a class="btn btn-light btn-lg" href="#">Book a Demo</a>
+    </div>
+    <div class="footer-nav">
+      <a href="#platform"><span>Our Platform</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12h16M13 5l7 7-7 7"/></svg></a>
+      <a href="#mission"><span>Our Mission</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12h16M13 5l7 7-7 7"/></svg></a>
+      <a href="#cta"><span>Book a Demo</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12h16M13 5l7 7-7 7"/></svg></a>
+    </div>
+    <div class="footer-wordmark" aria-hidden="true">ENERGIA</div>
+    <div class="footer-bottom">
+      <span>© 2026 Energia AI, Inc.</span>
+      <div>
+        <a href="#">Privacy Policy</a>
+        <a href="#">ToS</a>
+        <span class="muted">Made for buildings</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============ SCRIPTS ============ -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+  </script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
