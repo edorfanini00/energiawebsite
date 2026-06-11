@@ -380,7 +380,7 @@ const roomGlow = new THREE.Mesh(
 roomGlow.position.set(-11, 20.8, 4.5);
 scene.add(roomGlow);
 
-function glowSprite(size, color, opacity) {
+function glowSprite(size, color, opacity, parent = scene) {
   const c = document.createElement("canvas");
   c.width = c.height = 128;
   const g = c.getContext("2d");
@@ -394,7 +394,7 @@ function glowSprite(size, color, opacity) {
     new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, opacity, depthWrite: false })
   );
   s.scale.setScalar(size);
-  scene.add(s);
+  parent.add(s);
   return s;
 }
 
@@ -700,6 +700,12 @@ const impactScene = new THREE.Scene();
 impactScene.fog = new THREE.Fog(BG, 70, 170);
 const impactCam = new THREE.PerspectiveCamera(35, 1, 0.1, 400);
 
+/* soft lighting so the mini buildings get gentle shading */
+impactScene.add(new THREE.HemisphereLight(0xffffff, 0xe8e8e2, 1.7));
+const impactSun = new THREE.DirectionalLight(0xffffff, 0.55);
+impactSun.position.set(40, 80, 30);
+impactScene.add(impactSun);
+
 /* rolling height field */
 function terrainH(x, z) {
   return (
@@ -768,18 +774,31 @@ const SITE_XZ = [
 
 const labelsRoot = document.getElementById("impact-labels");
 const pins = [];
-const needleGeo = new THREE.CylinderGeometry(0.07, 0.015, 1, 8);
-needleGeo.translate(0, 0.5, 0); // grow upward from the base
+
+/* mini building tower — banded floors, base pad, rooftop unit */
+function miniBuilding(h) {
+  const g = new THREE.Group();
+  const w = 2.4 + h * 0.07;
+  box(w + 1.0, 0.5, w + 0.8, C.slab, 0, 0.25, 0, g);                 // base pad
+  box(w, h, w - 0.3, C.shell, 0, h / 2 + 0.4, 0, g);                 // tower
+  const bands = Math.max(3, Math.round(h / 1.7));
+  for (let k = 1; k <= bands; k++) {
+    box(w + 0.08, 0.09, w - 0.22, C.dark, 0, 0.4 + (h / (bands + 1)) * k, 0, g);
+  }
+  box(w * 0.45, 0.7, w * 0.4, C.dark, w * 0.12, h + 0.75, 0, g);     // rooftop unit
+  return g;
+}
+
 for (let i = 0; i < SITES.length; i++) {
   const site = SITES[i];
   const [x, z] = SITE_XZ[i];
   const baseY = terrainH(x, z);
   const h = 5 + (site.v / 2.1) * 11;
 
-  const needle = new THREE.Mesh(needleGeo, new THREE.MeshBasicMaterial({ color: "#181a1f" }));
-  needle.position.set(x, baseY, z);
-  needle.scale.set(1, 0.001, 1);
-  impactScene.add(needle);
+  const mesh = miniBuilding(h);
+  mesh.position.set(x, baseY, z);
+  mesh.scale.y = 0.001;
+  impactScene.add(mesh);
 
   const el = document.createElement("div");
   el.className = "pin-label";
@@ -788,8 +807,33 @@ for (let i = 0; i < SITES.length; i++) {
     (site.note ? `<em>${site.note}</em>` : "");
   labelsRoot.appendChild(el);
 
-  pins.push({ needle, el, x, z, baseY, h, delay: i * 0.035 });
+  pins.push({ mesh, el, x, z, baseY, h, delay: i * 0.035 });
 }
+
+/* ---- green connection loop traveling building to building ---- */
+const loopOrder = [...pins].sort((a, b) => Math.atan2(a.z, a.x) - Math.atan2(b.z, b.x));
+const loopCurve = new THREE.CatmullRomCurve3(
+  loopOrder.map((p) => new THREE.Vector3(p.x, p.baseY + p.h + 1.6, p.z)),
+  true,
+  "catmullrom",
+  0.45
+);
+const LOOP_SEGS = 700;
+const loopFaint = new THREE.Mesh(
+  new THREE.TubeGeometry(loopCurve, LOOP_SEGS, 0.055, 8, true),
+  new THREE.MeshBasicMaterial({ color: "#a4c652", transparent: true, opacity: 0 })
+);
+/* the bright "snake" needs two meshes so it can wrap around the loop seam */
+const snakeGeoA = new THREE.TubeGeometry(loopCurve, LOOP_SEGS, 0.17, 10, true);
+const snakeGeoB = snakeGeoA.clone();
+const snakeMat = new THREE.MeshBasicMaterial({ color: "#8fbe3f", transparent: true, opacity: 0 });
+const snakeA = new THREE.Mesh(snakeGeoA, snakeMat);
+const snakeB = new THREE.Mesh(snakeGeoB, snakeMat);
+impactScene.add(loopFaint, snakeA, snakeB);
+const LOOP_TOTAL = snakeGeoA.index.count;
+snakeGeoA.setDrawRange(0, 0);
+snakeGeoB.setDrawRange(0, 0);
+const loopHead = glowSprite(2.8, "rgba(190,225,120,0.95)", 0, impactScene);
 
 /* scroll progress + counter */
 let impactProgress = 0;
@@ -838,21 +882,43 @@ function renderImpact(time) {
   impactCam.position.y += Math.sin(time * 0.00022) * 0.6;
   impactCam.lookAt(4 * p, -1, -6);
 
-  /* pins rise in with a slight stagger once the section is on screen */
+  /* buildings rise in with a slight stagger once the section is on screen */
   const inView = Math.min(1, Math.max(0, (p - 0.18) / 0.22));
   const w = impactCanvas.clientWidth || window.innerWidth;
   const hpx = impactCanvas.clientHeight || window.innerHeight;
   for (const pin of pins) {
     const grow = Math.min(1, Math.max(0.001, (inView - pin.delay) * 2.2));
-    pin.needle.scale.y = pin.h * grow;
+    pin.mesh.scale.y = grow;
 
-    /* project the pin tip into screen space and place the HTML label */
-    _iv.set(pin.x, pin.baseY + pin.h * grow + 0.4, pin.z).project(impactCam);
+    /* project the rooftop into screen space and place the HTML label */
+    _iv.set(pin.x, pin.baseY + pin.h * grow + 1.6, pin.z).project(impactCam);
     const sx = (_iv.x * 0.5 + 0.5) * w;
     const sy = (-_iv.y * 0.5 + 0.5) * hpx;
     const visible = _iv.z < 1 && grow > 0.65 && sx > -80 && sx < w + 80;
     pin.el.style.opacity = visible ? Math.min(1, (grow - 0.65) * 4) : 0;
     if (visible) pin.el.style.transform = `translate(${sx + 8}px, ${sy - 6}px)`;
+  }
+
+  /* green connection loop: a bright segment endlessly circling the portfolio */
+  const loopVis = Math.min(1, Math.max(0, (inView - 0.55) * 3));
+  loopFaint.material.opacity = 0.3 * loopVis;
+  snakeMat.opacity = 0.95 * loopVis;
+  loopHead.material.opacity = 0.85 * loopVis;
+  if (loopVis > 0) {
+    const headT = (time * 0.00006) % 1;
+    const LEN = 0.14;
+    const start = (headT - LEN + 1) % 1;
+    const i0 = Math.floor((LOOP_TOTAL * start) / 3) * 3;
+    const cnt = Math.floor((LOOP_TOTAL * LEN) / 3) * 3;
+    if (i0 + cnt <= LOOP_TOTAL) {
+      snakeGeoA.setDrawRange(i0, cnt);
+      snakeGeoB.setDrawRange(0, 0);
+    } else {
+      snakeGeoA.setDrawRange(i0, LOOP_TOTAL - i0);
+      snakeGeoB.setDrawRange(0, i0 + cnt - LOOP_TOTAL);
+    }
+    loopCurve.getPointAt(headT, _iv);
+    loopHead.position.copy(_iv);
   }
 
   impactRenderer.render(impactScene, impactCam);
