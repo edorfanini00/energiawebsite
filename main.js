@@ -94,7 +94,7 @@ const plaza = new THREE.Mesh(
   new THREE.MeshBasicMaterial({ map: dotTexture(), transparent: true, opacity: 0.8, depthWrite: false })
 );
 plaza.rotation.x = -Math.PI / 2;
-plaza.position.set(8, 0.03, 24);
+plaza.position.set(-12, 0.03, 20);
 scene.add(plaza);
 
 /* ============================================================
@@ -196,16 +196,49 @@ function rtu(x, z) {
 }
 rtu(-6, 1.5);
 rtu(0.5, -2.5);
-rtu(6.5, 2.0);
 
 /* cooling tower */
 const ct = new THREE.Group();
-ct.position.set(8.5, ROOF_Y + 0.5, -3.5);
+ct.position.set(-9, ROOF_Y + 0.5, -4);
 box(4.0, 3.0, 4.0, C.unit, 0, 1.5, 0, ct);
 for (let k = 0; k < 5; k++) box(4.1, 0.1, 3.6, C.dark, 0, 0.5 + k * 0.45, 0, ct);
 cyl(1.6, 1.9, 0.9, C.shell, 0, 3.4, 0, ct);
 makeFan(1.25, 0, 3.95, 0, ct);
 bld.add(ct);
+
+/* ---------- rooftop AHU (air handling unit, next to the riser) ---------- */
+const ahu = new THREE.Group();
+ahu.position.set(5.2, ROOF_Y + 0.5, -2.6);
+box(6.2, 0.25, 3.2, C.dark, 0, 0.12, 0, ahu);                 // curb
+box(6.0, 2.2, 3.0, C.unit, 0, 1.35, 0, ahu);                  // casing
+box(0.08, 1.8, 2.6, C.dark, -1.0, 1.35, 0, ahu);              // section seam
+box(0.08, 1.8, 2.6, C.dark, 1.2, 1.35, 0, ahu);               // section seam
+cyl(0.55, 0.55, 0.12, C.dark, -2.2, 1.35, 1.52, ahu).rotation.x = Math.PI / 2; // access port
+cyl(0.55, 0.55, 0.12, C.dark, 0.1, 1.35, 1.52, ahu).rotation.x = Math.PI / 2;
+makeFan(0.8, 2.2, 2.6, 0, ahu);                               // supply fan
+box(1.0, 0.8, 1.0, C.duct, 3.4, 1.0, -1.0, ahu);              // duct to riser
+bld.add(ahu);
+
+/* ---------- supply shaft: roof → floor-3 ceiling plenum ---------- */
+box(1.2, 4.6, 1.2, C.duct, 2.5, ROOF_Y - 2.2, -5.0, bld);
+
+/* ============================================================
+   GROUND-FLOOR MECHANICAL ROOM — boiler
+   ============================================================ */
+const mech = new THREE.Group();
+mech.position.set(6.5, 0, -3.2);
+scene.add(mech);
+box(5.5, 0.12, 4.5, C.dark, 0, 0.31, 0, mech);                 // mech-room pad
+cyl(1.0, 1.0, 2.3, C.unit, 0, 1.45, 0, mech);                  // boiler vessel
+const dome = new THREE.Mesh(new THREE.SphereGeometry(1.0, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat(C.unit));
+dome.position.set(0, 2.6, 0);
+dome.castShadow = true;
+mech.add(dome);
+box(0.9, 1.1, 0.12, C.dark, 0, 1.2, 1.0, mech);                // burner panel
+cyl(0.22, 0.22, 1.0, C.dark, 0, 3.2, 0, mech);                 // flue stack
+cyl(0.5, 0.5, 1.4, C.dark, 1.7, 0.75, 1.2, mech).rotation.z = Math.PI / 2; // circ pump
+box(0.6, 0.6, 0.6, C.unit, 2.4, 0.75, 1.2, mech);              // pump motor
+cyl(0.45, 0.45, 1.6, C.shell, -1.9, 1.1, 0.8, mech);           // expansion tank
 
 /* ============================================================
    GROUND-LEVEL CHILLER PLANT (beside building)
@@ -223,68 +256,65 @@ for (const px of [-1.6, 0.2, 1.9]) {
   box(0.7, 0.7, 0.7, C.unit, px + 0.75, 0.7, 1.6, plant);
 }
 
-/* chilled-water pipe run (coral, like the red lines in the reference) */
-function pipe(points, color, radius = 0.14) {
-  const curve = new THREE.CatmullRomCurve3(points.map((p) => new THREE.Vector3(...p)));
-  const tube = new THREE.Mesh(
-    new THREE.TubeGeometry(curve, 80, radius, 8),
-    new THREE.MeshBasicMaterial({ color })
-  );
-  scene.add(tube);
-  return curve;
-}
-pipe(
+/* ============================================================
+   THE JOURNEY LINE — street → lobby → boiler → riser → AHU → VAV
+   Drawn progressively as the user scrolls.
+   ============================================================ */
+const routeCurve = new THREE.CatmullRomCurve3(
   [
-    [21, 0.5, 3.2],
-    [21, 0.35, 9],
-    [14, 0.35, 12],
-    [2, 0.35, 12.5],
-    [-6, 0.35, 18],
-    [-7, 0.35, 30],
-  ],
-  "#ff6a5e"
-);
-pipe(
-  [
-    [22, 0.5, 3.0],
-    [22.4, 0.35, 10],
-    [16, 0.35, 13.6],
-    [3, 0.35, 14.2],
-    [-4.4, 0.35, 19.6],
-    [-5.4, 0.35, 31],
-  ],
-  "#ff8a7e",
-  0.11
-);
-/* pipes from chiller up to cooling tower */
-pipe(
-  [
-    [18.2, 1.6, 0.2],
-    [15.5, 6, -2.6],
-    [13.4, 12, -3.4],
-    [11.2, ROOF_Y + 1.2, -3.5],
-  ],
-  "#9fb8cf",
-  0.16
+    [-28, 0.5, 27],              // out on the street
+    [-19, 0.5, 23.5],
+    [-12, 0.5, 20],              // across the dotted plaza
+    [-4, 0.7, 12],
+    [-1, 1.0, 7],                // through the front colonnade
+    [1.5, 1.2, 2],               // across the ground floor
+    [4.5, 1.5, -1.4],
+    [6.5, 3.1, -3.2],            // up and over the boiler
+    [9.6, 3.9, -4.2],            // join the riser corner
+    [10.45, 8, -4.3],            // climbing alongside the riser (visible face)
+    [10.45, 14, -4.3],
+    [10.1, ROOF_Y + 1.4, -4.5],  // exit at the roof
+    [8.6, ROOF_Y + 1.6, -3.8],   // into the AHU
+    [5.2, ROOF_Y + 1.9, -2.6],   // through the AHU sections
+    [3.2, ROOF_Y + 1.4, -3.8],   // out the supply side
+    [3.05, ROOF_Y - 2, -4.25],   // down the supply shaft (visible face)
+    [3.0, 13.95, -3.5],          // into the floor-3 plenum
+    [-1.5, 13.35, -0.95],        // along the trunk duct (just below it)
+    [-7.2, 13.35, -0.95],        // reach the VAV branch
+    [-8, 13.3, 0.6],             // through the VAV box
+    [-8, 12.7, 3.5],             // out the diffuser
+    [-8, 11.6, 5.2],             // into the room
+  ].map((p) => new THREE.Vector3(...p)),
+  false,
+  "catmullrom",
+  0.08                            // low tension → crisp, near-orthogonal corners
 );
 
-/* ============================================================
-   SUPPLY-AIR FLOW — glowing particle stream
-   ============================================================ */
-const flowCurve = new THREE.CatmullRomCurve3(
-  [
-    [8.5, ROOF_Y + 4.2, -3.5],   // cooling tower top
-    [9.5, ROOF_Y + 1.5, -5.0],   // riser inlet
-    [9.5, 10.6, -5.2],           // down the riser
-    [6, 10.3, -1.5],             // into floor-3 trunk duct
-    [-4, 10.3, -1.5],            // along the duct
-    [-8, 9.0, 3.5],              // out the diffuser
-    [-8, 2.5, 10],               // descending into plaza
-    [-2, 0.7, 16],               // skimming the dotted plaza
-    [10, 0.6, 22],
-    [22, 0.6, 28],
-  ].map((p) => new THREE.Vector3(...p))
+/* coral tube + white core, revealed via drawRange as you scroll */
+const TUBE_SEGS = 900;
+const routeTube = new THREE.Mesh(
+  new THREE.TubeGeometry(routeCurve, TUBE_SEGS, 0.17, 12),
+  new THREE.MeshBasicMaterial({ color: "#ff5d4e" })
 );
+const routeCore = new THREE.Mesh(
+  new THREE.TubeGeometry(routeCurve, TUBE_SEGS, 0.065, 8),
+  new THREE.MeshBasicMaterial({ color: "#ffd9d4" })
+);
+routeTube.renderOrder = 2;
+routeCore.renderOrder = 3;
+scene.add(routeTube, routeCore);
+const TUBE_INDEX = routeTube.geometry.index.count;
+const CORE_INDEX = routeCore.geometry.index.count;
+routeTube.geometry.setDrawRange(0, 0);
+routeCore.geometry.setDrawRange(0, 0);
+
+/* destination room glow (pulses once the line arrives at the VAV) */
+const roomGlow = new THREE.Mesh(
+  new THREE.BoxGeometry(8, 2.9, 6.5),
+  new THREE.MeshBasicMaterial({ color: 0x6db4ff, transparent: true, opacity: 0, depthWrite: false })
+);
+roomGlow.position.set(-8, 12.6, 3.2);
+scene.add(roomGlow);
 
 function glowSprite(size, color, opacity) {
   const c = document.createElement("canvas");
@@ -304,14 +334,15 @@ function glowSprite(size, color, opacity) {
   return s;
 }
 
-const N_PARTICLES = 90;
+/* energy pulses traveling along the revealed portion of the line */
+const N_PARTICLES = 26;
 const particles = [];
 for (let i = 0; i < N_PARTICLES; i++) {
-  const s = glowSprite(0.55 + Math.random() * 0.5, "rgba(95,160,255,0.9)", 0.55);
-  particles.push({ s, t: i / N_PARTICLES, speed: 0.00045 + Math.random() * 0.0002 });
+  const s = glowSprite(0.7 + Math.random() * 0.4, "rgba(255,140,120,0.95)", 0.6);
+  particles.push({ s, t: Math.random(), speed: 0.0012 + Math.random() * 0.0008 });
 }
-const comet = glowSprite(4.2, "rgba(120,180,255,0.95)", 0.9);
-let cometT = 0;
+/* glowing head riding the tip of the line as it draws */
+const comet = glowSprite(3.6, "rgba(255,150,130,0.95)", 0.95);
 
 /* ============================================================
    SURROUNDINGS — context buildings, trees, tiny people
@@ -352,25 +383,30 @@ function person(x, z) {
 /* ============================================================
    SCROLL CHOREOGRAPHY
    ============================================================ */
+/* camera follows the line: street → boiler → riser/AHU → VAV room → out */
 const camPos = new THREE.CatmullRomCurve3(
   [
-    [40, 30, 42],     // hero — wide iso view
-    [22, 30, 26],     // 01 — over the rooftop plant
-    [30, 8, 20],      // 02 — down at the chiller plant
-    [26, 13, 26],     // 03 — looking into the cutaway floors
-    [16, 6, 38],      // 04 — low over the plaza / air stream
-    [48, 32, 50],     // exit — pull way out
-  ].map((p) => new THREE.Vector3(...p))
+    [40, 30, 42],      // hero — wide iso view
+    [-16, 9, 46],      // 01 — line approaching from the street
+    [20, 5, 14],       // 02 — looking into the ground floor, at the boiler
+    [32, 19, 16],      // 03 — riser climbing to the rooftop AHU
+    [3, 13.2, 24],     // 04 — level with floor 3, looking into the VAV zone
+    [48, 32, 50],      // exit — pull way out
+  ].map((p) => new THREE.Vector3(...p)),
+  false,
+  "centripetal"      // no overshoot — keeps the camera outside the building
 );
 const camTarget = new THREE.CatmullRomCurve3(
   [
     [0, 8, 0],
-    [2, ROOF_Y + 1, -1],
-    [19, 1.5, 1],
-    [-2, 9, 0],
-    [2, 1, 16],
+    [-10, 1, 18],      // the line on the plaza
+    [6.5, 1.7, -3.2],  // the boiler
+    [10, 12, -4],      // the riser / AHU
+    [-6.5, 13.4, 1.5], // the VAV box
     [0, 9, 0],
-  ].map((p) => new THREE.Vector3(...p))
+  ].map((p) => new THREE.Vector3(...p)),
+  false,
+  "centripetal"
 );
 
 let progress = 0;
@@ -381,7 +417,7 @@ ScrollTrigger.create({
   trigger: ".stage",
   start: "top top",
   end: "bottom bottom",
-  scrub: 0.8,
+  scrub: 0.5,
   onUpdate(self) {
     progress = self.progress;
 
@@ -389,11 +425,6 @@ ScrollTrigger.create({
     const h = Math.max(0, 1 - progress / 0.09);
     hero.style.opacity = h;
     hero.style.transform = `translateY(${progress * -160}px)`;
-
-    /* step activation: 4 windows between 8% and 92% */
-    let idx = -1;
-    if (progress > 0.08) idx = Math.min(3, Math.floor(((progress - 0.08) / 0.84) * 4));
-    steps.forEach((el, i) => el.classList.toggle("active", i === idx));
   },
 });
 
@@ -417,7 +448,13 @@ function tick(time) {
   requestAnimationFrame(tick);
 
   /* extra smoothing on top of scrub */
-  smooth += (progress - smooth) * 0.07;
+  smooth += (progress - smooth) * 0.12;
+
+  /* step activation follows the smoothed camera, so text and view agree */
+  let idx = -1;
+  if (smooth > 0.08) idx = Math.min(3, Math.floor(((smooth - 0.08) / 0.84) * 4));
+  steps.forEach((el, i) => el.classList.toggle("active", i === idx));
+
   const u = Math.min(0.999, Math.max(0.001, smooth));
   camPos.getPoint(u, _p);
   camTarget.getPoint(u, _t);
@@ -436,15 +473,35 @@ function tick(time) {
     c.material.opacity = 0.2 + 0.16 * (0.5 + 0.5 * Math.sin(time * 0.0025 + i));
   }
 
-  /* particles along the supply curve */
+  /* ---- journey line reveal, tied to scroll ---- */
+  const reveal = Math.min(1, Math.max(0, (smooth - 0.05) / 0.85));
+  routeTube.geometry.setDrawRange(0, Math.floor(TUBE_INDEX * reveal));
+  routeCore.geometry.setDrawRange(0, Math.floor(CORE_INDEX * reveal));
+
+  /* glowing head rides the tip of the line
+     (getPointAt = arc-length parameterized, matching the tube's drawRange) */
+  if (reveal > 0.001 && reveal < 0.999) {
+    comet.material.opacity = 0.95;
+    routeCurve.getPointAt(reveal, _p);
+    comet.position.copy(_p);
+  } else {
+    comet.material.opacity = 0;
+  }
+
+  /* energy pulses flow only through the revealed portion */
   for (const pt of particles) {
     pt.t = (pt.t + pt.speed) % 1;
-    flowCurve.getPoint(pt.t, _p);
-    pt.s.position.copy(_p);
+    const visible = reveal > 0.02;
+    pt.s.material.opacity = visible ? 0.55 : 0;
+    if (visible) {
+      routeCurve.getPointAt(pt.t * reveal, _p);
+      pt.s.position.copy(_p);
+    }
   }
-  cometT = (cometT + 0.0011) % 1;
-  flowCurve.getPoint(cometT, _p);
-  comet.position.copy(_p);
+
+  /* destination room lights up when the line arrives */
+  const arrived = Math.min(1, Math.max(0, (reveal - 0.93) / 0.07));
+  roomGlow.material.opacity = arrived * (0.13 + 0.05 * Math.sin(time * 0.003));
 
   renderer.render(scene, camera);
 }
