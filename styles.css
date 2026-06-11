@@ -76,14 +76,15 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
   font-weight: 900;
   font-size: 19px;
   letter-spacing: 0.06em;
+  color: #000;
 }
-.logo span { color: var(--blue); margin-left: 2px; }
+.logo span { color: #000; margin-left: 2px; }
 .header-right { display: flex; gap: 10px; justify-content: flex-end; }
 
 /* ============ 3D Stage ============ */
 .stage {
   position: relative;
-  height: 560vh;            /* scroll length of the 3D journey */
+  height: 760vh;            /* scroll length of the 3D journey (incl. station dwells) */
   background: var(--ice);
 }
 .stage-sticky {

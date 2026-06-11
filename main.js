@@ -46,7 +46,7 @@ const C = {
   duct: "#cfdbe7",
   unit: "#e8eef5",
   dark: "#b9c7d6",
-  accent: "#5b8dff",
+  accent: "#22c55e",
 };
 
 function box(w, h, d, color, x, y, z, parent = scene) {
@@ -130,13 +130,16 @@ box(W + 0.6, 1.0, 0.5, C.shell, 0, ROOF_Y + 0.75, -D / 2, bld);
 box(0.5, 1.0, D, C.shell, -W / 2, ROOF_Y + 0.75, 0, bld);
 box(0.5, 1.0, D, C.shell, W / 2, ROOF_Y + 0.75, 0, bld);
 
-/* ---------- per-floor HVAC: ducts, VAV boxes, diffusers, desks ---------- */
+/* ---------- per-floor HVAC: minimalist — detail only where the journey goes ---------- */
 const diffuserCones = [];
+const JOURNEY_FLOOR = 3; // the floor the line ends on
 for (let i = 0; i < FLOORS; i++) {
   const ceilY = (i + 1) * FH - 0.55;
-  // main ceiling trunk duct (runs along x)
+  // main ceiling trunk duct (runs along x) — kept simple on every floor
   box(W - 5, 0.7, 0.85, C.duct, -1, ceilY, -1.5, bld);
-  // branches toward front with VAV box + diffusers
+  if (i !== JOURNEY_FLOOR) continue;
+
+  // detailed branches with VAV boxes + diffusers, only on the journey floor
   for (const bx of [-8, -1, 6]) {
     box(0.6, 0.6, 5.5, C.duct, bx, ceilY, 1.2, bld);
     box(1.5, 1.0, 1.6, C.dark, bx, ceilY, -0.2, bld); // VAV box
@@ -151,10 +154,10 @@ for (let i = 0; i < FLOORS; i++) {
     diffuserCones.push(cone);
     box(1.1, 0.18, 1.1, C.shell, bx, ceilY - 0.32, 3.5, bld);
   }
-  // sparse furniture
-  for (const fx of [-9, -4.5, 1, 5.5, 9]) {
-    box(2.2, 0.9, 1.1, C.unit, fx + (i % 2) * 1.2, i * FH + 0.95, 3.8 - (i % 3), bld);
-  }
+  // the destination VAV (bx = -8) gets full detail: damper actuator + reheat coil
+  box(0.5, 0.42, 0.5, C.accent, -7.05, ceilY + 0.2, -0.2, bld);  // damper actuator
+  box(0.9, 0.7, 0.6, C.dark, -8, ceilY - 0.1, 0.9, bld);          // reheat coil section
+  cyl(0.09, 0.09, 1.3, C.dark, -8.75, ceilY - 0.5, 0.9, bld);     // hot-water tap to coil
 }
 
 /* ---------- vertical supply riser ---------- */
@@ -217,6 +220,12 @@ cyl(0.55, 0.55, 0.12, C.dark, -2.2, 1.35, 1.52, ahu).rotation.x = Math.PI / 2; /
 cyl(0.55, 0.55, 0.12, C.dark, 0.1, 1.35, 1.52, ahu).rotation.x = Math.PI / 2;
 makeFan(0.8, 2.2, 2.6, 0, ahu);                               // supply fan
 box(1.0, 0.8, 1.0, C.duct, 3.4, 1.0, -1.0, ahu);              // duct to riser
+/* outside-air intake hood with louvers */
+box(0.9, 1.5, 2.4, C.dark, -3.4, 1.5, 0, ahu);
+for (let k = 0; k < 4; k++) box(0.98, 0.07, 2.2, C.shell, -3.4, 1.0 + k * 0.34, 0, ahu);
+/* internal sections shown as bands: filter (grey) → cooling coil (green) */
+box(0.12, 2.0, 3.06, "#b6c6d6", -0.4, 1.35, 0, ahu);          // filter bank
+box(0.12, 2.0, 3.06, "#9fd8bb", 0.55, 1.35, 0, ahu);          // cooling coil
 bld.add(ahu);
 
 /* ---------- supply shaft: roof → floor-3 ceiling plenum ---------- */
@@ -239,6 +248,14 @@ cyl(0.22, 0.22, 1.0, C.dark, 0, 3.2, 0, mech);                 // flue stack
 cyl(0.5, 0.5, 1.4, C.dark, 1.7, 0.75, 1.2, mech).rotation.z = Math.PI / 2; // circ pump
 box(0.6, 0.6, 0.6, C.unit, 2.4, 0.75, 1.2, mech);              // pump motor
 cyl(0.45, 0.45, 1.6, C.shell, -1.9, 1.1, 0.8, mech);           // expansion tank
+/* hot-water supply & return piping toward the riser */
+cyl(0.15, 0.15, 2.6, C.dark, 1.55, 2.45, -0.6, mech).rotation.z = Math.PI / 2;
+cyl(0.15, 0.15, 1.7, C.dark, 2.8, 1.65, -0.6, mech);
+cyl(0.15, 0.15, 2.1, C.dark, 1.25, 2.0, 0.45, mech).rotation.z = Math.PI / 2;
+/* isolation valves (green handwheels) + gauge */
+cyl(0.28, 0.28, 0.12, C.accent, 1.0, 2.78, -0.6, mech);
+cyl(0.28, 0.28, 0.12, C.accent, 1.0, 2.33, 0.45, mech);
+cyl(0.18, 0.18, 0.08, "#ffffff", 0.55, 1.95, 1.02, mech).rotation.x = Math.PI / 2; // pressure gauge
 
 /* ============================================================
    GROUND-LEVEL CHILLER PLANT (beside building)
@@ -290,15 +307,15 @@ const routeCurve = new THREE.CatmullRomCurve3(
   0.08                            // low tension → crisp, near-orthogonal corners
 );
 
-/* coral tube + white core, revealed via drawRange as you scroll */
+/* green tube + pale core, revealed via drawRange as you scroll */
 const TUBE_SEGS = 900;
 const routeTube = new THREE.Mesh(
   new THREE.TubeGeometry(routeCurve, TUBE_SEGS, 0.17, 12),
-  new THREE.MeshBasicMaterial({ color: "#ff5d4e" })
+  new THREE.MeshBasicMaterial({ color: "#22c55e" })
 );
 const routeCore = new THREE.Mesh(
   new THREE.TubeGeometry(routeCurve, TUBE_SEGS, 0.065, 8),
-  new THREE.MeshBasicMaterial({ color: "#ffd9d4" })
+  new THREE.MeshBasicMaterial({ color: "#d9f7e4" })
 );
 routeTube.renderOrder = 2;
 routeCore.renderOrder = 3;
@@ -311,7 +328,7 @@ routeCore.geometry.setDrawRange(0, 0);
 /* destination room glow (pulses once the line arrives at the VAV) */
 const roomGlow = new THREE.Mesh(
   new THREE.BoxGeometry(8, 2.9, 6.5),
-  new THREE.MeshBasicMaterial({ color: 0x6db4ff, transparent: true, opacity: 0, depthWrite: false })
+  new THREE.MeshBasicMaterial({ color: 0x5fdc8f, transparent: true, opacity: 0, depthWrite: false })
 );
 roomGlow.position.set(-8, 12.6, 3.2);
 scene.add(roomGlow);
@@ -323,7 +340,7 @@ function glowSprite(size, color, opacity) {
   const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
   grad.addColorStop(0, "rgba(255,255,255,1)");
   grad.addColorStop(0.25, color);
-  grad.addColorStop(1, "rgba(110,170,255,0)");
+  grad.addColorStop(1, "rgba(110,235,170,0)");
   g.fillStyle = grad;
   g.fillRect(0, 0, 128, 128);
   const s = new THREE.Sprite(
@@ -338,25 +355,111 @@ function glowSprite(size, color, opacity) {
 const N_PARTICLES = 26;
 const particles = [];
 for (let i = 0; i < N_PARTICLES; i++) {
-  const s = glowSprite(0.7 + Math.random() * 0.4, "rgba(255,140,120,0.95)", 0.6);
+  const s = glowSprite(0.7 + Math.random() * 0.4, "rgba(120,235,170,0.95)", 0.6);
   particles.push({ s, t: Math.random(), speed: 0.0012 + Math.random() * 0.0008 });
 }
 /* glowing head riding the tip of the line as it draws */
-const comet = glowSprite(3.6, "rgba(255,150,130,0.95)", 0.95);
+const comet = glowSprite(3.6, "rgba(130,255,180,0.95)", 0.95);
 
 /* ============================================================
-   SURROUNDINGS — context buildings, trees, tiny people
+   SYSTEM STATIONS — the line "docks" at each system, scroll
+   gets sticky there, and a label fades in
+   ============================================================ */
+function makeLabel(text, x, y, z) {
+  const c = document.createElement("canvas");
+  c.width = 512;
+  c.height = 128;
+  const g = c.getContext("2d");
+  g.font = "700 44px Archivo, Inter, sans-serif";
+  const w = g.measureText(text).width + 76;
+  g.fillStyle = "rgba(11,13,26,0.92)";
+  g.beginPath();
+  g.roundRect((512 - w) / 2, 28, w, 72, 36);
+  g.fill();
+  g.fillStyle = "#5ee395";
+  g.beginPath();
+  g.arc((512 - w) / 2 + 36, 64, 9, 0, Math.PI * 2);
+  g.fill();
+  g.fillStyle = "#ffffff";
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  g.fillText(text, 256 + 14, 66);
+  const s = new THREE.Sprite(
+    new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, opacity: 0, depthTest: false })
+  );
+  s.scale.set(7.2, 1.8, 1);
+  s.position.set(x, y, z);
+  s.renderOrder = 10;
+  scene.add(s);
+  return s;
+}
+
+/* world positions where the line reaches each key system */
+const stations = [
+  { point: new THREE.Vector3(6.5, 3.1, -3.2),            label: makeLabel("BOILER PLANT", 6.5, 6.2, -3.2) },
+  { point: new THREE.Vector3(5.2, ROOF_Y + 1.9, -2.6),   label: makeLabel("ROOFTOP AHU", 5.2, ROOF_Y + 5.2, -2.6) },
+  { point: new THREE.Vector3(-8, 13.3, 0.6),             label: makeLabel("VAV ZONE — FLOOR 4", -8, 16.6, 0.6) },
+];
+
+/* find the arc-length parameter u where the curve passes each station */
+const _sv = new THREE.Vector3();
+function findU(target) {
+  let best = 0, bd = Infinity;
+  for (let i = 0; i <= 600; i++) {
+    const u = i / 600;
+    routeCurve.getPointAt(u, _sv);
+    const d = _sv.distanceToSquared(target);
+    if (d < bd) { bd = d; best = u; }
+  }
+  return best;
+}
+for (const st of stations) st.u = findU(st.point);
+
+/* journey-space stop values (same mapping used by the reveal: j = 0.05 + 0.85u) */
+const stopsJ = stations.map((st) => Math.min(0.98, 0.05 + 0.85 * st.u));
+
+/* piecewise scroll → journey map with a flat "dwell" at each station.
+   Smoothstep easing inside each travel segment decelerates into the
+   stop and accelerates out — the scroll friction. */
+const DWELL = 0.085;
+const journeySegs = [];
+{
+  const knots = [0, ...stopsJ, 1];
+  const gaps = knots.slice(1).map((v, i) => v - knots[i]);
+  const totalGap = gaps.reduce((a, b) => a + b, 0);
+  const travelTotal = 1 - DWELL * stopsJ.length;
+  let s = 0;
+  for (let i = 0; i < gaps.length; i++) {
+    const w = travelTotal * (gaps[i] / totalGap);
+    journeySegs.push([s, s + w, knots[i], knots[i + 1]]);
+    s += w;
+    if (i < stopsJ.length) {
+      journeySegs.push([s, s + DWELL, knots[i + 1], knots[i + 1]]);
+      s += DWELL;
+    }
+  }
+}
+function journeyMap(x) {
+  for (const [s0, s1, j0, j1] of journeySegs) {
+    if (x <= s1) {
+      const t = s1 === s0 ? 1 : (x - s0) / (s1 - s0);
+      const e = t * t * (3 - 2 * t); // smoothstep = friction at both ends
+      return j0 + (j1 - j0) * e;
+    }
+  }
+  return 1;
+}
+
+/* ============================================================
+   SURROUNDINGS — kept minimal: a few context masses, a few trees
    ============================================================ */
 const bgBuildings = [
   [-34, 10, -16, 9, 20, 9],
-  [-26, 7, -30, 8, 14, 8],
   [30, 6, -22, 10, 12, 10],
   [40, 9, -2, 8, 18, 8],
-  [-40, 4, 8, 7, 8, 7],
 ];
 for (const [x, , z, w, h, d] of bgBuildings) {
   box(w, h, d, C.wall, x, h / 2, z);
-  box(w * 0.5, 1, d * 0.5, C.dark, x, h + 0.5, z); // rooftop unit silhouette
 }
 function tree(x, z, s = 1) {
   cyl(0.12 * s, 0.16 * s, 0.9 * s, C.dark, x, 0.45 * s, z);
@@ -365,20 +468,7 @@ function tree(x, z, s = 1) {
   crown.castShadow = true;
   scene.add(crown);
 }
-[[-16, 14], [-19, 19], [16, 16, 1.3], [24, 12], [28, 18, 0.8], [-24, 4, 1.2], [-20, -10], [34, 8, 1.1]].forEach(
-  ([x, z, s]) => tree(x, z, s || 1)
-);
-function person(x, z) {
-  const g = new THREE.Group();
-  cyl(0.14, 0.18, 0.55, C.dark, 0, 0.28, 0, g);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 10), mat(C.dark));
-  head.position.y = 0.68;
-  head.castShadow = true;
-  g.add(head);
-  g.position.set(x, 0, z);
-  scene.add(g);
-}
-[[-13, 10], [-10, 12.5], [15, 9], [17.5, 11], [3, 17], [-2, 21]].forEach(([x, z]) => person(x, z));
+[[-16, 14], [16, 16, 1.3], [24, 12], [-24, 4, 1.2]].forEach(([x, z, s]) => tree(x, z, s || 1));
 
 /* ============================================================
    SCROLL CHOREOGRAPHY
@@ -450,12 +540,15 @@ function tick(time) {
   /* extra smoothing on top of scrub */
   smooth += (progress - smooth) * 0.12;
 
-  /* step activation follows the smoothed camera, so text and view agree */
+  /* scroll → journey with dwell stops at each system */
+  const j = journeyMap(smooth);
+
+  /* step activation follows the journey, so text and view agree */
   let idx = -1;
-  if (smooth > 0.08) idx = Math.min(3, Math.floor(((smooth - 0.08) / 0.84) * 4));
+  if (j > 0.08) idx = Math.min(3, Math.floor(((j - 0.08) / 0.84) * 4));
   steps.forEach((el, i) => el.classList.toggle("active", i === idx));
 
-  const u = Math.min(0.999, Math.max(0.001, smooth));
+  const u = Math.min(0.999, Math.max(0.001, j));
   camPos.getPoint(u, _p);
   camTarget.getPoint(u, _t);
   /* gentle idle drift so the hero isn't static */
@@ -473,10 +566,16 @@ function tick(time) {
     c.material.opacity = 0.2 + 0.16 * (0.5 + 0.5 * Math.sin(time * 0.0025 + i));
   }
 
-  /* ---- journey line reveal, tied to scroll ---- */
-  const reveal = Math.min(1, Math.max(0, (smooth - 0.05) / 0.85));
+  /* ---- journey line reveal, tied to scroll (with station dwells) ---- */
+  const reveal = Math.min(1, Math.max(0, (j - 0.05) / 0.85));
   routeTube.geometry.setDrawRange(0, Math.floor(TUBE_INDEX * reveal));
   routeCore.geometry.setDrawRange(0, Math.floor(CORE_INDEX * reveal));
+
+  /* station labels fade in while the line is docked at each system */
+  for (let i = 0; i < stations.length; i++) {
+    const near = 1 - Math.min(1, Math.abs(j - stopsJ[i]) / 0.06);
+    stations[i].label.material.opacity = near * (0.85 + 0.15 * Math.sin(time * 0.004));
+  }
 
   /* glowing head rides the tip of the line
      (getPointAt = arc-length parameterized, matching the tube's drawRange) */
