@@ -12,7 +12,8 @@ Do not deploy to production or change domains without owner approval.
 |---|---|
 | `index.html` | The page |
 | `styles.css` | Layout, type, color and motion for direction A. Phone and tablet rules sit next to each component. |
-| `main.js` | Header state, the phone menu (Escape, focus return, inert when closed) and section reveals |
+| `boot.js` | Tiny synchronous bootstrap in `<head>`: sets the header state before first paint, and restores the static fallback if `main.js` fails to load or throws during setup |
+| `main.js` | Header state, the phone menu (Escape, focus return, inert when closed; the toggle is enabled once wired) and section reveals |
 | `assets/fonts/` | Self-hosted Satoshi woff2 (300 Light, 400, 700) |
 | `assets/brand/` | Official wordmark recolored to ink, and the favicon |
 | `assets/img/` | Responsive AVIF and WebP exports of the Blender renders |
@@ -54,8 +55,10 @@ The tests run at 1440×900, 768×1024, 390×844 and 375×812. They cover:
 - the page without JavaScript, and with reduced motion
 - no overlap between header controls and hero copy (rectangle intersections) without JavaScript, and with `main.js` blocked; content stays visible and the nav usable in both cases
 - printing shows sections that were never scrolled into view
-- focus rings reach 3:1 against the actual rendered pixels around them, on the sky, the white bar, paper and inside the phone menu
-- no inline script, and a CSP that allows same-origin scripts only
+- focus rings reach 3:1 against the actual rendered pixels around them, on the sky, the white bar, paper and inside the phone menu; the sampler also checks itself against a green ring on the sky, which must fail
+- first paint with `main.js` held back matches the final header (no fallback menu, layout shift under 0.1, hero contact link usable, Menu disabled until wired), and five cold loads per viewport stay under 0.1 layout shift
+- `boot.js` blocked keeps the static fallback with no late jump; `main.js` throwing during setup restores the fallback
+- exactly two scripts (synchronous `boot.js` before the stylesheet, deferred `main.js`), no inline script or handler attributes, and a CSP that allows same-origin scripts only
 - the local server answers a malformed URL with 400 and keeps serving (tooling only, not deployed)
 - text contrast measured against the hero render pixels (3:1 for the headline, 4.5:1 for smaller text) and on every solid section
 - the type scale: Satoshi 300 headline at 52 to 60 px on desktop and 28 to 34 px on phones, line height and tracking, H2 and H3 sizes, 18/16 px ledes and 16 px secondary text (steps, rules, FAQ answers)

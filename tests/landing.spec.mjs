@@ -130,6 +130,36 @@ async function worstPixelContrast(page, browser, selector) {
 }
 
 
+// Records layout shifts without recent input, with the shifted nodes.
+const SHIFT_INIT = () => {
+  window.__shifts = [];
+  new PerformanceObserver((list) => {
+    for (const e of list.getEntries()) {
+      if (e.hadRecentInput) continue;
+      window.__shifts.push({ v: e.value, t: Math.round(e.startTime), nodes: (e.sources || []).map((s) => (s.node && ((s.node.getAttribute && s.node.getAttribute("class")) || s.node.nodeName)) || "?").slice(0, 4) });
+    }
+  }).observe({ type: "layout-shift", buffered: true });
+};
+const shiftTotal = (page) => page.evaluate(() => window.__shifts.reduce((a, s) => a + s.v, 0));
+
+// Layout facts that must not change between first paint and the enhanced page.
+const headerState = (page) => page.evaluate(() => {
+  const vis = (el) => el && el.getBoundingClientRect().height > 0 && el.checkVisibility({ opacityProperty: true, visibilityProperty: true });
+  const toggle = document.querySelector("[data-toggle]");
+  const cta = document.querySelector(".hero__cta");
+  const c = cta.getBoundingClientRect();
+  return {
+    h1Top: Math.round(document.querySelector("h1").getBoundingClientRect().top),
+    barBottom: Math.round(document.querySelector(".bar").getBoundingClientRect().bottom),
+    navLinksVisible: [...document.querySelectorAll("[data-nav] a")].filter(vis).length,
+    toggleVisible: vis(toggle),
+    toggleDisabled: toggle.disabled,
+    ctaVisible: vis(cta),
+    ctaHit: vis(cta) ? document.elementFromPoint(c.left + c.width / 2, c.top + c.height / 2)?.closest(".hero__cta") === cta : null,
+    html: document.documentElement.className,
+  };
+});
+
 // Every visible header control against every hero copy element: any
 // rectangle intersection larger than 1px² is reported. Also checks the bar
 // ends above the headline.
@@ -163,7 +193,9 @@ async function overlaps(page) {
 // For the focused element: read its focus outline, hide it, screenshot, and
 // measure the outline colour against every pixel in the band the outline
 // occupies. Returns null when nothing visible is focused.
-async function ringContrast(page, browser) {
+// `probe` is one reusable page (from its own context) that decodes the
+// screenshots, so a test does not open a browser context per focus stop.
+async function ringContrast(page, probe) {
   const ring = await page.evaluate(() => {
     const el = document.activeElement;
     if (!el || el === document.body || !el.matches(":focus-visible")) return null;
@@ -184,8 +216,6 @@ async function ringContrast(page, browser) {
   if (ring.none) return { el: ring.el, worst: 0 };
   const png = await page.screenshot();
   await page.evaluate(() => { if (document.activeElement) document.activeElement.style.outlineColor = ""; });
-  const ctx = await browser.newContext();
-  const probe = await ctx.newPage();
   const worst = await probe.evaluate(async ({ b64, ring }) => {
     const img = new Image();
     img.src = `data:image/png;base64,${b64}`;
@@ -222,19 +252,27 @@ async function ringContrast(page, browser) {
     // No sampled pixels means the band was mis-measured: report it as a failure.
     return samples > 20 ? +worst.toFixed(2) : 0;
   }, { b64: png.toString("base64"), ring });
-  await ctx.close();
   return { el: ring.el, worst };
 }
 
-// main.js sets the enhancement state itself, so the page needs no inline
-// script and the CSP allows same-origin scripts only.
-test("no inline script; CSP allows same-origin scripts only", async () => {
-  const { readFileSync } = await import("node:fs");
+// Script contract: exactly one tiny synchronous same-origin bootstrap in
+// <head> before the stylesheet (so the header state is set before first
+// paint), then the deferred main.js. No inline script or handler
+// attributes, and the CSP allows same-origin scripts only.
+test("scripts: synchronous boot.js before CSS, deferred main.js, no inline; CSP self only", async () => {
+  const { readFileSync, statSync } = await import("node:fs");
   const html = readFileSync("index.html", "utf8");
-  expect(html).not.toMatch(/<script(?![^>]*\bsrc=)[^>]*>/i);
+  const tags = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].map((m) => ({ attrs: m[1].trim(), body: m[2].trim() }));
+  expect(tags.map((t) => t.attrs)).toEqual(['src="boot.js"', 'src="main.js" defer']);
+  for (const t of tags) expect(t.body).toBe("");
+  expect(html.indexOf('src="boot.js"')).toBeLessThan(html.indexOf('rel="stylesheet"'));
+  expect(html).not.toMatch(/\son[a-z]+\s*=/i);
+  const boot = readFileSync("boot.js", "utf8");
+  expect(statSync("boot.js").size).toBeLessThan(1500);
+  expect(boot).not.toMatch(/\beval\b|new Function|document\.write|innerHTML/);
   const csp = JSON.parse(readFileSync("vercel.json", "utf8")).headers[0].headers.find((h) => h.key === "Content-Security-Policy").value;
   expect(csp).toMatch(/script-src 'self';/);
-  expect(csp).not.toMatch(/sha256-|unsafe-inline/);
+  expect(csp).not.toMatch(/sha256-|unsafe-inline|unsafe-eval/);
 });
 
 // The local preview server is tooling, not the deployed site. It must answer
@@ -636,6 +674,94 @@ for (const vp of viewports) {
     });
 
 
+
+    // Fix round 2 regressions: first paint and late or failed scripts.
+
+    test("first paint with main.js delayed shows the final header, no shift", async ({ browser }) => {
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+      const page = await ctx.newPage();
+      await page.addInitScript(SHIFT_INIT);
+      let release;
+      const held = new Promise((r) => (release = r));
+      await page.route("**/main.js", async (route) => { await held; await route.continue(); });
+      await page.goto("/", { waitUntil: "commit" });
+      // HTML parsed and CSS applied, deferred main.js still held back.
+      await page.waitForFunction(() => document.readyState === "interactive" && document.querySelector("h1"));
+      await page.evaluate(() => document.fonts.ready);
+      await page.waitForTimeout(400);
+      const early = await headerState(page);
+      if (SHOTS) await page.screenshot({ path: `${SHOT_DIR}/${vp.name}-early-mainjs-pending.png` });
+      release();
+      await page.waitForLoadState("load");
+      await page.waitForTimeout(500);
+      const late = await headerState(page);
+      const shifts = await page.evaluate(() => window.__shifts);
+      expect(early.h1Top, JSON.stringify({ early, late })).toBe(late.h1Top);
+      expect(early.barBottom).toBe(late.barBottom);
+      expect(shifts.reduce((a, s) => a + s.v, 0), JSON.stringify(shifts)).toBeLessThan(0.1);
+      if (vp.phone) {
+        expect(early.navLinksVisible, "no fallback menu at first paint").toBe(0);
+        expect(early.toggleVisible).toBe(true);
+        // Not clickable before its handler exists; enabled once main.js runs.
+        expect(early.toggleDisabled).toBe(true);
+        expect(late.toggleDisabled).toBe(false);
+        // The hero contact link works while main.js is pending.
+        expect(early.ctaVisible && early.ctaHit).toBe(true);
+        await page.locator("[data-toggle]").click();
+        await expect(page.locator("[data-toggle]")).toHaveAttribute("aria-expanded", "true");
+      } else {
+        expect(early.navLinksVisible).toBe(4);
+      }
+      await ctx.close();
+    });
+
+    test("cold loads: layout shift stays under 0.1", async ({ browser }) => {
+      const values = [];
+      for (let i = 0; i < 5; i++) {
+        const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+        const page = await ctx.newPage();
+        await page.addInitScript(SHIFT_INIT);
+        await page.goto("/", { waitUntil: "load" });
+        await page.waitForTimeout(400);
+        values.push(+(await shiftTotal(page)).toFixed(3));
+        await ctx.close();
+      }
+      test.info().annotations.push({ type: "cls", description: values.join(",") });
+      expect(Math.max(...values), values.join(",")).toBeLessThan(0.1);
+    });
+
+    test("boot.js blocked: static fallback stays, no late enhancement", async ({ browser }) => {
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+      const page = await ctx.newPage();
+      await page.addInitScript(SHIFT_INIT);
+      await page.route("**/boot.js", (route) => route.abort());
+      await page.goto("/", { waitUntil: "load" });
+      await page.waitForTimeout(500);
+      const state = await headerState(page);
+      expect(state.html).not.toMatch(/\bjs\b/);
+      expect(state.navLinksVisible).toBe(4);
+      expect(state.toggleVisible).toBe(false);
+      expect((await overlaps(page)).list).toEqual([]);
+      expect(await shiftTotal(page)).toBeLessThan(0.1);
+      await ctx.close();
+    });
+
+    test("main.js throwing during setup restores the fallback", async ({ browser }) => {
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+      const page = await ctx.newPage();
+      await page.route("**/main.js", (route) => route.fulfill({ contentType: "text/javascript", body: 'throw new Error("simulated main.js failure");' }));
+      await page.goto("/", { waitUntil: "load" });
+      await page.waitForTimeout(400);
+      const state = await headerState(page);
+      expect(state.html).not.toMatch(/\bjs\b/);
+      expect(state.navLinksVisible).toBe(4);
+      expect(state.toggleVisible).toBe(false);
+      expect((await overlaps(page)).list).toEqual([]);
+      const hidden = await page.evaluate(() => [...document.querySelectorAll("[data-reveal]")].filter((el) => parseFloat(getComputedStyle(el).opacity) < 1).length);
+      expect(hidden).toBe(0);
+      await ctx.close();
+    });
+
     // Fix round 1 regressions. Each one failed on 42fd9e1.
 
     test("no-JS: header and hero content never overlap", async ({ browser }) => {
@@ -687,12 +813,14 @@ for (const vp of viewports) {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.goto("/");
       await settle(page);
+      const probeCtx = await browser.newContext();
+      const probe = await probeCtx.newPage();
       const results = [];
       const measureStops = async (label, stops) => {
         for (let i = 0; i < stops; i++) {
           await page.keyboard.press("Tab");
           await page.waitForTimeout(80);
-          const r = await ringContrast(page, browser);
+          const r = await ringContrast(page, probe);
           if (r) results.push({ ...r, label });
         }
       };
@@ -716,6 +844,18 @@ for (const vp of viewports) {
       expect(names).toContain("button");
       expect(names).toContain("SUMMARY");
       expect(names).toContain("contact__mail");
+
+      // Sampler control: the brand link with a green ring over the sky (the
+      // 42fd9e1 defect) must still measure under 3:1.
+      if (vp.phone) await page.keyboard.press("Escape");
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.waitForTimeout(300);
+      await page.focus(".bar__brand");
+      await page.evaluate(() => document.querySelector(".bar__brand").style.setProperty("outline-color", "#567740", "important"));
+      const control = await ringContrast(page, probe);
+      expect(control, "control ring measured").not.toBeNull();
+      expect(control.worst, JSON.stringify(control)).toBeLessThan(3);
+      await probeCtx.close();
     });
 
     if (SHOTS) {

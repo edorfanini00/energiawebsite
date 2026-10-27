@@ -3,6 +3,11 @@
 (function () {
   "use strict";
 
+  // boot.js sets "js" before first paint. Without it (boot.js blocked, or
+  // removed after a failure) the page stays in its static layout.
+  var root = document.documentElement;
+  if (!root.classList.contains("js")) return;
+
   var bar = document.querySelector("[data-bar]");
   var toggle = document.querySelector("[data-toggle]");
   var toggleLabel = document.querySelector("[data-toggle-label]");
@@ -66,10 +71,10 @@
   });
   syncNavInert();
 
-  // The menu is wired, so switch the page from its no-JS layout (nav in
-  // flow, always open) to the enhanced one. If this script is blocked or
-  // fails before here, the no-JS layout stays.
-  document.documentElement.classList.add("js");
+  // The menu is wired: enable the toggle (disabled in the markup so an early
+  // tap is never silently lost) and tell boot.js not to fall back any more.
+  toggle.disabled = false;
+  root.setAttribute("data-menu-ready", "");
 
   // Section reveals. Content is visible by default; it is only hidden for
   // the reveal once "reveal-ready" is set below. Nothing is hidden when
