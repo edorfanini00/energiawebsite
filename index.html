@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Energia AI · AI control for commercial HVAC</title>
-  <meta name="description" content="Energia AI is an AI control platform for commercial HVAC. It learns how your building heats and cools, reads the forecast and occupancy, and adjusts setpoints ahead of time, inside the limits your team sets.">
+  <meta name="description" content="Energia AI is an AI control platform for commercial HVAC, designed to learn how your building heats and cools and plan setpoints around weather and occupancy, inside the limits your team sets.">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#f3f1ec">
   <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -75,6 +75,10 @@
 
         <div class="day__stage">
           <article class="moment" id="moment-dawn" data-moment>
+            <div class="moment__part moment__part--do">
+              <h3 class="moment__action-label">What Energia AI does</h3>
+              <p>Plans the day from the forecast and your occupancy schedule, including when each zone should start conditioning so it is ready on time.</p>
+            </div>
             <div class="moment__art">
               <picture>
                 <source media="(max-width: 860px)" type="image/avif" srcset="assets/img/day-dawn-phone-600.avif 600w, assets/img/day-dawn-phone-900.avif 900w, assets/img/day-dawn-phone-1200.avif 1200w" sizes="100vw">
@@ -90,14 +94,14 @@
                 <h4>What changes</h4>
                 <p>The forecast shows a clear, warm afternoon. The building is still empty and the low sun is on the far side.</p>
               </div>
-              <div class="moment__part moment__part--do">
-                <h4>What Energia AI does</h4>
-                <p>Plans the day from the forecast and your occupancy schedule, including when each zone should start conditioning so it is ready on time.</p>
-              </div>
             </div>
           </article>
 
           <article class="moment" id="moment-morning" data-moment>
+            <div class="moment__part moment__part--do">
+              <h3 class="moment__action-label">What Energia AI does</h3>
+              <p>Keeps occupied zones inside the setpoint range you approved, with outdoor air at or above your ventilation minimums.</p>
+            </div>
             <div class="moment__art">
               <picture>
                 <source media="(max-width: 860px)" type="image/avif" srcset="assets/img/day-morning-phone-600.avif 600w, assets/img/day-morning-phone-900.avif 900w, assets/img/day-morning-phone-1200.avif 1200w" sizes="100vw">
@@ -113,14 +117,14 @@
                 <h4>What changes</h4>
                 <p>People arrive, and the morning sun moves onto the south face.</p>
               </div>
-              <div class="moment__part moment__part--do">
-                <h4>What Energia AI does</h4>
-                <p>Keeps occupied zones inside the setpoint range you approved, with outdoor air at or above your ventilation minimums.</p>
-              </div>
             </div>
           </article>
 
           <article class="moment" id="moment-afternoon" data-moment>
+            <div class="moment__part moment__part--do">
+              <h3 class="moment__action-label">What Energia AI does</h3>
+              <p>Began cooling the west zones before the sun reached them, using the forecast, and now holds them inside your range.</p>
+            </div>
             <div class="moment__art">
               <picture>
                 <source media="(max-width: 860px)" type="image/avif" srcset="assets/img/day-afternoon-phone-600.avif 600w, assets/img/day-afternoon-phone-900.avif 900w, assets/img/day-afternoon-phone-1200.avif 1200w" sizes="100vw">
@@ -136,14 +140,14 @@
                 <h4>What changes</h4>
                 <p>The sun is low in the west and falls straight onto the west windows. Those rooms are now gaining heat fastest.</p>
               </div>
-              <div class="moment__part moment__part--do">
-                <h4>What Energia AI does</h4>
-                <p>Began cooling the west zones before the sun reached them, using the forecast, and now holds them inside your range.</p>
-              </div>
             </div>
           </article>
 
           <article class="moment" id="moment-dusk" data-moment>
+            <div class="moment__part moment__part--do">
+              <h3 class="moment__action-label">What Energia AI does</h3>
+              <p>Lets empty zones move within the wider unoccupied range you set, keeps occupied rooms in range, and starts on tomorrow’s plan.</p>
+            </div>
             <div class="moment__art">
               <picture>
                 <source media="(max-width: 860px)" type="image/avif" srcset="assets/img/day-dusk-phone-600.avif 600w, assets/img/day-dusk-phone-900.avif 900w, assets/img/day-dusk-phone-1200.avif 1200w" sizes="100vw">
@@ -158,10 +162,6 @@
               <div class="moment__part">
                 <h4>What changes</h4>
                 <p>Most people have gone home. A few rooms are still in use.</p>
-              </div>
-              <div class="moment__part moment__part--do">
-                <h4>What Energia AI does</h4>
-                <p>Lets empty zones move within the wider unoccupied range you set, keeps occupied rooms in range, and starts on tomorrow’s plan.</p>
               </div>
             </div>
           </article>
@@ -212,7 +212,7 @@
             <span class="plan__label l-ps" data-phone>South zone</span>
             <span class="plan__label l-pi" data-phone>Interior</span>
           </div>
-          <figcaption class="note">The first floor of the same fictional building at 15:30, cut below the ceiling. Outlines show how a plan divides into zones. The fine grid stands for the control volumes the model uses to calculate heat flow.</figcaption>
+          <figcaption class="note">The first floor of the same fictional building at 15:30, cut below the ceiling. The dark area is the building core. Outlines show how a plan divides into zones. The fine grid stands for the control volumes the model uses to calculate heat flow.</figcaption>
         </figure>
 
         <ol class="steps">

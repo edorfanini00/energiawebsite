@@ -925,6 +925,13 @@ for (const vp of viewports) {
       await expect(page.locator("[data-toggle]")).toBeHidden();
       await expect(page.locator("[data-moment]:visible")).toHaveCount(4);
       await expect(page.locator(".day__tabs")).toBeHidden();
+      await page.locator("[data-moment] img").evaluateAll(imgs =>
+        Promise.all(imgs.map(img => { img.loading = "eager"; return img.decode(); }))
+      );
+      for (const moment of MOMENTS) {
+        await expect(page.locator(`#moment-${moment} .moment__part--do`)).toBeVisible();
+        await expect(page.locator(`#moment-${moment} img`)).toBeVisible();
+      }
       const hits = await overlaps(page);
       expect(hits.list, JSON.stringify(hits.list)).toEqual([]);
       await ctx.close();
@@ -943,6 +950,14 @@ for (const vp of viewports) {
       // With the tabs wired, print still shows all four moments and no tab row.
       await expect(page.locator("[data-moment]:visible")).toHaveCount(4);
       await expect(page.locator(".day__tabs")).toBeHidden();
+      await expect(page.locator("[data-toggle]")).toBeHidden();
+      await page.locator("[data-moment] img").evaluateAll(imgs =>
+        Promise.all(imgs.map(img => { img.loading = "eager"; return img.decode(); }))
+      );
+      for (const moment of MOMENTS) {
+        await expect(page.locator(`#moment-${moment} .moment__part--do`)).toBeVisible();
+        await expect(page.locator(`#moment-${moment} img`)).toBeVisible();
+      }
     });
 
     test("focus rings reach 3:1 against the pixels around them", async ({ page, browser }) => {

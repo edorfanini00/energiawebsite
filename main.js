@@ -65,6 +65,14 @@
     }
   });
 
+  // This is a disclosure, not a modal: sequential focus may leave it in
+  // either direction. Close without stealing focus from the destination.
+  document.addEventListener("focusin", function (event) {
+    if (bar.classList.contains("is-open") && !bar.contains(event.target)) {
+      setOpen(false, false);
+    }
+  });
+
   phone.addEventListener("change", function () {
     if (!phone.matches) setOpen(false, false);
     syncNavInert();

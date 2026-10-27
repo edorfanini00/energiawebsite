@@ -36,6 +36,10 @@ A fixed schedule does not adjust when the weather or occupancy changes. Energia 
 
 19:30 Evening
 
+What Energia AI does
+
+Plans the day from the forecast and your occupancy schedule, including when each zone should start conditioning so it is ready on time.
+
 06:30 Before anyone arrives
 
 What changes
@@ -44,7 +48,7 @@ The forecast shows a clear, warm afternoon. The building is still empty and the 
 
 What Energia AI does
 
-Plans the day from the forecast and your occupancy schedule, including when each zone should start conditioning so it is ready on time.
+Keeps occupied zones inside the setpoint range you approved, with outdoor air at or above your ventilation minimums.
 
 10:00 Floors fill up
 
@@ -54,7 +58,7 @@ People arrive, and the morning sun moves onto the south face.
 
 What Energia AI does
 
-Keeps occupied zones inside the setpoint range you approved, with outdoor air at or above your ventilation minimums.
+Began cooling the west zones before the sun reached them, using the forecast, and now holds them inside your range.
 
 15:30 Sun on the west glass
 
@@ -64,7 +68,7 @@ The sun is low in the west and falls straight onto the west windows. Those rooms
 
 What Energia AI does
 
-Began cooling the west zones before the sun reached them, using the forecast, and now holds them inside your range.
+Lets empty zones move within the wider unoccupied range you set, keeps occupied rooms in range, and starts on tomorrow’s plan.
 
 19:30 The building empties
 
@@ -72,17 +76,13 @@ What changes
 
 Most people have gone home. A few rooms are still in use.
 
-What Energia AI does
-
-Lets empty zones move within the wider unoccupied range you set, keeps occupied rooms in range, and starts on tomorrow’s plan.
-
 An illustrative day in a fictional building, rendered for this page. The times and actions are examples, not readings from a real site.
 
 It starts with a model of your building.
 
 Your floor plans become thermal zones. Energia AI then learns how each zone responds to sun, people and your HVAC. West zone Corner South zone Interior West zone Corner South zone Interior
 
-The first floor of the same fictional building at 15:30, cut below the ceiling. Outlines show how a plan divides into zones. The fine grid stands for the control volumes the model uses to calculate heat flow.
+The first floor of the same fictional building at 15:30, cut below the ceiling. The dark area is the building core. Outlines show how a plan divides into zones. The fine grid stands for the control volumes the model uses to calculate heat flow.
 
 Model
 
@@ -181,3 +181,9 @@ The retained implementation was written by Claude; this continuation was edited 
 - No customer-facing dashes, fabricated readings, testimonials, logos, savings percentages or performance guarantees were added. Existing manual override and fallback details remain.
 
 No model subprocess or paid API was used for editing. The pattern checker does not establish truth or writing quality; the contextual editorial review and source map are separate evidence.
+
+## Round 1 corrections
+
+Moved each existing control-action paragraph before its image without changing its wording or duplicating it. Added “The dark area is the building core.” to the plan caption.
+
+Meta description: Energia AI is an AI control platform for commercial HVAC, designed to learn how your building heats and cools and plan setpoints around weather and occupancy, inside the limits your team sets.

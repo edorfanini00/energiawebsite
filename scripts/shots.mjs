@@ -24,6 +24,9 @@ const viewports = [
   { name: "phone-375", width: 375, height: 812, scale: 2 },
   { name: "narrow-320", width: 320, height: 740, scale: 2 },
   { name: "landscape-844", width: 844, height: 390, scale: 2 },
+  { name: "breakpoint-859", width: 859, height: 1024, scale: 1 },
+  { name: "breakpoint-860", width: 860, height: 1024, scale: 1 },
+  { name: "breakpoint-861", width: 861, height: 1024, scale: 1 },
 ];
 const report = [];
 
