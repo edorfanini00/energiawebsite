@@ -19,11 +19,11 @@ const types = {
 };
 const vercel = JSON.parse(await readFile(join(root, "vercel.json"), "utf8"));
 const headers = Object.fromEntries(vercel.headers[0].headers.map((h) => [h.key, h.value]));
-const allowed = /^\/(index\.html|styles\.css|main\.js|robots\.txt|assets\/[\w./-]+)$/;
+const allowed = /^\/(index\.html|styles\.css|main\.js|robots\.txt|assets\/[\w./-]+|prototypes\/[\w./-]+)$/;
 
 createServer(async (req, res) => {
   const path = decodeURIComponent(new URL(req.url, "http://x").pathname);
-  const target = path === "/" ? "/index.html" : path;
+  const target = path.endsWith("/") ? `${path}index.html` : path;
   if (!allowed.test(target) || target.includes("..")) {
     res.writeHead(404, headers).end("Not found");
     return;

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Energia AI · Direction A prototype</title>
+  <meta name="description" content="Energia AI is an AI control platform for commercial HVAC.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="icon" href="../../assets/brand/favicon.png" type="image/png">
+  <link rel="preload" href="../../assets/fonts/satoshi-300.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../../assets/fonts/satoshi-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../shared.css">
+  <link rel="stylesheet" href="a.css">
+  <script>document.documentElement.classList.add("js");</script>
+  <script src="../../main.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="bar" data-bar>
+    <div class="bar__inner">
+      <a class="bar__brand" href="#top" aria-label="Energia AI, back to top">
+        <img class="mark-white" src="../img/energia-ai-wordmark-white.png" width="424" height="48" alt="">
+        <img class="mark-ink" src="../../assets/brand/energia-ai-wordmark-ink.png" width="424" height="48" alt="">
+      </a>
+      <div class="bar__end">
+        <nav class="bar__nav" id="site-nav" aria-label="Primary" data-nav>
+          <a href="#how">How it works</a>
+          <a href="#limits">Operator limits</a>
+          <a href="#questions">Questions</a>
+        </nav>
+        <a class="cta" href="mailto:edo.orfanini@energiaigroup.com?subject=Energia%20AI%3A%20our%20building">Talk to us<svg class="cta__arrow" viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M0 5h14.5M10 1l4.5 4-4.5 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
+        <button class="bar__toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-toggle>
+          <span class="bar__toggle-label" data-toggle-label>Menu</span>
+          <span class="bar__toggle-icon" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="a-hero" id="top" aria-labelledby="hero-title">
+      <picture class="a-hero__art">
+        <source media="(max-width: 700px)" type="image/avif" srcset="../img/a-phone-780.avif 780w, ../img/a-phone-1170.avif 1170w" sizes="100vw">
+        <source media="(max-width: 700px)" type="image/webp" srcset="../img/a-phone-780.webp 780w, ../img/a-phone-1170.webp 1170w" sizes="100vw">
+        <source type="image/avif" srcset="../img/a-desktop-1440.avif 1440w, ../img/a-desktop-2160.avif 2160w, ../img/a-desktop-2880.avif 2880w" sizes="100vw">
+        <source type="image/webp" srcset="../img/a-desktop-1440.webp 1440w, ../img/a-desktop-2160.webp 2160w, ../img/a-desktop-2880.webp 2880w" sizes="100vw">
+        <img src="../img/a-desktop-2160.webp" width="3200" height="2000" alt="" fetchpriority="high" decoding="async">
+      </picture>
+      <div class="a-hero__copy">
+        <h1 class="display a-hero__title" id="hero-title">A building that thinks ahead.</h1>
+        <p class="a-hero__line">AI control for commercial HVAC.</p>
+      </div>
+    </section>
+
+    <section class="a-feature" id="building" aria-labelledby="feature-title">
+      <div class="a-feature__head">
+        <h2 class="section-title a-feature__title" id="feature-title" data-reveal>No two buildings <strong>hold heat the same way.</strong></h2>
+        <p class="copy a-feature__body" data-reveal>West glass takes the afternoon sun. A full floor runs warm by eleven. Fixed schedules treat every day the same and correct a room only after it drifts. Energia AI learns how your building responds, then plans the next hours around it.</p>
+      </div>
+      <figure class="a-feature__art" data-reveal>
+        <picture>
+          <source media="(max-width: 700px)" type="image/avif" srcset="../img/a-feature-phone-780.avif 780w, ../img/a-feature-phone-1170.avif 1170w" sizes="100vw">
+          <source media="(max-width: 700px)" type="image/webp" srcset="../img/a-feature-phone-780.webp 780w, ../img/a-feature-phone-1170.webp 1170w" sizes="100vw">
+          <source type="image/avif" srcset="../img/a-feature-1440.avif 1440w, ../img/a-feature-2160.avif 2160w" sizes="(min-width: 1320px) 1200px, 92vw">
+          <source type="image/webp" srcset="../img/a-feature-1440.webp 1440w, ../img/a-feature-2160.webp 2160w" sizes="(min-width: 1320px) 1200px, 92vw">
+          <img src="../img/a-feature-1440.webp" width="2160" height="926" alt="" loading="lazy" decoding="async">
+        </picture>
+      </figure>
+    </section>
+  </main>
+
+  <footer class="proto-note">
+    <p>Direction A prototype: hero and first section only. Images are original concept renderings, not a client installation.</p>
+    <p><span id="how">How it works</span>, <span id="limits">operator limits</span> and <span id="questions">questions</span> follow once a direction is chosen.</p>
+  </footer>
+</body>
+</html>
