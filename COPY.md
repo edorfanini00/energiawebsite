@@ -25,7 +25,7 @@ Talk about your building
 
 **No two buildings hold heat the same way.**
 
-West glass takes the afternoon sun. A full floor on Tuesday runs warm by eleven. Fixed schedules treat every day the same. Energia AI learns how your building responds, then plans the next hours around it.
+West glass takes the afternoon sun. A full floor on Tuesday runs warm by eleven. A fixed schedule does not adjust when the weather or occupancy changes. Energia AI learns how your building responds, then plans the next hours around it.
 
 **From a model of your building to HVAC setpoints.**
 
@@ -135,4 +135,5 @@ Images are original concept renderings, not a client installation.
     - Every em dash, because customer-facing dashes are banned.
     - The shortened limits lede, which dropped the "checked before it reaches your BMS" fact.
   - Restored from the sourced copy: the deadband's purpose ("to avoid simultaneous heating and cooling") and "Energia AI steps back" for life safety.
+- **Fix round 1 (after the independent reviews of 42fd9e1).** The sentence "Fixed schedules treat every day the same." became "A fixed schedule does not adjust when the weather or occupancy changes." Fixed schedules can vary by day of week, so the old sentence was broader than the point; reviewer A recommended the change. No other copy changed. The Tuesday example is illustrative, not a client result.
 - **Claims.** No figures, savings, customers or deployments appear. Every fact maps to a row in `SOURCES.md`.

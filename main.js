@@ -3,10 +3,6 @@
 (function () {
   "use strict";
 
-  // The "js" class is set by a hashed inline script in <head> so the phone
-  // menu never flashes open; set it again here in case that script is absent.
-  document.documentElement.classList.add("js");
-
   var bar = document.querySelector("[data-bar]");
   var toggle = document.querySelector("[data-toggle]");
   var toggleLabel = document.querySelector("[data-toggle-label]");
@@ -70,14 +66,23 @@
   });
   syncNavInert();
 
-  // Section reveals. Content stays visible when motion is reduced or the
-  // observer is unavailable.
+  // The menu is wired, so switch the page from its no-JS layout (nav in
+  // flow, always open) to the enhanced one. If this script is blocked or
+  // fails before here, the no-JS layout stays.
+  document.documentElement.classList.add("js");
+
+  // Section reveals. Content is visible by default; it is only hidden for
+  // the reveal once "reveal-ready" is set below. Nothing is hidden when
+  // motion is reduced or the observer is unavailable.
   var items = document.querySelectorAll("[data-reveal]");
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduce || !("IntersectionObserver" in window)) {
-    items.forEach(function (el) { el.classList.add("is-in"); });
-    return;
-  }
+  if (reduce || !("IntersectionObserver" in window)) return;
+  // Anything already on screen stays as it is, so nothing blinks out.
+  items.forEach(function (el) {
+    var r = el.getBoundingClientRect();
+    if (r.top < window.innerHeight && r.bottom > 0) el.classList.add("is-in");
+  });
+  document.documentElement.classList.add("reveal-ready");
   var observer = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       if (entry.isIntersecting) {

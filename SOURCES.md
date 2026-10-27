@@ -20,6 +20,7 @@ The live site's other claims were deliberately not reused because nothing in the
 | Claim on page | Source |
 |---|---|
 | AI control platform for commercial HVAC. It learns zone thermal behavior and adjusts setpoints, weighing energy against comfort. | *Energia AI technical document*, Introduction and Part 1 (`~/Desktop/EnergiAI/docuento tecnico/Energia AI tehnical document-.pdf`) |
+| A fixed schedule does not adjust when the weather or occupancy changes (feature section) | Definitional framing of the problem, not a measured claim: a fixed schedule is a preset plan. It is set against the inputs the technical doc's Data Aggregation and Forecasting Layer adds (weather forecasts, occupancy). The West glass and Tuesday sentences are illustrative scenarios, not client results. |
 | Reads weather forecasts and occupancy schedules | Technical doc, Data Aggregation and Forecasting Layer and Part 5 (NOAA/OpenWeather forecasts, occupancy schedules from the BMS). Energia consumes forecasts and does not produce weather forecasts. |
 | Thermal model from floor plans, HVAC equipment and operating history. Physics plus a neural network. | Technical doc, Part 1: the SBCS hybrid simulator, finite-difference heat transfer between control volumes, and a GRU neural layer |
 | A reinforcement learning agent trains in simulation and is rewarded for comfort and penalized for energy | Technical doc, Part 1 and section 3: Soft Actor-Critic, with a reward weighing comfort loss, energy and emissions |

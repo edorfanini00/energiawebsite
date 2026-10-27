@@ -4,6 +4,8 @@
 //      npm run shots       (checks + screenshots into SHOT_DIR)
 import { test, expect } from "@playwright/test";
 import { mkdirSync } from "node:fs";
+import { spawn } from "node:child_process";
+import { request as httpRequest } from "node:http";
 
 const MAIL = "edo.orfanini@energiaigroup.com";
 const CTA_HREF = `mailto:${MAIL}?subject=Energia%20AI%3A%20our%20building`;
@@ -13,6 +15,8 @@ const SHOT_DIR = process.env.SHOT_DIR || "test-results/shots";
 if (SHOTS) mkdirSync(SHOT_DIR, { recursive: true });
 
 // kind: which type gates apply (the brief sets desktop and phone ranges).
+// Lede paragraphs are 18px desktop / 16px phone. Secondary text (step, rule
+// and FAQ answers) is a deliberate 16px at every width.
 const viewports = [
   { name: "desktop-1440", width: 1440, height: 900, phone: false, kind: "desktop" },
   { name: "tablet-768", width: 768, height: 1024, phone: true, kind: "tablet" },
@@ -20,9 +24,9 @@ const viewports = [
   { name: "phone-375", width: 375, height: 812, phone: true, kind: "phone" },
 ];
 const TYPE = {
-  desktop: { h1: [52, 60], h2: [36, 44], h3: [23, 25], body: [17, 18] },
-  tablet: { h1: [30, 46], h2: [26, 36], h3: [22, 25], body: [16, 18] },
-  phone: { h1: [28, 34], h2: [26, 30], h3: [22, 23], body: [16, 16] },
+  desktop: { h1: [52, 60], h2: [36, 44], h3: [23, 25], lede: [17, 18], secondary: [16, 16] },
+  tablet: { h1: [30, 46], h2: [26, 36], h3: [22, 25], lede: [16, 18], secondary: [16, 16] },
+  phone: { h1: [28, 34], h2: [26, 30], h3: [22, 23], lede: [16, 16], secondary: [16, 16] },
 };
 
 // Collect console errors, page errors, failed or off-origin requests.
@@ -125,6 +129,145 @@ async function worstPixelContrast(page, browser, selector) {
   return worst;
 }
 
+
+// Every visible header control against every hero copy element: any
+// rectangle intersection larger than 1px² is reported. Also checks the bar
+// ends above the headline.
+async function overlaps(page) {
+  return page.evaluate(() => {
+    const vis = (el) => {
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0 && el.checkVisibility({ opacityProperty: true, visibilityProperty: true });
+    };
+    const rect = (el) => {
+      const r = el.getBoundingClientRect();
+      return { el: `${el.tagName}.${el.className}`.slice(0, 40), x: r.left, y: r.top, r: r.right, b: r.bottom };
+    };
+    const header = [...document.querySelectorAll(".bar a, .bar button, .bar img")].filter(vis).map(rect);
+    const hero = [...document.querySelectorAll("#top h1, #top p, #top a")].filter(vis).map(rect);
+    const list = [];
+    for (const a of header) {
+      for (const b of hero) {
+        const w = Math.min(a.r, b.r) - Math.max(a.x, b.x);
+        const h = Math.min(a.b, b.b) - Math.max(a.y, b.y);
+        if (w > 1 && h > 1) list.push(`${a.el} over ${b.el} (${Math.round(w)}x${Math.round(h)})`);
+      }
+    }
+    const barBottom = Math.max(...header.map((r) => r.b));
+    const h1Top = document.querySelector("#top h1").getBoundingClientRect().top;
+    if (barBottom > h1Top + 0.5) list.push(`bar bottom ${Math.round(barBottom)} below h1 top ${Math.round(h1Top)}`);
+    return { list, rects: { header, hero } };
+  });
+}
+
+// For the focused element: read its focus outline, hide it, screenshot, and
+// measure the outline colour against every pixel in the band the outline
+// occupies. Returns null when nothing visible is focused.
+async function ringContrast(page, browser) {
+  const ring = await page.evaluate(() => {
+    const el = document.activeElement;
+    if (!el || el === document.body || !el.matches(":focus-visible")) return null;
+    const r = el.getBoundingClientRect();
+    if (r.width === 0 || r.bottom < 0 || r.top > innerHeight) return null;
+    const cs = getComputedStyle(el);
+    if (cs.outlineStyle === "none") return { el: `${el.tagName}.${el.className}`, none: true };
+    const out = {
+      el: `${el.tagName}.${el.className}`,
+      rgb: cs.outlineColor.match(/[\d.]+/g).slice(0, 3).map(Number),
+      off: parseFloat(cs.outlineOffset), w: parseFloat(cs.outlineWidth),
+      x: r.left, y: r.top, r: r.right, b: r.bottom,
+    };
+    el.style.outlineColor = "transparent";
+    return out;
+  });
+  if (!ring) return null;
+  if (ring.none) return { el: ring.el, worst: 0 };
+  const png = await page.screenshot();
+  await page.evaluate(() => { if (document.activeElement) document.activeElement.style.outlineColor = ""; });
+  const ctx = await browser.newContext();
+  const probe = await ctx.newPage();
+  const worst = await probe.evaluate(async ({ b64, ring }) => {
+    const img = new Image();
+    img.src = `data:image/png;base64,${b64}`;
+    await img.decode();
+    const c = document.createElement("canvas");
+    c.width = img.width; c.height = img.height;
+    const g = c.getContext("2d");
+    g.drawImage(img, 0, 0);
+    const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+    const lum = (r, gg, b) => 0.2126 * lin(r) + 0.7152 * lin(gg) + 0.0722 * lin(b);
+    const fg = lum(...ring.rgb);
+    const inner = ring.off + 0.5, outer = ring.off + ring.w - 0.5;
+    let worst = Infinity;
+    let samples = 0;
+    const x0 = Math.max(0, Math.floor(ring.x - outer)), x1 = Math.min(c.width - 1, Math.ceil(ring.r + outer));
+    const y0 = Math.max(0, Math.floor(ring.y - outer)), y1 = Math.min(c.height - 1, Math.ceil(ring.b + outer));
+    const d = g.getImageData(0, 0, c.width, c.height).data;
+    for (let y = y0; y <= y1; y++) {
+      for (let x = x0; x <= x1; x++) {
+        // Signed distance from the element box (negative inside, for inset
+        // outlines); the outline band lies between inner and outer.
+        const px = x + 0.5, py = y + 0.5;
+        const inside = px > ring.x && px < ring.r && py > ring.y && py < ring.b;
+        const dist = inside
+          ? -Math.min(px - ring.x, ring.r - px, py - ring.y, ring.b - py)
+          : Math.max(Math.max(ring.x - px, 0, px - ring.r), Math.max(ring.y - py, 0, py - ring.b));
+        if (dist < inner || dist > outer) continue;
+        const i = (y * c.width + x) * 4;
+        const bg = lum(d[i], d[i + 1], d[i + 2]);
+        worst = Math.min(worst, (Math.max(bg, fg) + 0.05) / (Math.min(bg, fg) + 0.05));
+        samples++;
+      }
+    }
+    // No sampled pixels means the band was mis-measured: report it as a failure.
+    return samples > 20 ? +worst.toFixed(2) : 0;
+  }, { b64: png.toString("base64"), ring });
+  await ctx.close();
+  return { el: ring.el, worst };
+}
+
+// main.js sets the enhancement state itself, so the page needs no inline
+// script and the CSP allows same-origin scripts only.
+test("no inline script; CSP allows same-origin scripts only", async () => {
+  const { readFileSync } = await import("node:fs");
+  const html = readFileSync("index.html", "utf8");
+  expect(html).not.toMatch(/<script(?![^>]*\bsrc=)[^>]*>/i);
+  const csp = JSON.parse(readFileSync("vercel.json", "utf8")).headers[0].headers.find((h) => h.key === "Content-Security-Policy").value;
+  expect(csp).toMatch(/script-src 'self';/);
+  expect(csp).not.toMatch(/sha256-|unsafe-inline/);
+});
+
+// The local preview server is tooling, not the deployed site. It must answer
+// a malformed percent-escape with an error status and keep serving.
+test("local server survives a malformed URI", async () => {
+  const port = 4390 + Math.floor(Math.random() * 100);
+  const child = spawn(process.execPath, ["scripts/serve.mjs"], { env: { ...process.env, PORT: String(port) }, stdio: ["ignore", "pipe", "pipe"] });
+  let log = "";
+  child.stdout.on("data", (b) => (log += b));
+  child.stderr.on("data", (b) => (log += b));
+  try {
+    await new Promise((resolve, reject) => {
+      const t = setTimeout(() => reject(new Error(`server did not start: ${log}`)), 5000);
+      child.stdout.on("data", () => { if (log.includes("Serving")) { clearTimeout(t); resolve(); } });
+    });
+    const get = (path) => new Promise((resolve) => {
+      const req = httpRequest({ host: "127.0.0.1", port, path, method: "GET" }, (res) => { res.resume(); resolve(res.statusCode); });
+      req.on("error", (e) => resolve(`error ${e.code}`));
+      req.end();
+    });
+    const bad = await get("/%E0%A4%A");
+    await new Promise((r) => setTimeout(r, 300));
+    expect(child.exitCode, log).toBeNull();
+    expect([400, 404]).toContain(bad);
+    expect(await get("/")).toBe(200);
+    expect(await get("/%2e%2e/package.json")).toBe(404);
+    expect(await get("/package.json")).toBe(404);
+  } finally {
+    // Stop only the server this test started.
+    if (child.exitCode === null) child.kill("SIGTERM");
+  }
+});
+
 for (const vp of viewports) {
   test.describe(vp.name, () => {
     test.use({ viewport: { width: vp.width, height: vp.height } });
@@ -179,7 +322,7 @@ for (const vp of viewports) {
       expect(art.all.filter((src) => /hero-/.test(src))).toHaveLength(1);
     });
 
-    test("type gates: restrained light display type and one scale", async ({ page }) => {
+    test("type gates: light display type, 18/16 lede, 16px secondary text", async ({ page }) => {
       await page.goto("/");
       await settle(page);
       const t = await page.evaluate(() => {
@@ -199,7 +342,8 @@ for (const vp of viewports) {
           h1: read(document.querySelector("h1")),
           h2: [...document.querySelectorAll("h2.title")].map(read),
           h3: [...document.querySelectorAll(".step h3")].map(read),
-          body: [...document.querySelectorAll(".lede")].map(read),
+          lede: [...document.querySelectorAll(".lede")].map(read),
+          secondary: [...document.querySelectorAll(".step p, .rule dd, .faq__item p")].map(read),
         };
       });
       const g = TYPE[vp.kind];
@@ -220,7 +364,10 @@ for (const vp of viewports) {
         within(h.lines, [1, 3], `h2 lines ${h.text}`);
       }
       for (const h of t.h3) within(h.size, g.h3, `h3 ${h.text}`);
-      for (const b of t.body) within(b.size, g.body, `body ${b.text}`);
+      expect(t.lede.length).toBe(4);
+      for (const b of t.lede) within(b.size, g.lede, `lede ${b.text}`);
+      expect(t.secondary.length).toBe(14);
+      for (const b of t.secondary) within(b.size, g.secondary, `secondary ${b.text}`);
     });
 
     test("one hero idea: short copy, no eyebrows, one visible CTA", async ({ page }) => {
@@ -387,6 +534,10 @@ for (const vp of viewports) {
         expect(text, String(banned)).not.toMatch(banned);
       }
       await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+      // Precise wording (review fix): fixed schedules vary by day of week, so
+      // the page says what they do not do rather than "treat every day the same".
+      expect(text).not.toMatch(/treat every day the same/i);
+      expect(text).toContain("A fixed schedule does not adjust when the weather or occupancy changes.");
     });
 
     if (vp.phone) {
@@ -482,6 +633,89 @@ for (const vp of viewports) {
       expect(state.smooth).toBe("auto");
       expect(problems).toEqual([]);
       await ctx.close();
+    });
+
+
+    // Fix round 1 regressions. Each one failed on 42fd9e1.
+
+    test("no-JS: header and hero content never overlap", async ({ browser }) => {
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, javaScriptEnabled: false });
+      const page = await ctx.newPage();
+      await page.goto("/");
+      await page.waitForTimeout(500);
+      const hits = await overlaps(page);
+      expect(hits.rects.header.length, "header controls measured").toBeGreaterThan(1);
+      expect(hits.list, JSON.stringify(hits.list)).toEqual([]);
+      // The fallback nav and the contact action stay reachable.
+      for (const a of await page.locator("[data-nav] a").all()) await expect(a).toBeVisible();
+      await ctx.close();
+    });
+
+    test("main.js blocked: content visible, navigation usable, no overlap", async ({ browser }) => {
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+      const page = await ctx.newPage();
+      await page.route("**/main.js", (route) => route.abort());
+      await page.goto("/");
+      await page.waitForTimeout(500);
+      const state = await page.evaluate(() => ({
+        hidden: [...document.querySelectorAll("[data-reveal], h1, h2, .hero__line")]
+          .filter((el) => parseFloat(getComputedStyle(el).opacity) < 1).map((el) => el.className || el.tagName),
+        enhanced: document.documentElement.className,
+      }));
+      expect(state.hidden).toEqual([]);
+      for (const a of await page.locator("[data-nav] a").all()) await expect(a).toBeVisible();
+      await expect(page.locator("[data-toggle]")).toBeHidden();
+      const hits = await overlaps(page);
+      expect(hits.list, JSON.stringify(hits.list)).toEqual([]);
+      await ctx.close();
+    });
+
+    test("print: content below the fold is visible without scrolling", async ({ page }) => {
+      await page.goto("/");
+      await page.waitForTimeout(400);
+      await page.emulateMedia({ media: "print" });
+      const hidden = await page.evaluate(() =>
+        [...document.querySelectorAll("[data-reveal]")]
+          .filter((el) => parseFloat(getComputedStyle(el).opacity) < 1)
+          .map((el) => el.className || el.tagName)
+      );
+      expect(hidden).toEqual([]);
+    });
+
+    test("focus rings reach 3:1 against the pixels around them", async ({ page, browser }) => {
+      // Instant scrolling, so a focused control is on screen when sampled.
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.goto("/");
+      await settle(page);
+      const results = [];
+      const measureStops = async (label, stops) => {
+        for (let i = 0; i < stops; i++) {
+          await page.keyboard.press("Tab");
+          await page.waitForTimeout(80);
+          const r = await ringContrast(page, browser);
+          if (r) results.push({ ...r, label });
+        }
+      };
+      // From the top: skip link, then the bar and hero over the sky, then on
+      // through the sections (the bar turns white once the page scrolls).
+      await measureStops("page", 22);
+      if (vp.phone) {
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.waitForTimeout(300);
+        await page.locator("[data-toggle]").click();
+        await page.waitForTimeout(400);
+        await measureStops("open menu", 4);
+      }
+      const failing = results.filter((r) => r.worst < 3);
+      expect(failing, JSON.stringify(failing)).toEqual([]);
+      const names = results.map((r) => r.el).join(" | ");
+      expect(names).toContain("skip");
+      expect(names).toContain("bar__brand");
+      expect(names).toMatch(vp.phone ? /bar__toggle/ : /bar__cta/);
+      if (vp.phone) expect(names).toContain("hero__cta");
+      expect(names).toContain("button");
+      expect(names).toContain("SUMMARY");
+      expect(names).toContain("contact__mail");
     });
 
     if (SHOTS) {

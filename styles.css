@@ -47,7 +47,9 @@
   --section: clamp(88px, 10vw, 144px);
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 
-  /* H1 56px at 1440 and 30px on phones; H2 40px and 28px; H3 24px and 22px. */
+  /* H1 56px at 1440 and 30px on phones; H2 40px and 28px; H3 24px and 22px.
+     Ledes (.lede) are 18px desktop and 16px phone. Secondary text (step,
+     rule and FAQ answers) is a deliberate 16px at every width. */
   --h1: clamp(30px, 1.1rem + 2.67vw, 56px);
   --h2: clamp(28px, 1rem + 1.67vw, 40px);
   --h3: clamp(22px, 1.25rem + 0.28vw, 24px);
@@ -90,6 +92,10 @@ a { color: inherit; }
   outline-offset: 3px;
 }
 .limits :focus-visible { outline-color: var(--green-light); }
+/* Over the sky the green ring measures about 1.5:1, so the transparent bar
+   and the hero use an ink ring (about 5:1 on the render). */
+.hero :focus-visible,
+.bar:not(.is-scrolled):not(.is-open) :focus-visible { outline-color: var(--ink); }
 
 .skip {
   position: absolute;
@@ -102,6 +108,9 @@ a { color: inherit; }
   text-decoration: none;
 }
 .skip:focus { top: 12px; }
+/* The skip link sits over the wordmark, so its ring is drawn inside its own
+   ink box. */
+.skip:focus-visible { outline: 2px solid var(--white); outline-offset: -6px; }
 
 .visually-hidden {
   position: absolute;
@@ -273,9 +282,13 @@ a:hover > .arrow { transform: translateX(3px); }
     border-bottom: 0;
   }
 }
-/* Without JS the phone menu stays open and readable. */
+/* Without JS (or before main.js has wired the menu) the bar scrolls with the
+   page instead of floating over it. On narrow screens it sits in the flow
+   above the hero with the menu open, so it never covers the headline. */
+html:not(.js) .bar { position: absolute; }
 @media (max-width: 860px) {
-  html:not(.js) .bar { position: absolute; }
+  html:not(.js) .bar { position: relative; background: var(--white); box-shadow: 0 1px 0 var(--line); }
+  html:not(.js) .hero__copy { padding-top: 48px; }
   html:not(.js) .bar__inner { height: auto; flex-wrap: wrap; padding-block: 10px; }
   html:not(.js) .bar__nav {
     position: static;
@@ -619,13 +632,20 @@ a:hover > .arrow { transform: translateX(3px); }
 
 /* --------------------------------------------------------------- motion */
 
+/* main.js sets "reveal-ready" only once the observer is running, so a
+   blocked or failed script never leaves content hidden. */
 @media (prefers-reduced-motion: no-preference) {
-  .js [data-reveal] {
+  .reveal-ready [data-reveal] {
     opacity: 0;
     transform: translateY(14px);
     transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
   }
-  .js [data-reveal].is-in { opacity: 1; transform: none; }
+  .reveal-ready [data-reveal].is-in { opacity: 1; transform: none; }
+}
+/* Print everything, including sections that were never scrolled into view. */
+@media print {
+  [data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .bar { position: absolute; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

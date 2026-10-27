@@ -22,7 +22,14 @@ const headers = Object.fromEntries(vercel.headers[0].headers.map((h) => [h.key, 
 const allowed = /^\/(index\.html|styles\.css|main\.js|robots\.txt|assets\/[\w./-]+)$/;
 
 createServer(async (req, res) => {
-  const path = decodeURIComponent(new URL(req.url, "http://x").pathname);
+  // A malformed URL or percent-escape gets a 400; it must not stop the server.
+  let path;
+  try {
+    path = decodeURIComponent(new URL(req.url, "http://x").pathname);
+  } catch {
+    res.writeHead(400, headers).end("Bad request");
+    return;
+  }
   const target = path === "/" ? "/index.html" : path;
   if (!allowed.test(target) || target.includes("..")) {
     res.writeHead(404, headers).end("Not found");
