@@ -1,0 +1,14 @@
+{
+  "name": "energia-landing",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Energia AI landing page preview (static HTML/CSS/JS)",
+  "scripts": {
+    "serve": "node scripts/serve.mjs",
+    "test": "playwright test",
+    "shots": "SHOTS=1 playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}

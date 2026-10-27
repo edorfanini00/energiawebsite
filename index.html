@@ -1,297 +1,173 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Energia AI — The New Standard in Building Energy</title>
-  <meta name="description" content="AI-driven HVAC optimization for commercial buildings. Energia AI tunes your building in real time to cut energy costs and protect comfort." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Archivo:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Energia AI · AI control for commercial HVAC</title>
+  <meta name="description" content="Energia AI is an AI control platform for commercial HVAC. It learns how each zone of your building heats and cools, reads weather forecasts and occupancy schedules, and adjusts setpoints before rooms drift.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#f1eee8">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="icon" href="assets/brand/favicon.png" type="image/png">
+  <link rel="preload" href="assets/fonts/satoshi-500.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/satoshi-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script>document.documentElement.classList.add("js");</script>
+  <script src="main.js" defer></script>
 </head>
 <body>
+  <a class="skip" href="#main">Skip to content</a>
 
-  <!-- ============ HEADER ============ -->
-  <header class="site-header">
-    <nav class="header-left">
-      <a href="#platform">Our Platform</a>
-      <a href="#mission">Our Mission</a>
-    </nav>
-    <a class="logo" href="#top">ENERGIA<span>AI</span></a>
-    <div class="header-right">
-      <a class="btn btn-ghost" href="#cta">Log In</a>
-      <a class="btn btn-dark" href="#cta">Book a Demo</a>
+  <header class="bar" data-bar>
+    <div class="bar__inner">
+      <a class="bar__brand" href="#top" aria-label="Energia AI, back to top">
+        <img src="assets/brand/energia-ai-wordmark-ink.png" width="424" height="48" alt="Energia AI">
+      </a>
+      <nav class="bar__nav" id="site-nav" aria-label="Primary" data-nav>
+        <a href="#how">How it works</a>
+        <a href="#limits">Operator limits</a>
+        <a href="#questions">Questions</a>
+        <a class="bar__cta" href="mailto:edo.orfanini@energiaigroup.com?subject=Energia%20AI%3A%20our%20building">Talk to us</a>
+      </nav>
+      <button class="bar__toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-toggle>
+        <span class="bar__toggle-label" data-toggle-label>Menu</span>
+        <span class="bar__toggle-icon" aria-hidden="true"></span>
+      </button>
     </div>
   </header>
 
-  <!-- ============ PHOTO HERO ============ -->
-  <section class="photo-hero" id="top">
-    <div class="ph-row">
-      <span class="ph-brand">Energia AI</span>
-      <h1 class="ph-title">Where AI Unlocks<br/>Building Energy</h1>
-      <a class="ph-learn" href="#journey">Learn More<span class="ph-arrow">&darr;</span></a>
-    </div>
-    <div class="ph-foot">
-      <h2>Building Energy Intelligence Platform</h2>
-      <p>
-        Energia AI develops and operates an AI optimization layer for
-        commercial buildings — tuning HVAC systems in real time to cut
-        energy, cost, and carbon without touching comfort.
-      </p>
-    </div>
-  </section>
-
-  <!-- ============ 3D SCROLL STAGE ============ -->
-  <section class="stage" id="journey">
-    <div class="stage-sticky">
-      <canvas id="scene"></canvas>
-
-      <!-- Hero copy -->
-      <div class="hero">
-        <h1>The New Standard<br/>in Building Energy</h1>
-        <p>
-          AI-driven optimization. Engineering-grade control.<br/>
-          We tune the HVAC inside your commercial buildings in real time<br/>
-          to protect comfort and your bottom line.
-        </p>
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="hero__copy">
+        <h1 class="hero__title" id="hero-title"><span>A building</span> <span>that thinks</span> <span>ahead.</span></h1>
+        <p class="hero__lede">Energia AI is an AI control platform for commercial HVAC. It learns how each zone of your building heats and cools, reads weather forecasts and occupancy schedules, and adjusts setpoints before rooms drift. Every decision weighs energy against comfort.</p>
+        <a class="button" href="mailto:edo.orfanini@energiaigroup.com?subject=Energia%20AI%3A%20our%20building">Talk about your building<span class="button__arrow" aria-hidden="true"></span></a>
       </div>
+      <picture class="hero__art">
+        <source type="image/avif" srcset="assets/img/hero-desktop-1200.avif 1200w, assets/img/hero-desktop-1800.avif 1800w, assets/img/hero-desktop-2400.avif 2400w" sizes="(max-width: 639px) 160vw, 100vw">
+        <source type="image/webp" srcset="assets/img/hero-desktop-1200.webp 1200w, assets/img/hero-desktop-1800.webp 1800w, assets/img/hero-desktop-2400.webp 2400w" sizes="(max-width: 639px) 160vw, 100vw">
+        <img src="assets/img/hero-desktop-1800.webp" width="2400" height="1500" alt="Architectural model of a white framed office building with glass floors, graphite rooftop HVAC plant and a green route running from the roof down the facade." fetchpriority="high" decoding="async">
+      </picture>
+    </section>
 
-      <!-- Step panel (bottom-left) -->
-      <div class="steps" id="steps">
-        <div class="step" data-step="0">
-          <div class="step-row">
-            <span class="step-num">01</span>
-            <h3 class="step-title">Sense, instantly</h3>
-          </div>
-          <div class="step-body">
-            <p>
-              We connect to your BMS in days, not months. BACnet-native
-              integration streams every rooftop unit, chiller, and VAV box
-              into one live model of your building. No rip-and-replace.
-            </p>
-          </div>
-        </div>
-        <div class="step" data-step="1">
-          <div class="step-row">
-            <span class="step-num">02</span>
-            <h3 class="step-title">Learn the building</h3>
-          </div>
-          <div class="step-body">
-            <p>
-              Our AI learns your building's thermal dynamics — occupancy,
-              weather, and equipment behavior — and forecasts load hours
-              ahead, so every decision is made before demand hits.
-            </p>
-          </div>
-        </div>
-        <div class="step" data-step="2">
-          <div class="step-row">
-            <span class="step-num">03</span>
-            <h3 class="step-title">Optimize in real time</h3>
-          </div>
-          <div class="step-body">
-            <p>
-              Setpoints, staging, and schedules tuned continuously. Energia
-              writes optimal commands back to your air handlers and chiller
-              plant every few minutes — comfort always within spec.
-            </p>
-          </div>
-        </div>
-        <div class="step" data-step="3">
-          <div class="step-row">
-            <span class="step-num">04</span>
-            <h3 class="step-title">Savings, verified</h3>
-          </div>
-          <div class="step-body">
-            <p>
-              Measurement & verification built in. Track kWh, peak demand,
-              and carbon against your baseline — typically 15–30% HVAC
-              energy savings, reported transparently every month.
-            </p>
-          </div>
+    <section class="habits" id="building" aria-labelledby="habits-title">
+      <div class="wrap habits__grid">
+        <h2 class="habits__title" id="habits-title" data-reveal>No two buildings hold heat the same way.</h2>
+        <p class="habits__body" data-reveal>West glass takes the afternoon sun. A full floor on Tuesday runs warm by eleven. Fixed schedules treat every day the same and correct a room only after it drifts. Energia AI learns how your building responds, then plans the next hours around it.</p>
+      </div>
+    </section>
+
+    <section class="how" id="how" aria-labelledby="how-title">
+      <div class="how__grid">
+        <figure class="how__art">
+          <picture>
+            <source type="image/avif" srcset="assets/img/control-detail-800.avif 800w, assets/img/control-detail-1200.avif 1200w, assets/img/control-detail-1800.avif 1800w" sizes="(min-width: 1024px) 58vw, 100vw">
+            <source type="image/webp" srcset="assets/img/control-detail-800.webp 800w, assets/img/control-detail-1200.webp 1200w, assets/img/control-detail-1800.webp 1800w" sizes="(min-width: 1024px) 58vw, 100vw">
+            <img src="assets/img/control-detail-1200.webp" width="1800" height="1200" alt="Close view of the rooftop plant: graphite fan units and an air handler, with a green route running from the plant over the parapet and down the facade." loading="lazy" decoding="async">
+          </picture>
+        </figure>
+        <div class="how__copy">
+          <h2 class="how__title" id="how-title" data-reveal>From model to setpoint.</h2>
+          <ol class="sequence">
+            <li class="sequence__item" data-reveal>
+              <h3>Model</h3>
+              <p>We build a thermal model of your building from its floor plans, HVAC equipment and operating history. Physics describes how heat moves between zones. A neural network learns the behavior physics misses.</p>
+            </li>
+            <li class="sequence__item" data-reveal>
+              <h3>Learn</h3>
+              <p>A reinforcement learning agent trains inside that model across simulated weather and occupancy conditions. It is rewarded for holding comfort and penalized for wasted energy.</p>
+            </li>
+            <li class="sequence__item" data-reveal>
+              <h3>Control</h3>
+              <p>On each control cycle the agent reads the building, checks the forecast and proposes new setpoints. Every proposal is checked against your limits before it reaches the building management system.</p>
+            </li>
+          </ol>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ============ FEATURES ============ -->
-  <section class="features" id="platform">
-    <h2>Designed for today's buildings,<br/>beyond legacy controls.</h2>
-    <div class="features-grid">
-      <div class="feature">
-        <div class="feature-icon">
-          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M32 6 8 20v24l24 14 24-14V20L32 6Z"/>
-            <path d="M8 20l24 14 24-14M32 34v24"/>
-            <circle cx="32" cy="22" r="5"/>
-          </svg>
+    <section class="limits" id="limits" aria-labelledby="limits-title">
+      <div class="wrap limits__grid">
+        <div class="limits__head">
+          <h2 class="limits__title" id="limits-title" data-reveal>Operators set the limits.</h2>
+          <p class="limits__lede" data-reveal>Energia AI’s control architecture is designed around boundaries agreed with your facilities team. Every proposed setpoint is checked against them before it reaches your BMS.</p>
         </div>
-        <h3>Real-Time Optimization</h3>
-        <p>
-          We believe speed is a skill. Our platform recalculates optimal
-          setpoints every few minutes, steering chillers, air handlers, and
-          VAVs the moment conditions shift — not at the next scheduled tune-up.
-        </p>
+        <dl class="rules">
+          <div class="rules__row" data-reveal>
+            <dt>Setpoint range</dt>
+            <dd>Heating and cooling setpoints stay inside the range you approve, with a deadband between them to avoid simultaneous heating and cooling.</dd>
+          </div>
+          <div class="rules__row" data-reveal>
+            <dt>Fresh air</dt>
+            <dd>Outdoor air minimums for your site, based on standards such as ASHRAE 62.1, are part of the control constraints. Ventilation is not traded for energy.</dd>
+          </div>
+          <div class="rules__row" data-reveal>
+            <dt>Equipment</dt>
+            <dd>Equipment limits are defined with your facilities team before control is enabled.</dd>
+          </div>
+          <div class="rules__row" data-reveal>
+            <dt>Fallback</dt>
+            <dd>If the connection drops or a reading looks wrong, control hands back to your existing sequences.</dd>
+          </div>
+          <div class="rules__row" data-reveal>
+            <dt>Life safety</dt>
+            <dd>Fire, smoke and critical equipment alarms take priority. Energia AI steps back and your building’s own systems and manual override take over.</dd>
+          </div>
+          <div class="rules__row" data-reveal>
+            <dt>Your BMS</dt>
+            <dd>We connect through open protocols such as BACnet and Modbus. Compatibility is confirmed with your team during an assessment.</dd>
+          </div>
+        </dl>
       </div>
-      <div class="feature">
-        <div class="feature-icon">
-          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M6 50h52M10 50V30l10-6v26M28 50V18l10-6v38M46 50V26l10 6v18"/>
-            <path d="M6 12c8 6 14-4 22 2s14-4 22 2" stroke-dasharray="3 4"/>
-          </svg>
+    </section>
+
+    <section class="contact" id="contact" aria-labelledby="contact-title">
+      <div class="wrap contact__grid">
+        <div class="contact__lead">
+          <h2 class="contact__title" id="contact-title" data-reveal>Talk about your building.</h2>
+          <p class="contact__body" data-reveal>Tell us what you run and what you want to fix. We will tell you plainly whether Energia AI is a fit.</p>
+          <div class="contact__actions" data-reveal>
+            <a class="button" href="mailto:edo.orfanini@energiaigroup.com?subject=Energia%20AI%3A%20our%20building">Talk about your building<span class="button__arrow" aria-hidden="true"></span></a>
+            <a class="contact__mail" href="mailto:edo.orfanini@energiaigroup.com">edo.orfanini@energiaigroup.com</a>
+          </div>
         </div>
-        <h3>AI Load Forecasting</h3>
-        <p>
-          Weather is a core input. Our engine forecasts thermal load and
-          occupancy hours ahead, pre-cooling and pre-heating with cheap
-          off-peak energy first, filtered for cost and carbon.
-        </p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">
-          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5">
-            <circle cx="28" cy="28" r="18"/>
-            <path d="M41 41l14 14M28 18v10l7 7"/>
-          </svg>
+        <div class="faq" id="questions">
+          <h2 class="faq__title">Questions</h2>
+          <details class="faq__item">
+            <summary>Which buildings is Energia AI for?</summary>
+            <p>Commercial buildings with central HVAC run through a building management system. An assessment tells us whether yours is a good candidate.</p>
+          </details>
+          <details class="faq__item">
+            <summary>What data do you need?</summary>
+            <p>Floor plans, HVAC equipment details, BMS points with trend history, and your occupancy schedules. Weather forecasts come from public sources.</p>
+          </details>
+          <details class="faq__item">
+            <summary>How do you assess savings?</summary>
+            <p>We compare a proposed control strategy with how the building runs today. Results depend on your equipment and the operating data your building keeps. Simulation results are not a guarantee of savings in your building.</p>
+          </details>
+          <details class="faq__item">
+            <summary>Does it need hardware on site?</summary>
+            <p>Expect a small gateway next to your BMS. It reads points and writes setpoints over your building’s protocols. The AI runs on that gateway or in our cloud, depending on your security requirements.</p>
+          </details>
+          <details class="faq__item">
+            <summary>Can operators take control back?</summary>
+            <p>Yes. Your existing control sequences stay in place underneath. Operators keep manual override, and if Energia AI loses its connection or sees bad data, control returns to those sequences.</p>
+          </details>
         </div>
-        <h3>Fault Detection & Diagnostics</h3>
-        <p>
-          We use continuous diagnostics with secure API integrations to catch
-          stuck dampers, leaking valves, and short-cycling equipment — flagging
-          faults before they burn energy or comfort.
-        </p>
       </div>
-      <div class="feature">
-        <div class="feature-icon">
-          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M10 8h36v48H10zM18 20h20M18 30h20M18 40h12"/>
-            <path d="M46 16h8v40H22" stroke-dasharray="3 4"/>
-          </svg>
-        </div>
-        <h3>Verified Savings</h3>
-        <p>
-          We guarantee controlled outcomes by managing energy's biggest
-          variables — cost and comfort — with IPMVP-aligned measurement and
-          automated reporting for every building.
-        </p>
-      </div>
-    </div>
-  </section>
+    </section>
+  </main>
 
-  <!-- ============ IMPACT — dotted terrain with building pins ============ -->
-  <section class="impact" id="impact">
-    <div class="impact-sticky">
-      <div class="impact-headline" aria-hidden="true">Our Impact</div>
-      <canvas id="impact-scene"></canvas>
-      <div class="impact-labels" id="impact-labels"></div>
-      <div class="impact-meta">
-        <span class="impact-asof">As of Jun 10, 2026</span>
-        <h3>AI Savings Under Mgmt.</h3>
-        <p>Energy our AI removes from commercial buildings, every year.</p>
-      </div>
-      <div class="impact-counter">
-        <span class="impact-unit">GWh / yr</span>
-        <span class="impact-count" id="impact-count">0.0</span>
-      </div>
-      <div class="impact-ruler" aria-hidden="true"></div>
-    </div>
-  </section>
-
-  <!-- ============ SPLIT / STANDARDS ============ -->
-  <section class="split" id="mission">
-    <div class="split-media">
-      <img
-        src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1400&auto=format&fit=crop"
-        alt="Modern commercial office building facade"
-        loading="lazy"
-      />
-    </div>
-    <div class="split-copy">
-      <h2>Engineering-grade standards across every building.</h2>
-      <p>
-        Modeled on mission-critical environments, our process enforces
-        comfort compliance, protected setpoint limits, and zero-disruption
-        tolerance — your tenants never feel the optimization.
-      </p>
-      <a class="btn btn-dark btn-lg" href="#cta">Explore the Platform</a>
-    </div>
-  </section>
-
-  <!-- ============ FAQ ============ -->
-  <section class="faq">
-    <div class="faq-left">
-      <h2>How we work and how we deliver measurable savings.</h2>
-    </div>
-    <div class="faq-right">
-      <details open>
-        <summary>How fast can Energia AI be deployed?<span class="chev"></span></summary>
-        <p>
-          We move at the speed of your portfolio. Our platform connects to
-          your existing BMS over BACnet, eliminating the months wasted in
-          traditional retrofit cycles. One integration call activates our
-          optimization engine in days, not quarters — ensuring your most
-          critical buildings start saving immediately.
-        </p>
-      </details>
-      <details>
-        <summary>Does it work with my existing BMS?<span class="chev"></span></summary>
-        <p>
-          Yes. Energia AI is vendor-neutral and speaks BACnet, Modbus, and
-          Niagara natively. We layer intelligence on top of Johnson Controls,
-          Siemens, Honeywell, Schneider, and Trane systems without replacing
-          a single controller.
-        </p>
-      </details>
-      <details>
-        <summary>How much can we expect to save?<span class="chev"></span></summary>
-        <p>
-          Commercial buildings typically see 15–30% HVAC energy reduction in
-          the first year, plus peak-demand savings. Every kWh is measured
-          against an IPMVP-aligned baseline, so savings are verified — not
-          estimated.
-        </p>
-      </details>
-      <details>
-        <summary>How does Energia differ from a traditional BMS upgrade?<span class="chev"></span></summary>
-        <p>
-          A BMS executes fixed schedules; Energia thinks. We forecast load,
-          learn your building's thermal behavior, and continuously write
-          optimal commands back — a closed loop that gets smarter every day,
-          with no new hardware on the wall.
-        </p>
-      </details>
-    </div>
-  </section>
-
-  <!-- ============ DARK CTA + FOOTER ============ -->
-  <footer class="footer" id="cta">
-    <div class="footer-cta">
-      <h2>Cut your energy spend with AI,<br/>and comfort you can rely on.</h2>
-      <a class="btn btn-light btn-lg" href="#">Book a Demo</a>
-    </div>
-    <div class="footer-nav">
-      <a href="#platform"><span>Our Platform</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12h16M13 5l7 7-7 7"/></svg></a>
-      <a href="#mission"><span>Our Mission</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12h16M13 5l7 7-7 7"/></svg></a>
-      <a href="#cta"><span>Book a Demo</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12h16M13 5l7 7-7 7"/></svg></a>
-    </div>
-    <div class="footer-wordmark" aria-hidden="true">ENERGIA</div>
-    <div class="footer-bottom">
-      <span>© 2026 Energia AI, Inc.</span>
-      <div>
-        <a href="#">Privacy Policy</a>
-        <a href="#">ToS</a>
-        <span class="muted">Made for buildings</span>
-      </div>
+  <footer class="foot">
+    <div class="wrap foot__grid">
+      <img class="foot__mark" src="assets/brand/energia-ai-wordmark-ink.png" width="424" height="48" alt="Energia AI">
+      <ul class="foot__links">
+        <li><a href="mailto:edo.orfanini@energiaigroup.com">Email</a></li>
+        <li><a href="https://www.linkedin.com/company/energia-ai/" rel="noopener noreferrer" target="_blank">LinkedIn<span class="visually-hidden"> (opens in a new tab)</span></a></li>
+      </ul>
+      <p class="foot__note">Images are original concept renderings, not a client installation.</p>
+      <p class="foot__copy">© 2026 Energia AI</p>
     </div>
   </footer>
-
-  <!-- ============ SCRIPTS ============ -->
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-  <script type="importmap">
-    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
-  </script>
-  <script type="module" src="main.js"></script>
 </body>
 </html>

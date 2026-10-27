@@ -1,0 +1,11 @@
+# Deploy only the static site. Tooling, tests and docs stay out of the bundle.
+node_modules
+package.json
+package-lock.json
+playwright.config.mjs
+tests
+test-results
+playwright-report
+scripts
+*.md
+.gitignore
