@@ -39,6 +39,8 @@ async function worstContrast(page, browser, selector) {
   const boxes = await page.evaluate((selector) => {
     const out = [];
     for (const el of document.querySelectorAll(selector)) {
+      // The closed phone menu is invisible; its links are not on screen.
+      if (!el.checkVisibility({ opacityProperty: true, visibilityProperty: true })) continue;
       const range = document.createRange();
       range.selectNodeContents(el);
       const rgb = getComputedStyle(el).color.match(/\d+/g).slice(0, 3).map(Number);

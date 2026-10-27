@@ -2,9 +2,8 @@
    One full-bleed daylight render: open sky top-left, an architectural
    fragment entering from the right and bottom. The headline sits in the
    calm sky. No paragraph and no button over the art; the conversion lives
-   in the bar. */
-
-.bar { --bar-fg: var(--white); }
+   in the bar. The daylight sky is too light for white text (2.4:1 measured
+   on the render), so hero type and the bar are ink. */
 
 /* ------------------------------------------------------------------ hero */
 
@@ -14,9 +13,9 @@
   min-height: 600px;
   max-height: 1100px;
   overflow: hidden;
-  color: var(--white);
+  color: var(--ink);
   /* Sky tone sampled from the render, shown while the image decodes. */
-  background: var(--sky, #8fb3c9);
+  background: var(--sky, #6f94ba);
 }
 .a-hero__art,
 .a-hero__art img {
@@ -65,7 +64,7 @@
   width: 100%;
   aspect-ratio: 21 / 9;
   object-fit: cover;
-  background: #c9d6de;
+  background: #d5dde2;
 }
 
 /* ----------------------------------------------------------------- phone */
@@ -80,5 +79,5 @@
   .a-hero__copy { padding-top: 104px; }
   .a-hero__line { margin-top: 14px; }
   .a-feature__art { margin-inline: 0; }
-  .a-feature__art img { aspect-ratio: 4 / 5; }
+  .a-feature__art img { aspect-ratio: 1 / 1; }
 }
