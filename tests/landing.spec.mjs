@@ -594,7 +594,7 @@ for (const vp of viewports) {
       expect(text).toContain("A fixed schedule does not adjust when the weather or occupancy changes.");
       // Keep substantive results qualifications and useful product copy; omit image meta-copy.
       expect(text).toContain("Simulation results are not a guarantee of savings in your building.");
-      expect(text).toContain("See how Energia AI responds throughout the day.");
+      expect(text).toContain("Energia AI plans for both, hour by hour.");
       expect(text).not.toMatch(/illustrati(?:ve|on)|fictional|renderings?|rendered|\bdemo\b|\bconcept\b|simulated visual|sample imagery|not readings from a real site|not a client installation/i);
       expect(text).not.toMatch(/\b\d+(\.\d+)?\s?(°|deg|kwh|kw\b|ppm)/i);
     });

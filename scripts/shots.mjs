@@ -105,6 +105,8 @@ for (const route of routes) {
         await page.waitForTimeout(300);
         await page.screenshot({ path: join(out, `${stem}-menu.png`) });
         await page.keyboard.press("Escape");
+        // Escape returns focus to the toggle; drop it so no focus ring shows in later captures.
+        await page.evaluate(() => document.activeElement?.blur());
       }
       await page.evaluate(async () => {
         for (let y = 0; y < document.documentElement.scrollHeight; y += innerHeight * 0.7) {
@@ -112,10 +114,11 @@ for (const route of routes) {
           await new Promise(resolve => setTimeout(resolve, 70));
         }
       });
+      // Section tops sit just below the fixed bar, as an anchor link would place them.
       for (const id of ["benefits", "day", "model", "limits", "start", "contact"]) {
         await page.evaluate((id) => {
           const el = document.getElementById(id);
-          window.scrollTo(0, el.getBoundingClientRect().top + scrollY);
+          window.scrollTo(0, el.getBoundingClientRect().top + scrollY - document.querySelector(".bar").offsetHeight);
         }, id);
         await page.waitForTimeout(400);
         await page.screenshot({ path: join(out, `${stem}-section-${id}.png`) });
@@ -125,7 +128,9 @@ for (const route of routes) {
         const tab = page.locator(`#tab-${m}`);
         if (!(await tab.isVisible())) throw new Error(`Missing day tab: ${m}`);
         await tab.click();
-        await page.evaluate(() => window.scrollTo(0, document.getElementById("day").getBoundingClientRect().top + scrollY));
+        // Move the pointer off the tabs so no hover state shows on an inactive tab.
+        await page.mouse.move(0, 0);
+        await page.evaluate(() => window.scrollTo(0, document.getElementById("day").getBoundingClientRect().top + scrollY - document.querySelector(".bar").offsetHeight));
         await page.evaluate(() => Promise.all([...document.querySelectorAll("[data-moment]:not([hidden]) img")].map((i) => i.decode())));
         await page.waitForTimeout(300);
         await page.screenshot({ path: join(out, `${stem}-day-${m}.png`) });

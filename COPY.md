@@ -14,7 +14,7 @@ Limits
 
 Questions
 
-Explore savings
+Discuss savings
 
 Menu
 
@@ -22,17 +22,17 @@ Spend less on HVAC. Keep people comfortable.
 
 Energia AI is an AI control platform for commercial HVAC, designed to reduce wasted heating and cooling and the routine adjustments your team handles every day.
 
-Explore your savings
+Discuss your savings
 
 What your building gains  *(screen reader heading, not shown)*
 
 Lower operating costs
 
-Heating and cooling follow when spaces are actually used, so less energy goes to empty rooms and unneeded runtime.
+Heating and cooling run when and where spaces are in use, so less energy goes to empty rooms and unneeded runtime.
 
 Comfort for occupants
 
-Energia AI plans ahead for weather and the day’s schedule, so rooms in use stay in the comfort range your team sets.
+Energia AI plans ahead for weather and the day’s schedule to keep rooms in use within the comfort range your team sets.
 
 Less routine adjustment
 
@@ -40,7 +40,7 @@ Your team spends less time changing setpoints by hand and keeps oversight, limit
 
 The load on your building changes by the hour.
 
-A fixed schedule does not adjust when the weather or occupancy changes. Energia AI plans for both. See how Energia AI responds throughout the day.
+A fixed schedule does not adjust when the weather or occupancy changes. Energia AI plans for both, hour by hour.
 
 06:30 Dawn
 
@@ -52,7 +52,7 @@ A fixed schedule does not adjust when the weather or occupancy changes. Energia 
 
 What Energia AI does
 
-Starts each zone just early enough to be comfortable when people arrive, instead of conditioning an empty building.
+Starts each zone only as early as it needs to be ready when people arrive, not hours ahead on a fixed schedule.
 
 06:30 Before anyone arrives
 
@@ -188,9 +188,9 @@ Yes. Operators keep manual override and your existing control sequences. If the 
 
 Find the savings opportunity in your building.
 
-Tell us your building type, current HVAC and operating schedules. A first conversation covers where energy may be wasted, whether Energia AI fits your HVAC and BMS, and what integration and measurement would involve.
+Tell us your building type, current HVAC and operating schedules. A first conversation covers where energy may be wasted, whether Energia AI fits your equipment and BMS, and how integration and savings measurement would work.
 
-Explore your savings
+Discuss your savings
 
 edo.orfanini@energiaigroup.com
 
@@ -226,11 +226,23 @@ Removed illustration explanations from the day introduction, day caption, plan c
 
 Owner feedback: the page talked about the product but not savings, benefits, or why to talk to Energia. The page now leads with outcomes and uses the mechanism to explain them.
 
-- Title, meta description and hero: “Spend less on HVAC. Keep people comfortable.” with one “designed to” qualification. Header CTA “Explore savings”, hero and contact CTA “Explore your savings”. Mailto addresses and subjects unchanged. `noindex, nofollow` kept.
+- Title, meta description and hero: “Spend less on HVAC. Keep people comfortable.” with one “designed to” qualification. Header CTA “Discuss savings”, hero and contact CTA “Discuss your savings”. Mailto addresses and subjects unchanged. `noindex, nofollow` kept.
 - New `#benefits` row between the hero and the day: lower operating costs, comfort for occupants, less routine adjustment. It is a description list under a screen reader only H2 (“What your building gains”), with no visible eyebrow and no controls.
 - The four day actions now state the owner gain: start only as early as needed, keep occupied rooms comfortable within approved limits, cool ahead of afternoon sun, stop spending energy on empty rooms.
-- Model, limits and start copy condensed. The physics plus learned model, training in simulation, limit checks before BMS writes, deadband, ASHRAE 62.1 based fresh air minimums, life safety priority, BACnet/Modbus with assessment, and the simulation qualification are kept. American spelling (“practices”).
+- Model, limits and start copy condensed. The thermal model that Energia AI learns from, training in simulation, limit checks before BMS writes, deadband, ASHRAE 62.1 based fresh air minimums, life safety priority, BACnet/Modbus with assessment, and the simulation qualification are kept. American spelling (“practices”).
 - New FAQ “How much could my building save?”: names the factors and says an assessment looks at savings potential and comfort together. No range.
-- Contact: “Find the savings opportunity in your building.” Says what to send (building type, current HVAC, operating schedules) and what a first conversation covers (where energy may be wasted, HVAC and BMS fit, integration and measurement). No estimate, audit, report, booking tool or form.
+- Contact: “Find the savings opportunity in your building.” Says what to send (building type, current HVAC, operating schedules) and what a first conversation covers (where energy may be wasted, equipment and BMS fit, how integration and savings measurement would work). No estimate, audit, report, booking tool or form.
 - No savings percentages, ROI, customers, guarantees, image explanations or dash characters. Four alt texts lost compound hyphens (“Street level”, “late afternoon”, “Midmorning”, “Midafternoon”).
 - Visible prose: 810 → 836 words (+26, +3.2%) by static count of `index.html`, despite the new 66 word benefits row, a new FAQ and a more specific contact. Evidence: `benefits-pass/copy-compare.json` in the V3 evidence root.
+
+## Benefits pass, fix round 1 · 2026-10-27
+
+Applied after two independent reviews of 7e6dbd1.
+
+- CTAs read “Discuss savings” (header) and “Discuss your savings” (hero, contact), and the meta description ends “Discuss the savings opportunity in your building.”, because each link opens an email rather than a self serve tool. Mailto addresses and subjects unchanged.
+- First benefit now parses: “Heating and cooling run when and where spaces are in use…”. The comfort benefit states the purpose (“to keep rooms in use within the comfort range your team sets”) rather than a measured result.
+- Dawn action no longer contradicts itself: “Starts each zone only as early as it needs to be ready when people arrive, not hours ahead on a fixed schedule.”
+- Day lede names the product once: “…Energia AI plans for both, hour by hour.”
+- Contact lede avoids the repeated “HVAC” and names what is measured: “…whether Energia AI fits your equipment and BMS, and how integration and savings measurement would work.”
+- American English in alt text: “sidewalk” instead of “pavement” (hero and 15:30), “across an intersection” instead of “across a crossing” (hero). The plan overlay source comment now says “meters” and “centered”.
+- Headlines keep their sentences and phrases together: each hero promise is its own line at every width, “savings opportunity” stays on one line from 360px up, and below 360px the day heading sets “changes by the hour.” on its own line instead of splitting “your building”.

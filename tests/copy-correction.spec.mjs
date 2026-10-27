@@ -6,7 +6,7 @@ const evidence = process.env.COPY_EVIDENCE_DIR || "test-results/copy-correction"
 const forbidden = /illustrati(?:ve|on)|fictional|renderings?|rendered|\bdemo\b|\bconcept\b|simulated visual|sample imagery|not readings from a real site|not a client installation/i;
 const caption = "The dark area is the building core. Outlines divide the floor into zones. The fine grid represents the control volumes used to calculate heat flow.";
 const actions = {
-  dawn: "Starts each zone just early enough to be comfortable when people arrive",
+  dawn: "Starts each zone only as early as it needs to be ready when people arrive",
   morning: "Keeps occupied rooms comfortable inside your approved setpoint range",
   afternoon: "Began cooling the west rooms before the sun reached them",
   dusk: "Stops spending energy on empty rooms",
@@ -35,7 +35,7 @@ for (const [width, height] of [[1440, 900], [768, 1024], [390, 844], [375, 812],
         }
         await document.fonts.ready;
       });
-      await expect(page.locator("#day .lede")).toContainText("See how Energia AI responds throughout the day.");
+      await expect(page.locator("#day .lede")).toContainText("Energia AI plans for both, hour by hour.");
       await expect(page.locator(".plan figcaption")).toHaveText(caption);
       await expect(page.locator(".day__caption, .foot__note")).toHaveCount(0);
       await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /designed to/);

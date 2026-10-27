@@ -105,7 +105,7 @@ for (const [width, height] of [[1440, 900], [768, 1024], [859, 1024], [860, 1024
         expect(geometry.unobscured).toBe(true);
         expect(geometry.beforeArt, "source order follows visible action → artwork").toBe(true);
         await expect(panel.locator(".moment__part--do")).toHaveCount(1);
-        await expect(page.locator("#day .lede")).toContainText("See how Energia AI responds throughout the day.");
+        await expect(page.locator("#day .lede")).toContainText("Energia AI plans for both, hour by hour.");
         await page.locator(`#tab-${moment}`).focus();
         await page.keyboard.press("Tab");
         await expect(panel).toBeFocused();

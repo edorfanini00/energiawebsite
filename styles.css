@@ -343,6 +343,8 @@ html:not(.js) .bar { position: absolute; }
   letter-spacing: -0.03em;
   text-wrap: balance;
 }
+/* Each promise on its own line, so a narrow wrap never lands mid sentence. */
+.hero__title-line { display: block; }
 .hero__line {
   max-width: 30ch;
   color: var(--ink-soft);
@@ -401,6 +403,11 @@ html:not(.js) .bar { position: absolute; }
   .benefits__list { grid-template-columns: 1fr; row-gap: 32px; }
   .benefits__list > div + div { border-top-color: var(--line); }
 }
+/* Tablet: a term column and a text column, like the limits ledger. */
+@media (min-width: 600px) and (max-width: 860px) {
+  .benefits__list > div { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: 32px; align-items: start; }
+  .benefits dd { margin-top: 0; }
+}
 
 /* --------------------------------------------------------- the day */
 
@@ -418,6 +425,11 @@ html:not(.js) .bar { position: absolute; }
 @media (max-width: 860px) {
   .day__head { grid-template-columns: 1fr; row-gap: 20px; }
   .day__head .lede { justify-self: start; }
+}
+/* Below 360 the heading would break inside "your building"; set the bold
+   phrase on its own line, as it already falls from 360 up. */
+@media (max-width: 359px) {
+  #day-title strong { display: block; }
 }
 
 /* The four moments. Without JS every moment is shown in order; main.js turns
@@ -753,6 +765,8 @@ html:not(.js) .bar { position: absolute; }
   text-wrap: balance;
 }
 .contact__title strong { display: block; font-weight: 700; }
+/* Keep the noun phrase together once there is room for it (278px of 280 at 320). */
+@media (min-width: 360px) { .contact__keep { white-space: nowrap; } }
 .contact__row {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);

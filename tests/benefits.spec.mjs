@@ -24,9 +24,9 @@ test.describe("benefits pass copy", () => {
     await page.goto("/");
     await expect(page.locator("#top h1")).toHaveText("Spend less on HVAC. Keep people comfortable.");
     await expect(page.locator(".hero__line")).toHaveText("Energia AI is an AI control platform for commercial HVAC, designed to reduce wasted heating and cooling and the routine adjustments your team handles every day.");
-    await expect(page.locator(".hero__cta")).toHaveText("Explore your savings");
-    await expect(page.locator(".bar__cta")).toHaveText("Explore savings");
-    await expect(page.locator(".contact .button")).toHaveText("Explore your savings");
+    await expect(page.locator(".hero__cta")).toHaveText("Discuss your savings");
+    await expect(page.locator(".bar__cta")).toHaveText("Discuss savings");
+    await expect(page.locator(".contact .button")).toHaveText("Discuss your savings");
     await expect(page).toHaveTitle("Energia AI · Spend less on commercial HVAC");
     await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /AI control platform for commercial HVAC, designed to reduce wasted heating and cooling/);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
@@ -47,7 +47,7 @@ test.describe("benefits pass copy", () => {
     const dd = section.locator("dd");
     await expect(dd).toHaveCount(3);
     await expect(dd.nth(0)).toContainText("less energy goes to empty rooms");
-    await expect(dd.nth(1)).toContainText("rooms in use stay in the comfort range your team sets");
+    await expect(dd.nth(1)).toContainText("keep rooms in use within the comfort range your team sets");
     await expect(dd.nth(2)).toContainText("keeps oversight, limits and manual override");
     // No controls inside, so the keyboard path from the hero to the day is unchanged.
     await expect(section.locator("a, button, input, summary, [tabindex]")).toHaveCount(0);
@@ -61,7 +61,7 @@ test.describe("benefits pass copy", () => {
     await page.goto("/");
     const actions = await page.locator(".moment__part--do p").allInnerTexts();
     expect(actions).toEqual([
-      "Starts each zone just early enough to be comfortable when people arrive, instead of conditioning an empty building.",
+      "Starts each zone only as early as it needs to be ready when people arrive, not hours ahead on a fixed schedule.",
       "Keeps occupied rooms comfortable inside your approved setpoint range, with fresh air at or above your ventilation minimums.",
       "Began cooling the west rooms before the sun reached them, so they stay comfortable instead of overheating.",
       "Stops spending energy on empty rooms by moving them to your wider unoccupied range, while rooms still in use stay comfortable.",
@@ -72,7 +72,7 @@ test.describe("benefits pass copy", () => {
     await page.goto("/");
     await expect(page.locator("#contact-title")).toHaveText("Find the savings opportunity in your building.");
     const lede = page.locator(".contact .lede");
-    for (const part of ["building type", "current HVAC", "operating schedules", "where energy may be wasted", "fits your HVAC and BMS", "what integration and measurement would involve"]) {
+    for (const part of ["building type", "current HVAC", "operating schedules", "where energy may be wasted", "fits your equipment and BMS", "how integration and savings measurement would work"]) {
       await expect(lede).toContainText(part);
     }
     // No promise of an instant estimate, free audit, report or booking tool.
@@ -115,7 +115,7 @@ test.describe("benefits pass copy", () => {
     expect(copy).not.toMatch(IMAGE_META);
     // Hyphens, en and em dashes, minus and other dash characters.
     expect(copy.match(/.{0,20}[-‐-―−].{0,20}/g)).toBeNull();
-    expect(copy).not.toMatch(/practis|colour|centre|metre|optimis|behaviour|organis|analys(e|ing)|favour|licen[cs]e/i);
+    expect(copy).not.toMatch(/practis|colour|centre|metre|optimis|behaviour|organis|analys(e|ing)|favour|licen[cs]e|pavement|\blift\b|storey/i);
   });
 
   test("mailtos are exactly the established addresses and subjects", async ({ page }) => {
@@ -132,7 +132,7 @@ test.describe("benefits pass copy", () => {
 });
 
 // Layout of the new row and the header CTA at each review width.
-for (const [width, height] of [[320, 740], [390, 844], [768, 1024], [861, 1024], [1440, 900]]) {
+for (const [width, height] of [[320, 740], [360, 780], [375, 812], [390, 844], [768, 1024], [844, 390], [861, 1024], [1440, 900]]) {
   test.describe(`benefits layout ${width}`, () => {
     test.use({ viewport: { width, height } });
 
@@ -153,6 +153,8 @@ for (const [width, height] of [[320, 740], [390, 844], [768, 1024], [861, 1024],
           dayTop: rect(document.querySelector("#day")).top,
           dayHeadTop: rect(document.querySelector("#day-title")).top,
           items: items.map(rect),
+          terms: items.map((d) => rect(d.querySelector("dt"))),
+          texts: items.map((d) => rect(d.querySelector("dd"))),
           dtLines: items.map((d) => lines(d.querySelector("dt"))),
           ddLines: items.map((d) => lines(d.querySelector("dd"))),
           ddSize: items.map((d) => getComputedStyle(d.querySelector("dd")).fontSize),
@@ -193,7 +195,68 @@ for (const [width, height] of [[320, 740], [390, 844], [768, 1024], [861, 1024],
         for (let i = 1; i < 3; i++) expect(m.items[i].top).toBeGreaterThanOrEqual(m.items[i - 1].bottom + 24);
         for (const n of m.dtLines) expect(n).toBeLessThanOrEqual(2);
         for (const n of m.ddLines) expect(n).toBeLessThanOrEqual(5);
+        if (width >= 600) {
+          // Tablet: each benefit is a term column beside a text column.
+          expect(m.dtLines).toEqual([1, 1, 1]);
+          for (let i = 0; i < 3; i++) {
+            expect(Math.abs(m.texts[i].top - m.terms[i].top)).toBeLessThanOrEqual(8);
+            expect(m.texts[i].left).toBeGreaterThanOrEqual(m.terms[i].right + 24);
+            expect(m.texts[i].right).toBeLessThanOrEqual(m.items[i].right + 0.5);
+          }
+          // The text column starts at the same x in every row.
+          expect(new Set(m.texts.map((r) => Math.round(r.left))).size).toBe(1);
+          for (const n of m.ddLines) expect(n).toBeLessThanOrEqual(3);
+        } else {
+          // Phone: the text sits under its term.
+          for (let i = 0; i < 3; i++) expect(m.texts[i].top).toBeGreaterThanOrEqual(m.terms[i].bottom);
+        }
       }
+    });
+
+    test("headlines break at sentence and phrase boundaries", async ({ page }) => {
+      await page.goto("/");
+      await page.evaluate(() => document.fonts.ready);
+      // Visual lines of an element, from the boxes of its words.
+      const lines = (selector) => page.evaluate((selector) => {
+        const el = document.querySelector(selector);
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        const words = [];
+        for (let node; (node = walker.nextNode());) {
+          for (const match of node.data.matchAll(/\S+/g)) {
+            const range = document.createRange();
+            range.setStart(node, match.index);
+            range.setEnd(node, match.index + match[0].length);
+            words.push({ word: match[0], top: Math.round(range.getClientRects()[0].top) });
+          }
+        }
+        const out = [];
+        for (const w of words) {
+          const last = out[out.length - 1];
+          if (last && Math.abs(last.top - w.top) < 4) last.text += ` ${w.word}`;
+          else out.push({ top: w.top, text: w.word });
+        }
+        return out.map((l) => l.text);
+      }, selector);
+      // Hero: each promise starts its own line; no line holds the end of one and the start of the other.
+      const h1 = page.locator("#top h1");
+      await expect(h1).toHaveText("Spend less on HVAC. Keep people comfortable.");
+      const parts = h1.locator(".hero__title-line");
+      await expect(parts).toHaveText(["Spend less on HVAC.", "Keep people comfortable."]);
+      expect(await parts.evaluateAll((els) => els.map((el) => getComputedStyle(el).display))).toEqual(["block", "block"]);
+      const h1Lines = await lines("#top h1");
+      expect(h1Lines.some((l) => /\.\s+\S/.test(l)), h1Lines.join(" / ")).toBe(false);
+      expect(h1Lines.findIndex((l) => l.startsWith("Keep"))).toBeGreaterThan(0);
+      expect(h1Lines.length).toBeGreaterThanOrEqual(2);
+      expect(h1Lines.length).toBeLessThanOrEqual(4);
+      // Day: "your building" stays together and the bold phrase starts a line.
+      const dayLines = await lines("#day-title");
+      expect(dayLines.some((l) => /your building/.test(l)), dayLines.join(" / ")).toBe(true);
+      expect(dayLines.some((l) => l.startsWith("changes by the")), dayLines.join(" / ")).toBe(true);
+      // Contact: "savings opportunity" stays together from 360 up, and the
+      // bold phrase is its own line at every width.
+      const contactLines = await lines("#contact-title");
+      expect(contactLines[contactLines.length - 1], contactLines.join(" / ")).toBe("in your building.");
+      if (width >= 360) expect(contactLines.some((l) => /savings opportunity/.test(l)), contactLines.join(" / ")).toBe(true);
     });
 
     test("keyboard moves from the hero straight into the day", async ({ page }) => {
