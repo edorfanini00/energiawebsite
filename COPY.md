@@ -26,7 +26,7 @@ Talk about your building
 
 The load on your building changes by the hour.
 
-A fixed schedule does not adjust when the weather or occupancy changes. Energia AI plans for both. Step through one day in an illustrative building.
+A fixed schedule does not adjust when the weather or occupancy changes. Energia AI plans for both. See how Energia AI responds throughout the day.
 
 06:30 Dawn
 
@@ -76,13 +76,11 @@ What changes
 
 Most people have gone home. A few rooms are still in use.
 
-An illustrative day in a fictional building, rendered for this page. The times and actions are examples, not readings from a real site.
-
 It starts with a model of your building.
 
 Your floor plans become thermal zones. Energia AI then learns how each zone responds to sun, people and your HVAC. West zone Corner South zone Interior West zone Corner South zone Interior
 
-The first floor of the same fictional building at 15:30, cut below the ceiling. The dark area is the building core. Outlines show how a plan divides into zones. The fine grid stands for the control volumes the model uses to calculate heat flow.
+The dark area is the building core. Outlines divide the floor into zones. The fine grid represents the control volumes used to calculate heat flow.
 
 Model
 
@@ -166,8 +164,6 @@ Email
 
 LinkedIn (opens in a new tab)
 
-Images are original renderings of a fictional building, not a client installation.
-
 © 2026 Energia AI
 
 ## Editing record
@@ -177,7 +173,7 @@ The retained implementation was written by Claude; this continuation was edited 
 - Preserved the selected headline, changing-day story, floor-plan explanation, operator boundaries, numbered start sequence and FAQ.
 - Changed the short dawn tab from “Before arrival” to “Dawn” so narrow controls remain readable; the panel still says “Before anyone arrives”.
 - Qualified the hero with “designed to” and shortened its explanation. The primary technical document describes forecast integration and equipment extensions as design work; no field deployment is inferred.
-- Checked the wording against Core MVP and the technical architecture, separately from the pattern checker. Kept explicit simulation, compatibility and illustrative-day qualifications.
+- Checked the wording against Core MVP and the technical architecture, separately from the pattern checker. Kept explicit simulation and compatibility qualifications. The historical illustrative-day label was subsequently removed by the owner correction below.
 - No customer-facing dashes, fabricated readings, testimonials, logos, savings percentages or performance guarantees were added. Existing manual override and fallback details remain.
 
 No model subprocess or paid API was used for editing. The pattern checker does not establish truth or writing quality; the contextual editorial review and source map are separate evidence.
@@ -187,3 +183,7 @@ No model subprocess or paid API was used for editing. The pattern checker does n
 Moved each existing control-action paragraph before its image without changing its wording or duplicating it. Added “The dark area is the building core.” to the plan caption.
 
 Meta description: Energia AI is an AI control platform for commercial HVAC, designed to learn how your building heats and cools and plan setpoints around weather and occupancy, inside the limits your team sets.
+
+## Owner copy correction · 2026-10-27
+
+Removed illustration explanations from the day introduction, day caption, plan caption and footer at the owner’s direction. The plan keeps its useful core, zone and control-volume explanation. Internal provenance remains here and in `SOURCES.md`; it is not page copy. No synonymous image labels were added. Technical simulation/results qualifications, design-intent metadata, all four controller actions and exact contact links remain unchanged. Frozen local-only prototypes are historical comparison evidence, not the served landing page.
