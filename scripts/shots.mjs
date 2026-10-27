@@ -1,21 +1,25 @@
-// Capture and measure the direction prototypes at the reference viewports.
+// Capture and measure the landing page at the review viewports.
 // Each viewport gets a fresh page load (no resizing a loaded page), then a
-// hero capture, a first-feature capture and computed type/landmark metrics.
-// Usage: node scripts/proto-shots.mjs <out-dir> [base-url]
+// hero capture, one capture per section, a full-page capture and computed
+// type and landmark metrics.
+// Usage: node scripts/shots.mjs <out-dir> [base-url] [--hero-only]
 import { chromium } from "@playwright/test";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-const out = process.argv[2] || "proto-shots";
+const out = process.argv[2] || "shots";
+const heroOnly = process.argv.includes("--hero-only");
 const base = process.argv[3] || "http://127.0.0.1:4173";
 mkdirSync(out, { recursive: true });
 
 const chrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const browser = await chromium.launch(existsSync(chrome) ? { executablePath: chrome } : {});
-const routes = ["a", "c"];
+const routes = ["a"];
 const viewports = [
-  { name: "desktop", width: 1440, height: 900, scale: 1 },
-  { name: "phone", width: 390, height: 844, scale: 2 },
+  { name: "desktop-1440", width: 1440, height: 900, scale: 1 },
+  { name: "tablet-768", width: 768, height: 1024, scale: 2 },
+  { name: "phone-390", width: 390, height: 844, scale: 2 },
+  { name: "phone-375", width: 375, height: 812, scale: 2 },
 ];
 const report = [];
 
@@ -35,7 +39,7 @@ for (const route of routes) {
     page.on("request", (r) => !r.url().startsWith(base) && !r.url().startsWith("data:") && foreign.push(r.url()));
     page.on("response", (r) => r.status() >= 400 && failed.push(`${r.status()} ${r.url()}`));
 
-    await page.goto(`${base}/prototypes/${route}/`, { waitUntil: "networkidle" });
+    await page.goto(`${base}/`, { waitUntil: "networkidle" });
     await page.evaluate(() => document.fonts.ready);
     await page.evaluate(async () => {
       await Promise.all([...document.images].map((img) => img.decode().catch(() => {})));
@@ -43,6 +47,7 @@ for (const route of routes) {
     await page.waitForTimeout(300);
 
     const metrics = await page.evaluate(() => {
+      const q = (sel) => document.querySelector(sel);
       const box = (el) => {
         const r = el.getBoundingClientRect();
         return { x: Math.round(r.x), y: Math.round(r.y + scrollY), w: Math.round(r.width), h: Math.round(r.height) };
@@ -73,24 +78,33 @@ for (const route of routes) {
         h1: type("h1"),
         h2: type("h2"),
         body: type("#building p"),
-        ctaAboveFold: [...document.querySelectorAll("a.cta")].some((a) => {
+        ctaAboveFold: [...document.querySelectorAll(".bar__cta, .hero__cta")].some((a) => {
           const r = a.getBoundingClientRect();
           return r.height > 0 && r.bottom <= innerHeight && getComputedStyle(a).visibility !== "hidden";
         }),
       };
     });
 
-    const stem = `${route}-${vp.name}`;
+    const stem = vp.name;
     await page.screenshot({ path: join(out, `${stem}-hero.png`) });
-    await page.evaluate(() => {
-      const el = document.querySelector("#building");
-      window.scrollTo(0, el.getBoundingClientRect().top + scrollY - (innerWidth > 860 ? 0 : 0));
-    });
-    await page.waitForTimeout(500);
-    await page.screenshot({ path: join(out, `${stem}-first-feature.png`) });
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await page.waitForTimeout(200);
-    await page.screenshot({ path: join(out, `${stem}-full.png`), fullPage: true });
+    if (!heroOnly) {
+      await page.evaluate(async () => {
+        document.querySelectorAll("img[loading=lazy]").forEach((img) => (img.loading = "eager"));
+        document.querySelectorAll("[data-reveal]").forEach((el) => el.classList.add("is-in"));
+        await Promise.all([...document.images].map((img) => img.decode().catch(() => {})));
+      });
+      for (const id of ["building", "how", "limits", "contact"]) {
+        await page.evaluate((id) => {
+          const el = document.getElementById(id);
+          window.scrollTo(0, el.getBoundingClientRect().top + scrollY);
+        }, id);
+        await page.waitForTimeout(400);
+        await page.screenshot({ path: join(out, `${stem}-section-${id}.png`) });
+      }
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.waitForTimeout(300);
+      await page.screenshot({ path: join(out, `${stem}-full.png`), fullPage: true });
+    }
 
     report.push({ route, viewport: vp.name, metrics, errors, foreign, failed });
     await context.close();

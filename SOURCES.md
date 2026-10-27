@@ -9,8 +9,8 @@ Where each brand asset, image, font, design reference and product claim comes fr
 | Wordmark | https://framerusercontent.com/assets/c0LHicZODGuq8EA3pLRTvE1njg.png (626×417 RGBA, white glyphs, sha256 `5899975f07aa714ead0d1df95d39288bd00148f8f3135663ca7db5f91f4baa6d`), linked from https://www.energiaigroup.com/ | Cropped to its alpha bounding box (424×48), with the original alpha kept and the fill set to ink `#171814`. Saved as `assets/brand/energia-ai-wordmark-ink.png`. No new mark was drawn. |
 | Favicon | The first glyph (E) of the same wordmark | Paper glyph on an ink square, 64×64: `assets/brand/favicon.png` |
 | Green `#567740` | Live site design token `--token-d2c4f753-…: #567740` in the HTML served by energiaigroup.com (read 2026-10-27) | Primary CTA background (white text, 5.11:1) and focus ring |
-| Light green `#82c95e` | `rgb(130, 201, 94)` in the same live HTML | Rule labels on the ink section (8.89:1 on `#171814`) |
-| Typeface | The live site's computed styles use Satoshi for headings and UI | Self-hosted Satoshi 400, 500 and 700 woff2 from Fontshare (Indian Type Foundry), under the ITF Free Font License (FFL) v2.0. https://www.fontshare.com/licenses/itf-ffl, read 2026-10-27, says “All Fontshare fonts are 100% free for personal and commercial use” and covers self-hosting. Files are in `assets/fonts/`. |
+| Light green `#82c95e` | `rgb(130, 201, 94)` in the same live HTML | Focus ring on the ink operator-limits section |
+| Typeface | The live site's computed styles use Satoshi for headings and UI | Self-hosted Satoshi 300 (Light), 400 and 700 woff2 from Fontshare (Indian Type Foundry), under the ITF Free Font License (FFL) v2.0. https://www.fontshare.com/licenses/itf-ffl, read 2026-10-27, says “All Fontshare fonts are 100% free for personal and commercial use” and covers self-hosting. Files are in `assets/fonts/`. `satoshi-300.woff2` is the woff2 that Fontshare's own CSS API (`api.fontshare.com/v2/css?f[]=satoshi@300`) points to on cdn.fontshare.com. Its name table reads “Satoshi Light”, usWeightClass 300, sha256 `8a24f395b65048dea9dece6444525fa3adf180057d82c3f831095bff3feda5a0`. It is a genuine light master, not a synthesized weight. The 500 weight is no longer used and was removed. |
 | Contact | `mailto:edo.orfanini@energiaigroup.com`, the published contact. LinkedIn: https://www.linkedin.com/company/energia-ai/ | Every CTA is a plain mailto link. The page has no forms and makes no network requests. |
 
 The live site's other claims were deliberately not reused because nothing in the sources substantiates them: “patent pending”, “Up to 30%”, “Up to 45%”, BACnet/Modbus/LonWorks “connects to” as blanket claims, tenant billing, carbon credit marketplace and the AI chatbot.
@@ -37,7 +37,14 @@ The live site's other claims were deliberately not reused because nothing in the
 
 - **BrainBox AI** (https://brainboxai.com/, https://brainboxai.com/en/solutions/ai-control, https://brainboxai.com/en/articles/lifting-the-veil-on-brainbox-ais-data-architecture). The owner suggested it as a content reference for a company doing similar work. Taken from it: the order of the story (building behavior → decision → HVAC action → operator control → fit conversation) and the customer problems it names (fixed schedules, changing weather and occupancy, balancing cost and comfort, keeping the facilities team in charge). Not taken: any product name, accuracy figure, savings figure, command volume, testimonial, case study, control frequency or BACnet priority detail. None of these describe Energia.
 
-## Design references (principles only, no assets reused)
+## Visual benchmark (principles only, no assets reused)
+
+- **BrainBox AI home page** (https://brainboxai.com/en/). The owner named it as the visual benchmark after rejecting the 616f693 page. Fresh captures at 1440×900 and 390×844, with computed type, are in `~/.hermes/workspace/energia-landing-20261027/brainbox-reference/`.
+  - Observed: Atlas Grotesk 300 at 56/61.6px (28px on phones), white over a sky-dominated photo of a real-scale building fragment from a low camera. The hero has no paragraph. The first feature is a 36px sentence heading with emphasis in bold.
+  - Used here: light restrained display type (Satoshi 300, 56/30px), a life-size architectural fragment against sky, one hero idea, and sentence headings with weight emphasis.
+  - Not used: any image, copy, metric, red tab, card carousel or layout grid. The headline is ink, not white, because white measured under 3:1 on our render.
+
+## Earlier design references (616f693, superseded)
 
 Captured with Playwright on 2026-10-27 at 1440×900 and 390×844. Screenshots and computed styles are in `~/.hermes/workspace/energia-landing-20261027/evidence/ref-*`.
 
@@ -50,21 +57,20 @@ No reference artwork, layout or copy was copied. No award status is claimed for 
 
 ## Imagery
 
-All images on the page are original Blender renders made for this preview by the separate art worker. They are fictional architecture, not a client installation, and contain no baked-in labels or telemetry. Masters, the `.blend`, source scripts and the manifest are in `~/.hermes/workspace/energia-landing-20261027/art/`. See `ART-RESULT.md` there for the Blender version, engine, cameras and materials.
+All images on the page are original Blender 5.2.1 Cycles renders made for this preview by the separate art worker.
+- They show fictional architecture, not a client installation.
+- They contain no baked-in labels, UI or telemetry.
+- No downloaded, paid or reference imagery was used.
+- The editable scenes, scripts, proofs and manifests stay private in `~/.hermes/workspace/energia-landing-20261027/art/brainbox-v2/`. Only the exported web files ship. See `V2-ART-RESULT.md` and `V2-FEATURE-ART-RESULT.md` there.
 
-Responsive files in `assets/img/` are produced by `scripts/export-art.sh` (ffmpeg Lanczos resize, `cwebp -q 82`, `avifenc -q 62`).
+| Web files | Master | sha256 (master PNG) | Camera |
+|---|---|---|---|
+| `hero-desktop-{1440,2160,2880}.{avif,webp}` | `a-desktop.png` 3200×2000 | `125cebbde679541250c32407a03a7d1234f87f8fe5d0315d5f15a79ecaaa8539` | CAM_A_Desktop, 24 mm, eye height 1.7 m, corrected verticals |
+| `hero-phone-{780,1170}.{avif,webp}` | `a-phone.png` 1290×2792 | `7ecf5c9ace66d782e0c39bc34a5053170319386b8b7c5ccceb5b477a942257fe` | CAM_A_Phone, 24 mm, 1.7 m |
+| `feature-desktop-{1400,2100,2800}.{avif,webp}` | `feature-desktop.png` 2800×1200 | `cb6f28b80f9eb8fc297032e327480e5c2052fba37fccb260d90a6120714467a6` | CAM_Feature_Desktop, 35 mm, 1.7 m, west facade in low afternoon sun |
+| `feature-phone-{600,900,1200}.{avif,webp}` | `feature-phone.png` 1200×1500 | `63e52b8b672a1058cf06475fe4c46dc5cfe8782876844b1353fa882b905153a3` | CAM_Feature_Phone, 35 mm, 1.7 m |
 
-Final masters integrated (art worker v7, `ART-RESULT.md`, `manifest.json`):
-
-| Web files | Master | sha256 (master PNG) | Size | Camera | Edge colour |
-|---|---|---|---|---|---|
-| `hero-desktop-{1200,1800,2400}.{avif,webp}` | `art/hero-desktop.png` | `623af07b10a4b435e263bfbe3dd719c92c1ed8c6dcec33e96523135a8d5a155f` | 2400×1500 RGB | CAM_Hero_Desktop | `#cbc8c4` (CSS `--plate`) |
-| `control-detail-{800,1200,1800}.{avif,webp}` | `art/control-detail.png` | `14b4239f6cb7c6660881a8769768b5ed0876215255bd7599d7f777dd591a7ba3` | 1800×1200 RGB | CAM_Control_Detail | `#aeaba5` (CSS `--plate-detail`) |
-
-The portrait render `art/hero-mobile.png` (CAM_Hero_Mobile, sha256 `0a2d665f…`) is not used. On the page its plinth came within about 2 px of the frame edge at 390 px wide, and an inset on the plate colour showed visible seams. Phones show a 1:1 crop of the desktop hero instead, which is the same scene and camera, with about 15 px clear right of the plinth. A 5 to 8% pullback of CAM_Hero_Mobile has been requested through the parent.
-
-Render details:
-
-- Blender 5.2.1 LTS, Cycles on Metal GPU, 256 spp, AgX.
-- Scene `art/blend/energia-architecture-v7-final.blend`. It uses procedural materials only, with no downloaded or paid assets.
-- PSNR of the full-size exports against the masters: hero desktop AVIF 46.8 dB and WebP 44.9 dB; control detail AVIF 45.5 dB and WebP 41.2 dB.
+`scripts/export-art.sh` produces the responsive files: an ffmpeg Lanczos resize, then `cwebp -q 82` and `avifenc -q 62`.
+- The hero and the first feature use different renders. No render is repeated on the page.
+- The 616f693 renders (an isometric model on a grey plate) and the direction C rooftop renders are not in the bundle.
+- The A/C prototypes remain in git history at tag `proto-ac-20261027`.
