@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prototype A · Energia AI</title>
+  <meta name="description" content="Energia AI is an AI control platform for commercial HVAC. It learns how your building heats and cools, reads the forecast and occupancy, and adjusts setpoints ahead of time, inside the limits your team sets.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#9fb6cf">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <script src="../boot.js"></script>
+  <link rel="icon" href="../assets/brand/favicon.png" type="image/png">
+  <link rel="preload" href="../assets/fonts/satoshi-300.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../assets/fonts/satoshi-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script src="../main.js" defer></script>
+</head>
+<body class="v-a">
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="bar" data-bar>
+    <div class="bar__inner">
+      <a class="bar__brand" href="#top" aria-label="Energia AI, back to top">
+        <img src="../assets/brand/energia-ai-wordmark-ink.png" width="424" height="48" alt="">
+      </a>
+      <nav class="bar__nav" id="site-nav" aria-label="Primary" data-nav>
+        <a href="#day">The day</a>
+        <a href="#model">How it learns</a>
+        <a href="#limits">Limits</a>
+        <a href="#questions">Questions</a>
+        <a class="bar__cta" href="mailto:edo.orfanini@energiaigroup.com?subject=Energia%20AI%3A%20our%20building">Talk to us<svg class="arrow" viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M0 5h14.5M10 1l4.5 4-4.5 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
+      </nav>
+      <button class="bar__toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-toggle disabled>
+        <span class="bar__toggle-label" data-toggle-label>Menu</span>
+        <span class="bar__toggle-icon" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <picture class="hero__art">
+        <source media="(max-width: 700px)" type="image/avif" srcset="../assets/img/hero-phone-780.avif 780w, ../assets/img/hero-phone-1170.avif 1170w" sizes="100vw">
+        <source media="(max-width: 700px)" type="image/webp" srcset="../assets/img/hero-phone-780.webp 780w, ../assets/img/hero-phone-1170.webp 1170w" sizes="100vw">
+        <source type="image/avif" srcset="../assets/img/hero-desktop-1440.avif 1440w, ../assets/img/hero-desktop-2160.avif 2160w, ../assets/img/hero-desktop-2880.avif 2880w" sizes="(max-aspect-ratio: 1/1) 170vh, 100vw">
+        <source type="image/webp" srcset="../assets/img/hero-desktop-1440.webp 1440w, ../assets/img/hero-desktop-2160.webp 2160w, ../assets/img/hero-desktop-2880.webp 2880w" sizes="(max-aspect-ratio: 1/1) 170vh, 100vw">
+        <img src="../assets/img/hero-desktop-2160.webp" width="3200" height="2000" alt="Street-level view across a crossing to the corner of a pale stone office building in late-afternoon sun. Its west face is lit warm, street trees line the pavement and offices are lit behind the windows." fetchpriority="high" decoding="async">
+      </picture>
+      <div class="hero__copy">
+        <h1 class="hero__title" id="hero-title">HVAC control that sees the day coming.</h1>
+        <p class="hero__line">Energia AI is an AI control platform for commercial HVAC. It learns how your building heats and cools, then adjusts setpoints ahead of the weather and the people inside.</p>
+        <a class="hero__cta textlink" href="mailto:edo.orfanini@energiaigroup.com?subject=Energia%20AI%3A%20our%20building">Talk about your building<svg class="arrow" viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M0 5h14.5M10 1l4.5 4-4.5 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
+      </div>
+    </section>
+
+    <section class="day" id="day" aria-labelledby="day-title" data-day>
+      <div class="wrap day__head">
+        <h2 class="title" id="day-title" data-reveal>The load on your building <strong>changes by the hour.</strong></h2>
+        <p class="lede" data-reveal>A fixed schedule does not adjust when the weather or occupancy changes. Energia AI plans for both. Step through one day in an illustrative building.</p>
+      </div>
+
+      <div class="wrap day__layout">
+        <div class="day__tabs">
+          <div class="dayline" data-dayline>
+            <span class="dayline__rule" aria-hidden="true"></span>
+            <span class="dayline__sun" aria-hidden="true"></span>
+            <div class="dayline__list" data-day-list data-label="Times of day">
+              <button class="dayline__tab" type="button" id="tab-dawn" data-day-tab data-at="0.094"><span class="t">06:30</span><span class="l">Before arrival</span></button>
+              <button class="dayline__tab" type="button" id="tab-morning" data-day-tab data-at="0.3125"><span class="t">10:00</span><span class="l">Floors fill</span></button>
+              <button class="dayline__tab" type="button" id="tab-afternoon" data-day-tab data-at="0.656" data-initial><span class="t">15:30</span><span class="l">West sun</span></button>
+              <button class="dayline__tab" type="button" id="tab-dusk" data-day-tab data-at="0.906" data-dark><span class="t">19:30</span><span class="l">Evening</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="day__stage">
+          <article class="moment" id="moment-dawn" data-moment>
+            <div class="moment__art">
+              <picture>
+                <source media="(max-width: 860px)" type="image/avif" srcset="../assets/img/day-dawn-phone-600.avif 600w, ../assets/img/day-dawn-phone-900.avif 900w, ../assets/img/day-dawn-phone-1200.avif 1200w" sizes="100vw">
+                <source media="(max-width: 860px)" type="image/webp" srcset="../assets/img/day-dawn-phone-600.webp 600w, ../assets/img/day-dawn-phone-900.webp 900w, ../assets/img/day-dawn-phone-1200.webp 1200w" sizes="100vw">
+                <source type="image/avif" srcset="../assets/img/day-dawn-desktop-1200.avif 1200w, ../assets/img/day-dawn-desktop-1800.avif 1800w, ../assets/img/day-dawn-desktop-2400.avif 2400w" sizes="(min-width: 1440px) 1296px, 90vw">
+                <source type="image/webp" srcset="../assets/img/day-dawn-desktop-1200.webp 1200w, ../assets/img/day-dawn-desktop-1800.webp 1800w, ../assets/img/day-dawn-desktop-2400.webp 2400w" sizes="(min-width: 1440px) 1296px, 90vw">
+                <img src="../assets/img/day-dawn-desktop-1200.webp" width="2400" height="1500" alt="The same building from a rooftop across the street at early morning: both visible faces in cool shade, pale sky, a few rooms lit." loading="lazy" decoding="async">
+              </picture>
+            </div>
+            <div class="moment__body">
+              <h3 class="moment__title"><time>06:30</time>Before anyone arrives</h3>
+              <div class="moment__part">
+                <h4>What changes</h4>
+                <p>The forecast shows a clear, warm afternoon. The building is still empty and the low sun is on the far side.</p>
+              </div>
+              <div class="moment__part moment__part--do">
+                <h4>What Energia AI does</h4>
+                <p>Plans the day from the forecast and your occupancy schedule, including when each zone should start conditioning so it is ready on time.</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="moment" id="moment-morning" data-moment>
+            <div class="moment__art">
+              <picture>
+                <source media="(max-width: 860px)" type="image/avif" srcset="../assets/img/day-morning-phone-600.avif 600w, ../assets/img/day-morning-phone-900.avif 900w, ../assets/img/day-morning-phone-1200.avif 1200w" sizes="100vw">
+                <source media="(max-width: 860px)" type="image/webp" srcset="../assets/img/day-morning-phone-600.webp 600w, ../assets/img/day-morning-phone-900.webp 900w, ../assets/img/day-morning-phone-1200.webp 1200w" sizes="100vw">
+                <source type="image/avif" srcset="../assets/img/day-morning-desktop-1200.avif 1200w, ../assets/img/day-morning-desktop-1800.avif 1800w, ../assets/img/day-morning-desktop-2400.avif 2400w" sizes="(min-width: 1440px) 1296px, 90vw">
+                <source type="image/webp" srcset="../assets/img/day-morning-desktop-1200.webp 1200w, ../assets/img/day-morning-desktop-1800.webp 1800w, ../assets/img/day-morning-desktop-2400.webp 2400w" sizes="(min-width: 1440px) 1296px, 90vw">
+                <img src="../assets/img/day-morning-desktop-1200.webp" width="2400" height="1500" alt="Mid-morning from the same rooftop: sun on the south face, the west face in shade, offices lit on every floor." loading="lazy" decoding="async">
+              </picture>
+            </div>
+            <div class="moment__body">
+              <h3 class="moment__title"><time>10:00</time>Floors fill up</h3>
+              <div class="moment__part">
+                <h4>What changes</h4>
+                <p>People arrive, and the morning sun moves onto the south face.</p>
+              </div>
+              <div class="moment__part moment__part--do">
+                <h4>What Energia AI does</h4>
+                <p>Keeps occupied zones inside the setpoint range you approved, with outdoor air at or above your ventilation minimums.</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="moment" id="moment-afternoon" data-moment>
+            <div class="moment__art">
+              <picture>
+                <source media="(max-width: 860px)" type="image/avif" srcset="../assets/img/day-afternoon-phone-600.avif 600w, ../assets/img/day-afternoon-phone-900.avif 900w, ../assets/img/day-afternoon-phone-1200.avif 1200w" sizes="100vw">
+                <source media="(max-width: 860px)" type="image/webp" srcset="../assets/img/day-afternoon-phone-600.webp 600w, ../assets/img/day-afternoon-phone-900.webp 900w, ../assets/img/day-afternoon-phone-1200.webp 1200w" sizes="100vw">
+                <source type="image/avif" srcset="../assets/img/day-afternoon-desktop-1200.avif 1200w, ../assets/img/day-afternoon-desktop-1800.avif 1800w, ../assets/img/day-afternoon-desktop-2400.avif 2400w" sizes="(min-width: 1440px) 1296px, 90vw">
+                <source type="image/webp" srcset="../assets/img/day-afternoon-desktop-1200.webp 1200w, ../assets/img/day-afternoon-desktop-1800.webp 1800w, ../assets/img/day-afternoon-desktop-2400.webp 2400w" sizes="(min-width: 1440px) 1296px, 90vw">
+                <img src="../assets/img/day-afternoon-desktop-1200.webp" width="2400" height="1500" alt="Mid-afternoon from the same rooftop: low sun full on the west face, long tree shadows across the pavement, the south face in raking light." loading="lazy" decoding="async">
+              </picture>
+            </div>
+            <div class="moment__body">
+              <h3 class="moment__title"><time>15:30</time>Sun on the west glass</h3>
+              <div class="moment__part">
+                <h4>What changes</h4>
+                <p>The sun is low in the west and falls straight onto the west windows. Those rooms are now gaining heat fastest.</p>
+              </div>
+              <div class="moment__part moment__part--do">
+                <h4>What Energia AI does</h4>
+                <p>Began cooling the west zones before the sun reached them, using the forecast, and now holds them inside your range.</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="moment" id="moment-dusk" data-moment>
+            <div class="moment__art">
+              <picture>
+                <source media="(max-width: 860px)" type="image/avif" srcset="../assets/img/day-dusk-phone-600.avif 600w, ../assets/img/day-dusk-phone-900.avif 900w, ../assets/img/day-dusk-phone-1200.avif 1200w" sizes="100vw">
+                <source media="(max-width: 860px)" type="image/webp" srcset="../assets/img/day-dusk-phone-600.webp 600w, ../assets/img/day-dusk-phone-900.webp 900w, ../assets/img/day-dusk-phone-1200.webp 1200w" sizes="100vw">
+                <source type="image/avif" srcset="../assets/img/day-dusk-desktop-1200.avif 1200w, ../assets/img/day-dusk-desktop-1800.avif 1800w, ../assets/img/day-dusk-desktop-2400.avif 2400w" sizes="(min-width: 1440px) 1296px, 90vw">
+                <source type="image/webp" srcset="../assets/img/day-dusk-desktop-1200.webp 1200w, ../assets/img/day-dusk-desktop-1800.webp 1800w, ../assets/img/day-dusk-desktop-2400.webp 2400w" sizes="(min-width: 1440px) 1296px, 90vw">
+                <img src="../assets/img/day-dusk-desktop-1200.webp" width="2400" height="1500" alt="Dusk from the same rooftop: a darkening blue sky, street lights on, and only some floors still lit." loading="lazy" decoding="async">
+              </picture>
+            </div>
+            <div class="moment__body">
+              <h3 class="moment__title"><time>19:30</time>The building empties</h3>
+              <div class="moment__part">
+                <h4>What changes</h4>
+                <p>Most people have gone home. A few rooms are still in use.</p>
+              </div>
+              <div class="moment__part moment__part--do">
+                <h4>What Energia AI does</h4>
+                <p>Lets empty zones move within the wider unoccupied range you set, keeps occupied rooms in range, and starts on tomorrow’s plan.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <p class="wrap note day__caption">An illustrative day in a fictional building, rendered for this page. The times and actions are examples, not readings from a real site.</p>
+    </section>
+
+      </main>
+</body>
+</html>

@@ -1,139 +1,183 @@
-# COPY
+# Energia V3 copy
 
-Final visible copy for the landing preview (direction A), in page order, followed by the editing record.
-The source of truth is `index.html`. Keep this file in sync when the copy changes.
+Selected B. Source of truth: `index.html`. Audience: commercial building owners and facilities teams. Purpose: explain the control design and invite a building-fit conversation via the existing mailto. The day is an illustrative mechanism, not live product UI.
 
-Surface: Decide/Learn. Each section carries one idea:
+## Page text in DOM order
 
-1. Hero: what Energia AI is, in one headline and one category line.
-2. Building: why one fixed schedule fails.
-3. How it works: model, learn and control, then one control cycle as type.
-4. Operator limits: the boundaries the system works inside.
-5. Contact and FAQ: start a conversation about one building.
+Skip to content
 
-Every CTA is `mailto:edo.orfanini@energiaigroup.com?subject=Energia AI: our building`. That covers the bar ("Talk to us", inside the menu on phones), the phone hero link and the contact button ("Talk about your building").
+The day
 
-## Page copy
+How it learns
 
-Navigation: **How it works**, **Operator limits**, **Questions**, **Talk to us**.
+Limits
 
-**A building that thinks ahead.**
+Questions
 
-AI control for commercial HVAC.
+Talk to us
+
+Menu
+
+HVAC control that sees the day coming.
+
+Energia AI is an AI control platform for commercial HVAC, designed to learn how your building heats and cools and plan setpoints around weather and occupancy.
 
 Talk about your building
 
-**No two buildings hold heat the same way.**
+The load on your building changes by the hour.
 
-West glass takes the afternoon sun. A full floor on Tuesday runs warm by eleven. A fixed schedule does not adjust when the weather or occupancy changes. Energia AI learns how your building responds, then plans the next hours around it.
+A fixed schedule does not adjust when the weather or occupancy changes. Energia AI plans for both. Step through one day in an illustrative building.
 
-**From a model of your building to HVAC setpoints.**
+06:30 Dawn
 
-Energia AI builds a thermal model of your building, trains a control agent inside it, then proposes setpoints that your limits check first.
+10:00 Floors fill
 
-**Model**
+15:30 West sun
 
-We build the model from floor plans, HVAC equipment and operating history. Physics describes how heat moves between zones. A neural network learns what physics misses.
+19:30 Evening
 
-**Learn**
+06:30 Before anyone arrives
 
-A reinforcement learning agent trains inside that model across simulated weather and occupancy conditions. It is rewarded for holding comfort and penalized for wasted energy.
+What changes
 
-**Control**
+The forecast shows a clear, warm afternoon. The building is still empty and the low sun is on the far side.
 
-On each control cycle the agent reads the building, checks the forecast and proposes new setpoints for your building management system (BMS).
+What Energia AI does
 
-One control cycle
+Plans the day from the forecast and your occupancy schedule, including when each zone should start conditioning so it is ready on time.
 
-- Read the building
+10:00 Floors fill up
 
-- Check the forecast
+What changes
 
-- Propose setpoints
+People arrive, and the morning sun moves onto the south face.
 
-- Check your limits
+What Energia AI does
 
-- Write to your BMS
+Keeps occupied zones inside the setpoint range you approved, with outdoor air at or above your ventilation minimums.
 
-**Operators set the limits.**
+15:30 Sun on the west glass
+
+What changes
+
+The sun is low in the west and falls straight onto the west windows. Those rooms are now gaining heat fastest.
+
+What Energia AI does
+
+Began cooling the west zones before the sun reached them, using the forecast, and now holds them inside your range.
+
+19:30 The building empties
+
+What changes
+
+Most people have gone home. A few rooms are still in use.
+
+What Energia AI does
+
+Lets empty zones move within the wider unoccupied range you set, keeps occupied rooms in range, and starts on tomorrow’s plan.
+
+An illustrative day in a fictional building, rendered for this page. The times and actions are examples, not readings from a real site.
+
+It starts with a model of your building.
+
+Your floor plans become thermal zones. Energia AI then learns how each zone responds to sun, people and your HVAC. West zone Corner South zone Interior West zone Corner South zone Interior
+
+The first floor of the same fictional building at 15:30, cut below the ceiling. Outlines show how a plan divides into zones. The fine grid stands for the control volumes the model uses to calculate heat flow.
+
+Model
+
+We build a thermal model from floor plans, HVAC equipment data and operating history. Physics describes how heat moves between zones. A neural network learns what physics misses.
+
+Train
+
+A reinforcement learning agent practises inside that model across simulated weather and occupancy. It is rewarded for holding comfort and penalized for wasted energy.
+
+Control
+
+On each control cycle it reads the building, checks the forecast and proposes setpoints. Your limits check every proposal before it reaches your building management system (BMS).
+
+Your team sets the limits.
 
 The control architecture is designed around boundaries agreed with your facilities team. Every proposed setpoint is checked against them before it reaches your BMS.
 
-**Setpoint range**
+Setpoint range
 
 Heating and cooling setpoints stay inside the range you approve, with a deadband between them to avoid simultaneous heating and cooling.
 
-**Fresh air**
+Fresh air
 
 Outdoor air minimums for your site, based on standards such as ASHRAE 62.1, are control constraints. Ventilation is not reduced below those minimums to save energy.
 
-**Equipment**
+Equipment
 
 Equipment limits are agreed with your facilities team before control is enabled.
 
-**Fallback**
+Fallback
 
 If the connection drops or a reading looks wrong, control returns to your existing sequences.
 
-**Life safety**
+Life safety
 
 Fire, smoke and critical equipment alarms take priority. Energia AI steps back and your building’s own systems and manual override take over.
 
-**Your BMS**
+Your BMS
 
 We connect through open protocols such as BACnet and Modbus. Compatibility is confirmed with your team in an assessment.
 
-**Talk about your building.**
+What it takes to start.
 
-Tell us what you run and what you want to fix. We will tell you plainly whether Energia AI is a fit.
+From a first look at your building to a gateway beside your BMS.
 
-Talk about your building edo.orfanini@energiaigroup.com
+Assessment
 
-**Questions**
+We review your HVAC equipment, BMS points and trend history, and confirm protocol compatibility with your team.
 
-**Which buildings is Energia AI for?**
+Model and comparison
+
+We build the model from your floor plans and operating data, then compare a proposed control strategy with how the building runs today. Simulation results are not a guarantee of savings in your building.
+
+Gateway
+
+A small gateway next to your BMS reads points and writes setpoints over your building’s protocols. The AI runs on the gateway or in our cloud, depending on your security requirements.
+
+Questions
+
+Which buildings is Energia AI for?
 
 Commercial buildings with central HVAC run through a building management system. An assessment tells us whether yours is a good candidate.
 
-**What data do you need?**
+What data do you need?
 
 Floor plans, HVAC equipment details, BMS points with trend history, and your occupancy schedules. Weather forecasts come from public sources.
 
-**How do you assess savings?**
-
-We compare a proposed control strategy with how the building runs today. Results depend on your equipment and available operating data. Simulation results are not a guarantee of savings in your building.
-
-**Does it need hardware on site?**
-
-Expect a small gateway next to your BMS. It reads points and writes setpoints over your building’s protocols. The AI runs on that gateway or in our cloud, depending on your security requirements.
-
-**Can operators take control back?**
+Can operators take control back?
 
 Yes. Your existing control sequences stay in place. Operators keep manual override, and if Energia AI loses its connection or sees bad data, control returns to those sequences.
 
-- Email
+Talk about your building.
 
-- LinkedIn (opens in a new tab)
+Tell us what you run and what you want to fix. We will tell you plainly whether Energia AI is a fit.
 
-Images are original concept renderings, not a client installation.
+Talk about your building
+
+edo.orfanini@energiaigroup.com
+
+Email
+
+LinkedIn (opens in a new tab)
+
+Images are original renderings of a fictional building, not a client installation.
 
 © 2026 Energia AI
 
-## Editing record (V2, direction A)
+## Editing record
 
-- **Hero.** The five-line lede was removed from the art. The hero now carries only the headline and "AI control for commercial HVAC.", per the V2 brief (one hero idea, no paragraph over the art).
-- **Shortened from 616f693.**
-  - The How it works intro and steps.
-  - The operator limits, which keep every fact.
-  - "Fixed schedules treat every day the same." The clause "and correct a room only after it drifts" was dropped as too broad.
-- **SlopMonster (2026-10-27).**
-  - The checker scored 5/5 before and after editing.
-  - The second pass was the Codex CLI via `cleanse.sh` with `DESLOP_WRITER=claude`. It exited 0. Its output and notes are in `~/.hermes/workspace/energia-landing-20261027/evidence/slopmonster-v2/`.
-  - Accepted: "HVAC setpoints", "conditions", the "(BMS)" expansion, "not reduced below those minimums to save energy", "available operating data", and dropping "underneath".
-  - Rejected:
-    - The hero rewrite, which would break the one-line hero.
-    - Every em dash, because customer-facing dashes are banned.
-    - The shortened limits lede, which dropped the "checked before it reaches your BMS" fact.
-  - Restored from the sourced copy: the deadband's purpose ("to avoid simultaneous heating and cooling") and "Energia AI steps back" for life safety.
-- **Fix round 1 (after the independent reviews of 42fd9e1).** The sentence "Fixed schedules treat every day the same." became "A fixed schedule does not adjust when the weather or occupancy changes." Fixed schedules can vary by day of week, so the old sentence was broader than the point; reviewer A recommended the change. No other copy changed. The Tuesday example is illustrative, not a client result.
-- **Claims.** No figures, savings, customers or deployments appear. Every fact maps to a row in `SOURCES.md`.
+The retained implementation was written by Claude; this continuation was edited by Codex, giving it a different model-family editorial pass without launching another model process. The inherited progress log reports a 5/5 pattern check; a new local checker receipt is recorded in `copy-check.log` in the V3 evidence root.
+
+- Preserved the selected headline, changing-day story, floor-plan explanation, operator boundaries, numbered start sequence and FAQ.
+- Changed the short dawn tab from “Before arrival” to “Dawn” so narrow controls remain readable; the panel still says “Before anyone arrives”.
+- Qualified the hero with “designed to” and shortened its explanation. The primary technical document describes forecast integration and equipment extensions as design work; no field deployment is inferred.
+- Checked the wording against Core MVP and the technical architecture, separately from the pattern checker. Kept explicit simulation, compatibility and illustrative-day qualifications.
+- No customer-facing dashes, fabricated readings, testimonials, logos, savings percentages or performance guarantees were added. Existing manual override and fallback details remain.
+
+No model subprocess or paid API was used for editing. The pattern checker does not establish truth or writing quality; the contextual editorial review and source map are separate evidence.

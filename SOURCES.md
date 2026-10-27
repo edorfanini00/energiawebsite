@@ -11,67 +11,50 @@ Where each brand asset, image, font, design reference and product claim comes fr
 | Green `#567740` | Live site design token `--token-d2c4f753-…: #567740` in the HTML served by energiaigroup.com (read 2026-10-27) | Primary CTA background (white text, 5.11:1) and focus ring |
 | Light green `#82c95e` | `rgb(130, 201, 94)` in the same live HTML | Focus ring on the ink operator-limits section |
 | Typeface | The live site's computed styles use Satoshi for headings and UI | Self-hosted Satoshi 300 (Light), 400 and 700 woff2 from Fontshare (Indian Type Foundry), under the ITF Free Font License (FFL) v2.0. https://www.fontshare.com/licenses/itf-ffl, read 2026-10-27, says “All Fontshare fonts are 100% free for personal and commercial use” and covers self-hosting. Files are in `assets/fonts/`. `satoshi-300.woff2` is the woff2 that Fontshare's own CSS API (`api.fontshare.com/v2/css?f[]=satoshi@300`) points to on cdn.fontshare.com. Its name table reads “Satoshi Light”, usWeightClass 300, sha256 `8a24f395b65048dea9dece6444525fa3adf180057d82c3f831095bff3feda5a0`. It is a genuine light master, not a synthesized weight. The 500 weight is no longer used and was removed. |
-| Contact | `mailto:edo.orfanini@energiaigroup.com`, the published contact. LinkedIn: https://www.linkedin.com/company/energia-ai/ | Every CTA is a plain mailto link. The page has no forms and makes no network requests. |
+| Contact | `mailto:edo.orfanini@energiaigroup.com`, the published contact. LinkedIn: https://www.linkedin.com/company/energia-ai/ | Every CTA is a plain mailto link. The page has no forms or data submission; it requests only same-origin page assets. |
 
 The live site's other claims were deliberately not reused because nothing in the sources substantiates them: “patent pending”, “Up to 30%”, “Up to 45%”, BACnet/Modbus/LonWorks “connects to” as blanket claims, tenant billing, carbon credit marketplace and the AI chatbot.
 
-## Product claims
+## V3 product claims and scope
 
-| Claim on page | Source |
-|---|---|
-| AI control platform for commercial HVAC. It learns zone thermal behavior and adjusts setpoints, weighing energy against comfort. | *Energia AI technical document*, Introduction and Part 1 (`~/Desktop/EnergiAI/docuento tecnico/Energia AI tehnical document-.pdf`) |
-| A fixed schedule does not adjust when the weather or occupancy changes (feature section) | Definitional framing of the problem, not a measured claim: a fixed schedule is a preset plan. It is set against the inputs the technical doc's Data Aggregation and Forecasting Layer adds (weather forecasts, occupancy). The West glass and Tuesday sentences are illustrative scenarios, not client results. |
-| Reads weather forecasts and occupancy schedules | Technical doc, Data Aggregation and Forecasting Layer and Part 5 (NOAA/OpenWeather forecasts, occupancy schedules from the BMS). Energia consumes forecasts and does not produce weather forecasts. |
-| Thermal model from floor plans, HVAC equipment and operating history. Physics plus a neural network. | Technical doc, Part 1: the SBCS hybrid simulator, finite-difference heat transfer between control volumes, and a GRU neural layer |
-| A reinforcement learning agent trains in simulation and is rewarded for comfort and penalized for energy | Technical doc, Part 1 and section 3: Soft Actor-Critic, with a reward weighing comfort loss, energy and emissions |
-| Each control cycle reads the building, checks forecasts, proposes setpoints, and checks them against limits before the BMS | Technical doc, section 4, Real-Time Inference Flow. The page leaves out the document's five-minute interval. |
-| Setpoint range and deadband | Technical doc, section 7.6 (2), Temperature Setpoint Boundaries |
-| Outdoor air minimums based on standards such as ASHRAE 62.1 are part of the control constraints | Technical doc, section 7.6 (1). This is a design requirement, so no certification or compliance is claimed. |
-| Equipment limits are defined with the facilities team before control is enabled | A deliberately conservative statement. Technical doc Part 1 says fans, VAV dampers, pumps and actuator delays are not modelled in the current simulator, so the page promises nothing about those devices. |
-| Fallback to existing sequences on a lost connection or bad data | Technical doc, section 4 (rule-based or MPC fallback) and the Integration layer. Written as architecture under “control architecture is designed around…”. |
-| Life-safety alarms take priority | Technical doc, section 7.6 (6), Safety and Emergency Override Conditions |
-| BACnet and Modbus; fit is confirmed in an assessment | Technical doc, Integration layer and Part 6 (BACnet/IP, Modbus TCP, OPC-UA). The page does not claim universal compatibility. |
-| Gateway next to the BMS, with AI on the gateway or in the cloud | Technical doc, section 6 (cloud and edge inference) and Part 6 (gateway device) |
-| How savings are assessed. No percentage is shown. | *Core MVP Goal.docx* gives 15 to 25% as a target, not a measured result. Per the parent review the page shows no figure. |
+Primary authority: `/Users/edorfanini/Desktop/EnergiAI/docuento tecnico/Energia AI tehnical document-.pdf` and `/Users/edorfanini/Desktop/EnergiAI/Core MVP Goal/Core MVP Goal.docx`. Preserved extracts read during continuation are `sources/tech-doc.txt` and `sources/core-mvp.txt` in the V3 evidence root. The technical document distinguishes the existing SBCS simulator from proposed deployment architecture. Core MVP describes simulation first, then gateway deployment. Neither proves a field installation or realized savings.
 
-## Content references (structure only)
+- Hero: commercial HVAC control, a thermal model, weather and occupancy inputs, and anticipatory setpoints describe the design intent in technical document Parts 1 and 4–6 and Core MVP Automated HVAC Adjustments. The page says “designed to”; it does not claim a deployed forecast-enabled controller. Part 3 explicitly lists forecast integration, radiative heat transfer and expanded equipment actuation as simulator limitations.
+- The day: 06:30, 10:00, 15:30 and 19:30 are fictional scenario times. Dawn illustrates scheduled conditioning; morning illustrates approved setpoints and ventilation constraints; afternoon illustrates forecast-led cooling; evening illustrates occupied/unoccupied targets. Core MVP section 2 supports anticipatory control as an objective. Technical document Parts 4–5 describe the forecast/control design, and section 7.6 describes constraints. These scenes are not simulator output, telemetry, measured comfort or a customer case study. The nearby caption states that times and actions are examples.
+- Model: thermal zones and the control-volume grid come from Part 1 and Part 2 steps 1–3. Physics plus a GRU neural layer, simulation training with Soft Actor-Critic, and a comfort/energy reward come from Part 1. The floor-plan overlay is explanatory geometry on the fictional building, not a real model output or product interface.
+- Control: reading the building, forecasts, proposed setpoints and checking limits before BMS writes map to Part 4 sections 3–4 and 7.6. Operator-defined limits, fallback and emergency priority describe architecture, not certification. The page explicitly introduces them as design boundaries.
+- Limits: setpoint range/deadband, fresh-air minimums, equipment constraints and life-safety priority map to section 7.6. ASHRAE 62.1 is named by the supplied architecture; no current compliance or certification is claimed. Connection/data fallback maps to Part 4 section 4 and the Integration layer.
+- Getting started and FAQ: floor plans, equipment metadata, trend history and occupancy schedules map to Part 2. Gateway, edge/cloud inference and BACnet/Modbus architecture map to Parts 4 and 6. Protocol compatibility is assessed with the facilities team; universal integration is not asserted.
+- Savings: Core MVP's 15–25% is a simulation target. The baseline-versus-policy report's modeled results are not used as field proof. The page shows no percentage, customer, testimonial, savings guarantee, deployment count or fabricated reading. It explicitly says simulation results do not guarantee building savings.
 
-- **BrainBox AI** (https://brainboxai.com/, https://brainboxai.com/en/solutions/ai-control, https://brainboxai.com/en/articles/lifting-the-veil-on-brainbox-ais-data-architecture). The owner suggested it as a content reference for a company doing similar work. Taken from it: the order of the story (building behavior → decision → HVAC action → operator control → fit conversation) and the customer problems it names (fixed schedules, changing weather and occupancy, balancing cost and comfort, keeping the facilities team in charge). Not taken: any product name, accuracy figure, savings figure, command volume, testimonial, case study, control frequency or BACnet priority detail. None of these describe Energia.
+## Selected composition and retained reference evidence
 
-## Visual benchmark (principles only, no assets reused)
+Evidence root: `/Users/edorfanini/.hermes/workspace/energia-landing-v3-20261027`.
 
-- **BrainBox AI home page** (https://brainboxai.com/en/). The owner named it as the visual benchmark after rejecting the 616f693 page. Fresh captures at 1440×900 and 390×844, with computed type, are in `~/.hermes/workspace/energia-landing-20261027/brainbox-reference/`.
-  - Observed: Atlas Grotesk 300 at 56/61.6px (28px on phones), white over a sky-dominated photo of a real-scale building fragment from a low camera. The hero has no paragraph. The first feature is a 36px sentence heading with emphasis in bold.
-  - Used here: light restrained display type (Satoshi 300, 56/30px), a life-size architectural fragment against sky, one hero idea, and sentence headings with weight emphasis.
-  - Not used: any image, copy, metric, red tab, card carousel or layout grid. The headline is ink, not white, because white measured under 3:1 on our render.
+Research and artwork were completed before this continuation. No new research, paid assets, image generation or rendering was performed. `DIRECTION.md` records actual comparisons and selects B. `candidates/` preserves the A/B desktop and phone screenshots. `references/` preserves the original fresh-load captures; these are evidence only, never shipped assets.
 
-## Earlier design references (616f693, superseded)
+- BrainBox AI (`https://brainboxai.com/en/`): observed light type, restrained first-view copy and real-scale architecture. B borrows hierarchy and scale principles, while placing all text on warm paper to solve the actual overlay contrast failures in A.
+- Phasic (`https://www.phasic.ai/`, Awwwards nominee listing): observed one changing visual explaining a mechanism. The four-state building day serves that explanatory role here. No SOTD status is claimed for Phasic.
+- Sustainable Metal Cloud (`https://smc.co/`, nominee listing): restrained brand green was considered. No artwork or branded motif is reused.
+- LPAS and Belgrade Arbor: retained SOTD reference captures and listing evidence informed architectural context, daylight, warm interiors and the plan view. `DIRECTION.md` distinguishes observed qualities from the chosen implementation.
 
-Captured with Playwright on 2026-10-27 at 1440×900 and 390×844. Screenshots and computed styles are in `~/.hermes/workspace/energia-landing-20261027/evidence/ref-*`.
+B uses the saved paper headline/panorama and the vertical desktop day list. Final corrections follow its written rules: 60px desktop / 34px phone H1, a single visible first-view CTA, and a short phone tab label. The original prototype routes retain their frozen stylesheet for comparison and are excluded from preview deployment.
 
-- **Phasic** (https://www.phasic.ai/; Awwwards nominee page https://www.awwwards.com/sites/phasic-energy). Observed: a single engineered object photographed in isolation on a light neutral ground, a very large display headline (H1 128px, weight 400, −3.84px tracking), one short supporting line, square-cornered CTAs and a strict frame grid. Used here: an isolated studio object as the hero image, large controlled type and square buttons.
-- **Sustainable Metal Cloud** (https://smc.co/; Awwwards nominee page https://www.awwwards.com/sites/sustainable-metal-cloud). Observed: a white page with a single saturated brand green used for CTAs and key words. Used here: green kept for action only. Its swirling green ribbon and two-tone headline were not used.
-- **Accenta** (https://www.awwwards.com/sites/accenta, honorable mention). Listed by the parent and not inspected in this build.
-- **Current Energia site** (`current-site.png`): dark background, blurred teal and violet glows, pill chips, centered stack. This preview moves away from all of those.
+## V3 image provenance
 
-No reference artwork, layout or copy was copied. No award status is claimed for this page.
+Every rendered image shows the same fictional building. No reference image, stock photo, purchased asset or customer installation appears. Only optimized assets in `assets/img/` ship.
 
-## Imagery
+- Editable scene: `art/blend/v3-c2-final.blend` in the V3 evidence root; SHA-256 `7b75118dc52f719420f5848cf35491a5c9145576eeb8805099e997b54fcc27b4`.
+- Scene authoring and read-only rendering: `art/scripts/build_scene.py`, `render_view.py`, `run_render.sh`, `run_finals.sh`. Render receipts and per-shot logs are beside the raw masters. `art/masters/finals-status.log` records successful serial exits for all 12 shots.
+- Raw masters: `art/masters/{hero-desktop,hero-phone,day-{dawn,morning,afternoon,dusk}-{desktop,phone},plan-desktop,plan-phone}.png`. Hero cameras are street-level; day cameras are the raised rooftop vantage; plan cameras are overhead cuts. Each phone view has its own camera.
+- Retouch: eight day masters have a disclosed sky-horizon hairline cleanup in `art/masters/retouched/`, made by `art/scripts/retouch_horizon.py`. Original masters remain intact. `retouch-log.jsonl` records full input/output hashes and changed-pixel counts. The verifier confirms all changed pixels are confined to the recorded narrow horizon rows and flat sky runs reaching a frame edge; the rest is unchanged. No geometry, window, tree or light was repainted.
+- Encoding inputs: `art/masters/web/` contains byte-identical copies of those eight retouches and the four unchanged hero/plan masters. Pass this directory to `scripts/export-art.sh`, not the raw master directory.
+- Responsive files: **70**, verified by decoding, dimensions and SHA-256. Hero: 10; four day states: 48; plan: 12. The inherited “56 exports” was an incorrect count. All 70 total 6,606,615 bytes on disk; browsers request a responsive subset.
+- Encoding: ffmpeg Lanczos resize to width with even height, WebP quality 80/method 6/sharp YUV, AVIF quality 60/speed 4/YUV 444. The existing export log is `art/logs/export.log`.
+- Full machine-readable inventory: `ART-MANIFEST.json` in the evidence root, generated by `python3 scripts/verify-art.py <evidence-root>`. It includes actual absolute paths, full hashes, dimensions, bytes, render settings/camera receipts, raw → retouch → encoding-input → responsive-export lineage, scripts and limitations.
 
-All images on the page are original Blender 5.2.1 Cycles renders made for this preview by the separate art worker.
-- They show fictional architecture, not a client installation.
-- They contain no baked-in labels, UI or telemetry.
-- No downloaded, paid or reference imagery was used.
-- The editable scenes, scripts, proofs and manifests stay private in `~/.hermes/workspace/energia-landing-20261027/art/brainbox-v2/`. Only the exported web files ship. See `V2-ART-RESULT.md` and `V2-FEATURE-ART-RESULT.md` there.
+The historical render receipts identify temporary scene copies and omit full scene hashes; their final-run log records a 16-character source prefix that matches the retained scene. The export log omits per-file source hashes. The continuation verified preserved files and lineage without claiming a new render or byte-for-byte encoder reproduction.
 
-| Web files | Master | sha256 (master PNG) | Camera |
-|---|---|---|---|
-| `hero-desktop-{1440,2160,2880}.{avif,webp}` | `a-desktop.png` 3200×2000 | `125cebbde679541250c32407a03a7d1234f87f8fe5d0315d5f15a79ecaaa8539` | CAM_A_Desktop, 24 mm, eye height 1.7 m, corrected verticals |
-| `hero-phone-{780,1170}.{avif,webp}` | `a-phone.png` 1290×2792 | `7ecf5c9ace66d782e0c39bc34a5053170319386b8b7c5ccceb5b477a942257fe` | CAM_A_Phone, 24 mm, 1.7 m |
-| `feature-desktop-{1400,2100,2800}.{avif,webp}` | `feature-desktop.png` 2800×1200 | `cb6f28b80f9eb8fc297032e327480e5c2052fba37fccb260d90a6120714467a6` | CAM_Feature_Desktop, 35 mm, 1.7 m, west facade in low afternoon sun |
-| `feature-phone-{600,900,1200}.{avif,webp}` | `feature-phone.png` 1200×1500 | `63e52b8b672a1058cf06475fe4c46dc5cfe8782876844b1353fa882b905153a3` | CAM_Feature_Phone, 35 mm, 1.7 m |
+Plan labels and outlines use the retained cameras' plan coordinates, documented alongside the SVG in `index.html`. They are real text and vector outlines over the original render, not baked-in UI. Phone framing crops the floor plan and uses its matching overlay.
 
-`scripts/export-art.sh` produces the responsive files: an ffmpeg Lanczos resize, then `cwebp -q 82` and `avifenc -q 62`.
-- The hero and the first feature use different renders. No render is repeated on the page.
-- The 616f693 renders (an isometric model on a grey plate) and the direction C rooftop renders are not in the bundle.
-- The A/C prototypes remain in git history at tag `proto-ac-20261027`.
+Known visual limits: original CGI, no people, repeated architectural/tree structure, and some stylization. The phone hero deliberately crops away its unused sky field. Local checks do not establish universal visual quality or photorealism. Independent current-head review and hosted preview verification remain parent-owned gates.

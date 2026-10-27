@@ -1,4 +1,4 @@
-// Energia AI landing preview: header state, mobile menu and section reveals.
+// Energia AI landing preview: header state, mobile menu, the day tabs and section reveals.
 // No analytics, no network requests, no form handling.
 (function () {
   "use strict";
@@ -75,6 +75,77 @@
   // tap is never silently lost) and tell boot.js not to fall back any more.
   toggle.disabled = false;
   root.setAttribute("data-menu-ready", "");
+
+  // The day: four illustrative moments become tabs on a day line. The markup
+  // shows every moment in order, so without this script nothing is lost.
+  // Roles, roving tabindex and arrow keys follow the WAI-ARIA tabs pattern
+  // with automatic activation; the selected panel is itself focusable so
+  // Tab moves from the selected tab into its content.
+  var day = document.querySelector("[data-day]");
+  if (day) {
+    var list = day.querySelector("[data-day-list]");
+    var line = day.querySelector("[data-dayline]");
+    var tabs = Array.prototype.slice.call(day.querySelectorAll("[data-day-tab]"));
+    var panels = Array.prototype.slice.call(day.querySelectorAll("[data-moment]"));
+    if (list && line && tabs.length && tabs.length === panels.length) {
+      list.setAttribute("role", "tablist");
+      list.setAttribute("aria-label", list.getAttribute("data-label") || "Times of day");
+      function syncOrientation() {
+        list.setAttribute("aria-orientation", phone.matches ? "horizontal" : "vertical");
+      }
+      syncOrientation();
+      phone.addEventListener("change", syncOrientation);
+      tabs.forEach(function (tab, i) {
+        var panel = panels[i];
+        tab.setAttribute("role", "tab");
+        tab.setAttribute("aria-controls", panel.id);
+        panel.setAttribute("role", "tabpanel");
+        panel.setAttribute("aria-labelledby", tab.id);
+        panel.setAttribute("tabindex", "0");
+      });
+      var select = function (index, focus) {
+        tabs.forEach(function (tab, i) {
+          var on = i === index;
+          tab.setAttribute("aria-selected", String(on));
+          tab.tabIndex = on ? 0 : -1;
+          panels[i].hidden = !on;
+        });
+        line.style.setProperty("--at", tabs[index].getAttribute("data-at"));
+        line.toggleAttribute("data-dark", tabs[index].hasAttribute("data-dark"));
+        if (focus) tabs[index].focus();
+      };
+      tabs.forEach(function (tab, i) {
+        tab.addEventListener("click", function () { select(i, false); });
+        tab.addEventListener("keydown", function (event) {
+          var next = null;
+          if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (i + 1) % tabs.length;
+          else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (i - 1 + tabs.length) % tabs.length;
+          else if (event.key === "Home") next = 0;
+          else if (event.key === "End") next = tabs.length - 1;
+          if (next === null) return;
+          event.preventDefault();
+          select(next, true);
+        });
+      });
+      var initial = Math.max(0, tabs.findIndex(function (t) { return t.hasAttribute("data-initial"); }));
+      select(initial, false);
+      day.setAttribute("data-ready", "");
+      // Fetch the other moments' images once the section is near, so a
+      // switch does not wait on the network. Hidden lazy images would
+      // otherwise load only when shown.
+      var warm = function () {
+        day.querySelectorAll("img[loading='lazy']").forEach(function (img) { img.loading = "eager"; });
+      };
+      if ("IntersectionObserver" in window) {
+        var near = new IntersectionObserver(function (entries) {
+          if (entries.some(function (e) { return e.isIntersecting; })) { warm(); near.disconnect(); }
+        }, { rootMargin: "600px 0px" });
+        near.observe(day);
+      } else {
+        warm();
+      }
+    }
+  }
 
   // Section reveals. Content is visible by default; it is only hidden for
   // the reveal once "reveal-ready" is set below. Nothing is hidden when

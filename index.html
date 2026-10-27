@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Energia AI · AI control for commercial HVAC</title>
-  <meta name="description" content="Energia AI is an AI control platform for commercial HVAC. It learns how your building heats and cools, reads weather forecasts and occupancy schedules, and adjusts setpoints before rooms drift.">
+  <meta name="description" content="Energia AI is an AI control platform for commercial HVAC. It learns how your building heats and cools, reads the forecast and occupancy, and adjusts setpoints ahead of time, inside the limits your team sets.">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#6f94ba">
+  <meta name="theme-color" content="#f3f1ec">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <script src="boot.js"></script>
   <link rel="icon" href="assets/brand/favicon.png" type="image/png">
@@ -24,8 +24,9 @@
         <img src="assets/brand/energia-ai-wordmark-ink.png" width="424" height="48" alt="">
       </a>
       <nav class="bar__nav" id="site-nav" aria-label="Primary" data-nav>
-        <a href="#how">How it works</a>
-        <a href="#limits">Operator limits</a>
+        <a href="#day">The day</a>
+        <a href="#model">How it learns</a>
+        <a href="#limits">Limits</a>
         <a href="#questions">Questions</a>
         <a class="bar__cta" href="mailto:edo.orfanini@energiaigroup.com?subject=Energia%20AI%3A%20our%20building">Talk to us<svg class="arrow" viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M0 5h14.5M10 1l4.5 4-4.5 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
       </nav>
@@ -38,132 +39,281 @@
 
   <main id="main">
     <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="hero__copy">
+        <h1 class="hero__title" id="hero-title">HVAC control that sees the day coming.</h1>
+        <p class="hero__line">Energia AI is an AI control platform for commercial HVAC, designed to learn how your building heats and cools and plan setpoints around weather and occupancy.</p>
+        <a class="hero__cta textlink" href="mailto:edo.orfanini@energiaigroup.com?subject=Energia%20AI%3A%20our%20building">Talk about your building<svg class="arrow" viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M0 5h14.5M10 1l4.5 4-4.5 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
+      </div>
       <picture class="hero__art">
         <source media="(max-width: 700px)" type="image/avif" srcset="assets/img/hero-phone-780.avif 780w, assets/img/hero-phone-1170.avif 1170w" sizes="100vw">
         <source media="(max-width: 700px)" type="image/webp" srcset="assets/img/hero-phone-780.webp 780w, assets/img/hero-phone-1170.webp 1170w" sizes="100vw">
-        <source type="image/avif" srcset="assets/img/hero-desktop-1440.avif 1440w, assets/img/hero-desktop-2160.avif 2160w, assets/img/hero-desktop-2880.avif 2880w" sizes="(max-aspect-ratio: 1/1) 160vh, 100vw">
-        <source type="image/webp" srcset="assets/img/hero-desktop-1440.webp 1440w, assets/img/hero-desktop-2160.webp 2160w, assets/img/hero-desktop-2880.webp 2880w" sizes="(max-aspect-ratio: 1/1) 160vh, 100vw">
-        <img src="assets/img/hero-desktop-2160.webp" width="3200" height="2000" alt="Low view of the corner of a white office building against a clear blue sky: deep stacked concrete slabs, dark window bands and a green duct rising between the floors." fetchpriority="high" decoding="async">
+        <source type="image/avif" srcset="assets/img/hero-desktop-1440.avif 1440w, assets/img/hero-desktop-2160.avif 2160w, assets/img/hero-desktop-2880.avif 2880w" sizes="100vw">
+        <source type="image/webp" srcset="assets/img/hero-desktop-1440.webp 1440w, assets/img/hero-desktop-2160.webp 2160w, assets/img/hero-desktop-2880.webp 2880w" sizes="100vw">
+        <img src="assets/img/hero-desktop-2160.webp" width="3200" height="2000" alt="Street-level view across a crossing to the corner of a pale stone office building in late-afternoon sun. Its west face is lit warm, street trees line the pavement and offices are lit behind the windows." fetchpriority="high" decoding="async">
       </picture>
-      <div class="hero__copy">
-        <h1 class="hero__title" id="hero-title">A building that thinks ahead.</h1>
-        <p class="hero__line">AI control for commercial HVAC.</p>
-        <a class="hero__cta" href="mailto:edo.orfanini@energiaigroup.com?subject=Energia%20AI%3A%20our%20building">Talk about your building<svg class="arrow" viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M0 5h14.5M10 1l4.5 4-4.5 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
-      </div>
     </section>
 
-    <section class="feature" id="building" aria-labelledby="feature-title">
-      <div class="wrap split">
-        <h2 class="title" id="feature-title" data-reveal>No two buildings <strong>hold heat the same way.</strong></h2>
-        <p class="lede" data-reveal>West glass takes the afternoon sun. A full floor on Tuesday runs warm by eleven. A fixed schedule does not adjust when the weather or occupancy changes. Energia AI learns how your building responds, then plans the next hours around it.</p>
+    <section class="day" id="day" aria-labelledby="day-title" data-day>
+      <div class="wrap day__head">
+        <h2 class="title" id="day-title" data-reveal>The load on your building <strong>changes by the hour.</strong></h2>
+        <p class="lede" data-reveal>A fixed schedule does not adjust when the weather or occupancy changes. Energia AI plans for both. Step through one day in an illustrative building.</p>
       </div>
-      <figure class="feature__art" data-reveal>
-        <picture>
-          <source media="(max-width: 700px)" type="image/avif" srcset="assets/img/feature-phone-600.avif 600w, assets/img/feature-phone-900.avif 900w, assets/img/feature-phone-1200.avif 1200w" sizes="100vw">
-          <source media="(max-width: 700px)" type="image/webp" srcset="assets/img/feature-phone-600.webp 600w, assets/img/feature-phone-900.webp 900w, assets/img/feature-phone-1200.webp 1200w" sizes="100vw">
-          <source type="image/avif" srcset="assets/img/feature-desktop-1400.avif 1400w, assets/img/feature-desktop-2100.avif 2100w, assets/img/feature-desktop-2800.avif 2800w" sizes="(min-width: 1340px) 1200px, 90vw">
-          <source type="image/webp" srcset="assets/img/feature-desktop-1400.webp 1400w, assets/img/feature-desktop-2100.webp 2100w, assets/img/feature-desktop-2800.webp 2800w" sizes="(min-width: 1340px) 1200px, 90vw">
-          <img src="assets/img/feature-desktop-1400.webp" width="2800" height="1200" alt="Eye-level view of the same building’s glass corner in low afternoon sun: the west glass catches a warm glare while the other face sits in shade." loading="lazy" decoding="async">
-        </picture>
-      </figure>
+
+      <div class="wrap day__layout">
+        <div class="day__tabs">
+          <div class="dayline" data-dayline>
+            <span class="dayline__rule" aria-hidden="true"></span>
+            <span class="dayline__sun" aria-hidden="true"></span>
+            <div class="dayline__list" data-day-list data-label="Times of day">
+              <button class="dayline__tab" type="button" id="tab-dawn" data-day-tab data-at="0.094"><span class="t">06:30</span><span class="l">Dawn</span></button>
+              <button class="dayline__tab" type="button" id="tab-morning" data-day-tab data-at="0.3125"><span class="t">10:00</span><span class="l">Floors fill</span></button>
+              <button class="dayline__tab" type="button" id="tab-afternoon" data-day-tab data-at="0.656" data-initial><span class="t">15:30</span><span class="l">West sun</span></button>
+              <button class="dayline__tab" type="button" id="tab-dusk" data-day-tab data-at="0.906" data-dark><span class="t">19:30</span><span class="l">Evening</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="day__stage">
+          <article class="moment" id="moment-dawn" data-moment>
+            <div class="moment__art">
+              <picture>
+                <source media="(max-width: 860px)" type="image/avif" srcset="assets/img/day-dawn-phone-600.avif 600w, assets/img/day-dawn-phone-900.avif 900w, assets/img/day-dawn-phone-1200.avif 1200w" sizes="100vw">
+                <source media="(max-width: 860px)" type="image/webp" srcset="assets/img/day-dawn-phone-600.webp 600w, assets/img/day-dawn-phone-900.webp 900w, assets/img/day-dawn-phone-1200.webp 1200w" sizes="100vw">
+                <source type="image/avif" srcset="assets/img/day-dawn-desktop-1200.avif 1200w, assets/img/day-dawn-desktop-1800.avif 1800w, assets/img/day-dawn-desktop-2400.avif 2400w" sizes="(min-width: 1440px) 936px, 65vw">
+                <source type="image/webp" srcset="assets/img/day-dawn-desktop-1200.webp 1200w, assets/img/day-dawn-desktop-1800.webp 1800w, assets/img/day-dawn-desktop-2400.webp 2400w" sizes="(min-width: 1440px) 936px, 65vw">
+                <img src="assets/img/day-dawn-desktop-1200.webp" width="2400" height="1500" alt="The same building from a rooftop across the street at early morning: both visible faces in cool shade, pale sky, a few rooms lit." loading="lazy" decoding="async">
+              </picture>
+            </div>
+            <div class="moment__body">
+              <h3 class="moment__title"><time>06:30</time>Before anyone arrives</h3>
+              <div class="moment__part">
+                <h4>What changes</h4>
+                <p>The forecast shows a clear, warm afternoon. The building is still empty and the low sun is on the far side.</p>
+              </div>
+              <div class="moment__part moment__part--do">
+                <h4>What Energia AI does</h4>
+                <p>Plans the day from the forecast and your occupancy schedule, including when each zone should start conditioning so it is ready on time.</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="moment" id="moment-morning" data-moment>
+            <div class="moment__art">
+              <picture>
+                <source media="(max-width: 860px)" type="image/avif" srcset="assets/img/day-morning-phone-600.avif 600w, assets/img/day-morning-phone-900.avif 900w, assets/img/day-morning-phone-1200.avif 1200w" sizes="100vw">
+                <source media="(max-width: 860px)" type="image/webp" srcset="assets/img/day-morning-phone-600.webp 600w, assets/img/day-morning-phone-900.webp 900w, assets/img/day-morning-phone-1200.webp 1200w" sizes="100vw">
+                <source type="image/avif" srcset="assets/img/day-morning-desktop-1200.avif 1200w, assets/img/day-morning-desktop-1800.avif 1800w, assets/img/day-morning-desktop-2400.avif 2400w" sizes="(min-width: 1440px) 936px, 65vw">
+                <source type="image/webp" srcset="assets/img/day-morning-desktop-1200.webp 1200w, assets/img/day-morning-desktop-1800.webp 1800w, assets/img/day-morning-desktop-2400.webp 2400w" sizes="(min-width: 1440px) 936px, 65vw">
+                <img src="assets/img/day-morning-desktop-1200.webp" width="2400" height="1500" alt="Mid-morning from the same rooftop: sun on the south face, the west face in shade, offices lit on every floor." loading="lazy" decoding="async">
+              </picture>
+            </div>
+            <div class="moment__body">
+              <h3 class="moment__title"><time>10:00</time>Floors fill up</h3>
+              <div class="moment__part">
+                <h4>What changes</h4>
+                <p>People arrive, and the morning sun moves onto the south face.</p>
+              </div>
+              <div class="moment__part moment__part--do">
+                <h4>What Energia AI does</h4>
+                <p>Keeps occupied zones inside the setpoint range you approved, with outdoor air at or above your ventilation minimums.</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="moment" id="moment-afternoon" data-moment>
+            <div class="moment__art">
+              <picture>
+                <source media="(max-width: 860px)" type="image/avif" srcset="assets/img/day-afternoon-phone-600.avif 600w, assets/img/day-afternoon-phone-900.avif 900w, assets/img/day-afternoon-phone-1200.avif 1200w" sizes="100vw">
+                <source media="(max-width: 860px)" type="image/webp" srcset="assets/img/day-afternoon-phone-600.webp 600w, assets/img/day-afternoon-phone-900.webp 900w, assets/img/day-afternoon-phone-1200.webp 1200w" sizes="100vw">
+                <source type="image/avif" srcset="assets/img/day-afternoon-desktop-1200.avif 1200w, assets/img/day-afternoon-desktop-1800.avif 1800w, assets/img/day-afternoon-desktop-2400.avif 2400w" sizes="(min-width: 1440px) 936px, 65vw">
+                <source type="image/webp" srcset="assets/img/day-afternoon-desktop-1200.webp 1200w, assets/img/day-afternoon-desktop-1800.webp 1800w, assets/img/day-afternoon-desktop-2400.webp 2400w" sizes="(min-width: 1440px) 936px, 65vw">
+                <img src="assets/img/day-afternoon-desktop-1200.webp" width="2400" height="1500" alt="Mid-afternoon from the same rooftop: low sun full on the west face, long tree shadows across the pavement, the south face in raking light." loading="lazy" decoding="async">
+              </picture>
+            </div>
+            <div class="moment__body">
+              <h3 class="moment__title"><time>15:30</time>Sun on the west glass</h3>
+              <div class="moment__part">
+                <h4>What changes</h4>
+                <p>The sun is low in the west and falls straight onto the west windows. Those rooms are now gaining heat fastest.</p>
+              </div>
+              <div class="moment__part moment__part--do">
+                <h4>What Energia AI does</h4>
+                <p>Began cooling the west zones before the sun reached them, using the forecast, and now holds them inside your range.</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="moment" id="moment-dusk" data-moment>
+            <div class="moment__art">
+              <picture>
+                <source media="(max-width: 860px)" type="image/avif" srcset="assets/img/day-dusk-phone-600.avif 600w, assets/img/day-dusk-phone-900.avif 900w, assets/img/day-dusk-phone-1200.avif 1200w" sizes="100vw">
+                <source media="(max-width: 860px)" type="image/webp" srcset="assets/img/day-dusk-phone-600.webp 600w, assets/img/day-dusk-phone-900.webp 900w, assets/img/day-dusk-phone-1200.webp 1200w" sizes="100vw">
+                <source type="image/avif" srcset="assets/img/day-dusk-desktop-1200.avif 1200w, assets/img/day-dusk-desktop-1800.avif 1800w, assets/img/day-dusk-desktop-2400.avif 2400w" sizes="(min-width: 1440px) 936px, 65vw">
+                <source type="image/webp" srcset="assets/img/day-dusk-desktop-1200.webp 1200w, assets/img/day-dusk-desktop-1800.webp 1800w, assets/img/day-dusk-desktop-2400.webp 2400w" sizes="(min-width: 1440px) 936px, 65vw">
+                <img src="assets/img/day-dusk-desktop-1200.webp" width="2400" height="1500" alt="Dusk from the same rooftop: a darkening blue sky, street lights on, and only some floors still lit." loading="lazy" decoding="async">
+              </picture>
+            </div>
+            <div class="moment__body">
+              <h3 class="moment__title"><time>19:30</time>The building empties</h3>
+              <div class="moment__part">
+                <h4>What changes</h4>
+                <p>Most people have gone home. A few rooms are still in use.</p>
+              </div>
+              <div class="moment__part moment__part--do">
+                <h4>What Energia AI does</h4>
+                <p>Lets empty zones move within the wider unoccupied range you set, keeps occupied rooms in range, and starts on tomorrow’s plan.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <p class="wrap note day__caption">An illustrative day in a fictional building, rendered for this page. The times and actions are examples, not readings from a real site.</p>
     </section>
 
-    <section class="how" id="how" aria-labelledby="how-title">
-      <div class="wrap split">
-        <h2 class="title" id="how-title" data-reveal>From a model of your building <strong>to HVAC setpoints.</strong></h2>
-        <p class="lede" data-reveal>Energia AI builds a thermal model of your building, trains a control agent inside it, then proposes setpoints that your limits check first.</p>
+    <section class="model" id="model" aria-labelledby="model-title">
+      <div class="wrap day__head">
+        <h2 class="title" id="model-title" data-reveal>It starts with <strong>a model of your building.</strong></h2>
+        <p class="lede" data-reveal>Your floor plans become thermal zones. Energia AI then learns how each zone responds to sun, people and your HVAC.</p>
       </div>
-      <ol class="wrap steps">
-        <li class="step" data-reveal>
-          <h3>Model</h3>
-          <p>We build the model from floor plans, HVAC equipment and operating history. Physics describes how heat moves between zones. A neural network learns what physics misses.</p>
-        </li>
-        <li class="step" data-reveal>
-          <h3>Learn</h3>
-          <p>A reinforcement learning agent trains inside that model across simulated weather and occupancy conditions. It is rewarded for holding comfort and penalized for wasted energy.</p>
-        </li>
-        <li class="step" data-reveal>
-          <h3>Control</h3>
-          <p>On each control cycle the agent reads the building, checks the forecast and proposes new setpoints for your building management system (BMS).</p>
-        </li>
-      </ol>
-      <figure class="wrap cycle" data-reveal>
-        <figcaption class="cycle__label">One control cycle</figcaption>
-        <ol class="cycle__flow">
-          <li>Read the building</li>
-          <li>Check the forecast</li>
-          <li>Propose setpoints</li>
-          <li class="is-gate">Check your limits</li>
-          <li>Write to your BMS</li>
+      <div class="wrap model__grid">
+        <figure class="plan" data-reveal>
+          <div class="plan__frame">
+            <picture>
+              <source media="(max-width: 700px)" type="image/avif" srcset="assets/img/plan-phone-600.avif 600w, assets/img/plan-phone-900.avif 900w, assets/img/plan-phone-1200.avif 1200w" sizes="100vw">
+              <source media="(max-width: 700px)" type="image/webp" srcset="assets/img/plan-phone-600.webp 600w, assets/img/plan-phone-900.webp 900w, assets/img/plan-phone-1200.webp 1200w" sizes="100vw">
+              <source type="image/avif" srcset="assets/img/plan-desktop-1400.avif 1400w, assets/img/plan-desktop-2100.avif 2100w, assets/img/plan-desktop-2800.avif 2800w" sizes="(min-width: 1440px) 840px, (min-width: 961px) 62vw, 92vw">
+              <source type="image/webp" srcset="assets/img/plan-desktop-1400.webp 1400w, assets/img/plan-desktop-2100.webp 2100w, assets/img/plan-desktop-2800.webp 2800w" sizes="(min-width: 1440px) 840px, (min-width: 961px) 62vw, 92vw">
+              <img src="assets/img/plan-desktop-1400.webp" width="2800" height="1600" alt="The first floor seen from above, cut just below the ceiling: rows of desks along the west and south windows, a dark central core, and stripes of afternoon sun falling through the west glass. Outlines mark the west, corner, south and interior zones." loading="lazy" decoding="async">
+            </picture>
+            <!-- Zone outlines drawn in plan metres (y flipped). Desktop camera: 54 m wide, centred on 15.5, 8.5. -->
+            <svg class="plan__zones plan__zones--desktop" viewBox="-11.5 -23.93 54 30.86" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+              <defs><pattern id="cv-d" width="1.5" height="1.5" patternUnits="userSpaceOnUse"><path class="grid" d="M1.5 0V1.5H0" fill="none"/></pattern></defs>
+              <path d="M0.3 -23.7H10.5V-10.5H41.7V-0.3H0.3Z" fill="url(#cv-d)"/>
+              <rect class="z z--sun" x="0.3" y="-23.7" width="4.3" height="19.1"/>
+              <rect class="z" x="0.3" y="-4.6" width="4.3" height="4.3"/>
+              <rect class="z" x="4.6" y="-4.6" width="37.1" height="4.3"/>
+              <path class="z" d="M4.6 -23.7H10.5V-10.5H41.7V-4.6H4.6Z"/>
+            </svg>
+            <svg class="plan__zones plan__zones--phone" viewBox="-1.4 -21 20.8 26" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+              <defs><pattern id="cv-p" width="1.5" height="1.5" patternUnits="userSpaceOnUse"><path class="grid" d="M1.5 0V1.5H0" fill="none"/></pattern></defs>
+              <path d="M0.3 -21H10.5V-10.5H19.4V-0.3H0.3Z" fill="url(#cv-p)"/>
+              <rect class="z z--sun" x="0.3" y="-21" width="4.3" height="16.4"/>
+              <rect class="z" x="0.3" y="-4.6" width="4.3" height="4.3"/>
+              <rect class="z" x="4.6" y="-4.6" width="14.8" height="4.3"/>
+              <path class="z" d="M4.6 -21H10.5V-10.5H19.4V-4.6H4.6Z"/>
+            </svg>
+            <span class="plan__label plan__label--sun l-dw" data-desktop>West zone</span>
+            <span class="plan__label l-dc" data-desktop>Corner</span>
+            <span class="plan__label l-ds" data-desktop>South zone</span>
+            <span class="plan__label l-di" data-desktop>Interior</span>
+            <span class="plan__label plan__label--sun l-pw" data-phone>West zone</span>
+            <span class="plan__label l-pc" data-phone>Corner</span>
+            <span class="plan__label l-ps" data-phone>South zone</span>
+            <span class="plan__label l-pi" data-phone>Interior</span>
+          </div>
+          <figcaption class="note">The first floor of the same fictional building at 15:30, cut below the ceiling. Outlines show how a plan divides into zones. The fine grid stands for the control volumes the model uses to calculate heat flow.</figcaption>
+        </figure>
+
+        <ol class="steps">
+          <li class="step" data-reveal>
+            <h3>Model</h3>
+            <p>We build a thermal model from floor plans, HVAC equipment data and operating history. Physics describes how heat moves between zones. A neural network learns what physics misses.</p>
+          </li>
+          <li class="step" data-reveal>
+            <h3>Train</h3>
+            <p>A reinforcement learning agent practises inside that model across simulated weather and occupancy. It is rewarded for holding comfort and penalized for wasted energy.</p>
+          </li>
+          <li class="step" data-reveal>
+            <h3>Control</h3>
+            <p>On each control cycle it reads the building, checks the forecast and proposes setpoints. Your limits check every proposal before it reaches your building management system (BMS).</p>
+          </li>
         </ol>
-      </figure>
+      </div>
     </section>
 
     <section class="limits" id="limits" aria-labelledby="limits-title">
-      <div class="wrap split">
-        <h2 class="title" id="limits-title" data-reveal>Operators <strong>set the limits.</strong></h2>
+      <div class="wrap limits__head">
+        <h2 class="title" id="limits-title" data-reveal>Your team <strong>sets the limits.</strong></h2>
         <p class="lede" data-reveal>The control architecture is designed around boundaries agreed with your facilities team. Every proposed setpoint is checked against them before it reaches your BMS.</p>
       </div>
-      <dl class="wrap rules">
-        <div class="rule" data-reveal>
+      <dl class="wrap ledger">
+        <div class="ledger__row" data-reveal>
           <dt>Setpoint range</dt>
           <dd>Heating and cooling setpoints stay inside the range you approve, with a deadband between them to avoid simultaneous heating and cooling.</dd>
         </div>
-        <div class="rule" data-reveal>
+        <div class="ledger__row" data-reveal>
           <dt>Fresh air</dt>
           <dd>Outdoor air minimums for your site, based on standards such as ASHRAE 62.1, are control constraints. Ventilation is not reduced below those minimums to save energy.</dd>
         </div>
-        <div class="rule" data-reveal>
+        <div class="ledger__row" data-reveal>
           <dt>Equipment</dt>
           <dd>Equipment limits are agreed with your facilities team before control is enabled.</dd>
         </div>
-        <div class="rule" data-reveal>
+        <div class="ledger__row" data-reveal>
           <dt>Fallback</dt>
           <dd>If the connection drops or a reading looks wrong, control returns to your existing sequences.</dd>
         </div>
-        <div class="rule" data-reveal>
+        <div class="ledger__row" data-reveal>
           <dt>Life safety</dt>
           <dd>Fire, smoke and critical equipment alarms take priority. Energia AI steps back and your building’s own systems and manual override take over.</dd>
         </div>
-        <div class="rule" data-reveal>
+        <div class="ledger__row" data-reveal>
           <dt>Your BMS</dt>
           <dd>We connect through open protocols such as BACnet and Modbus. Compatibility is confirmed with your team in an assessment.</dd>
         </div>
       </dl>
     </section>
 
+    <section class="start" id="start" aria-labelledby="start-title">
+      <div class="wrap start__grid">
+        <div>
+          <h2 class="title" id="start-title" data-reveal>What it takes <strong>to start.</strong></h2>
+          <p class="lede start__lede" data-reveal>From a first look at your building to a gateway beside your BMS.</p>
+        </div>
+        <div>
+          <ol class="start__steps">
+            <li data-reveal>
+              <h3>Assessment</h3>
+              <p>We review your HVAC equipment, BMS points and trend history, and confirm protocol compatibility with your team.</p>
+            </li>
+            <li data-reveal>
+              <h3>Model and comparison</h3>
+              <p>We build the model from your floor plans and operating data, then compare a proposed control strategy with how the building runs today. Simulation results are not a guarantee of savings in your building.</p>
+            </li>
+            <li data-reveal>
+              <h3>Gateway</h3>
+              <p>A small gateway next to your BMS reads points and writes setpoints over your building’s protocols. The AI runs on the gateway or in our cloud, depending on your security requirements.</p>
+            </li>
+          </ol>
+          <div class="faq" id="questions">
+            <h2 class="faq__title">Questions</h2>
+            <details class="faq__item">
+              <summary>Which buildings is Energia AI for?</summary>
+              <p>Commercial buildings with central HVAC run through a building management system. An assessment tells us whether yours is a good candidate.</p>
+            </details>
+            <details class="faq__item">
+              <summary>What data do you need?</summary>
+              <p>Floor plans, HVAC equipment details, BMS points with trend history, and your occupancy schedules. Weather forecasts come from public sources.</p>
+            </details>
+            <details class="faq__item">
+              <summary>Can operators take control back?</summary>
+              <p>Yes. Your existing control sequences stay in place. Operators keep manual override, and if Energia AI loses its connection or sees bad data, control returns to those sequences.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="contact" id="contact" aria-labelledby="contact-title">
-      <div class="wrap contact__grid">
-        <div class="contact__lead">
-          <h2 class="title" id="contact-title" data-reveal>Talk about <strong>your building.</strong></h2>
-          <p class="lede" data-reveal>Tell us what you run and what you want to fix. We will tell you plainly whether Energia AI is a fit.</p>
-          <div class="contact__actions" data-reveal>
+      <div class="wrap">
+        <h2 class="contact__title" id="contact-title" data-reveal>Talk about <strong>your building.</strong></h2>
+        <div class="contact__row" data-reveal>
+          <p class="lede">Tell us what you run and what you want to fix. We will tell you plainly whether Energia AI is a fit.</p>
+          <div class="contact__actions">
             <a class="button" href="mailto:edo.orfanini@energiaigroup.com?subject=Energia%20AI%3A%20our%20building">Talk about your building<svg class="arrow" viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M0 5h14.5M10 1l4.5 4-4.5 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
             <a class="contact__mail" href="mailto:edo.orfanini@energiaigroup.com">edo.orfanini@energiaigroup.com</a>
           </div>
-        </div>
-        <div class="faq" id="questions">
-          <h2 class="faq__title">Questions</h2>
-          <details class="faq__item">
-            <summary>Which buildings is Energia AI for?</summary>
-            <p>Commercial buildings with central HVAC run through a building management system. An assessment tells us whether yours is a good candidate.</p>
-          </details>
-          <details class="faq__item">
-            <summary>What data do you need?</summary>
-            <p>Floor plans, HVAC equipment details, BMS points with trend history, and your occupancy schedules. Weather forecasts come from public sources.</p>
-          </details>
-          <details class="faq__item">
-            <summary>How do you assess savings?</summary>
-            <p>We compare a proposed control strategy with how the building runs today. Results depend on your equipment and available operating data. Simulation results are not a guarantee of savings in your building.</p>
-          </details>
-          <details class="faq__item">
-            <summary>Does it need hardware on site?</summary>
-            <p>Expect a small gateway next to your BMS. It reads points and writes setpoints over your building’s protocols. The AI runs on that gateway or in our cloud, depending on your security requirements.</p>
-          </details>
-          <details class="faq__item">
-            <summary>Can operators take control back?</summary>
-            <p>Yes. Your existing control sequences stay in place. Operators keep manual override, and if Energia AI loses its connection or sees bad data, control returns to those sequences.</p>
-          </details>
         </div>
       </div>
     </section>
@@ -176,7 +326,7 @@
         <li><a href="mailto:edo.orfanini@energiaigroup.com">Email</a></li>
         <li><a href="https://www.linkedin.com/company/energia-ai/" rel="noopener noreferrer" target="_blank">LinkedIn<span class="visually-hidden"> (opens in a new tab)</span></a></li>
       </ul>
-      <p class="foot__note">Images are original concept renderings, not a client installation.</p>
+      <p class="foot__note">Images are original renderings of a fictional building, not a client installation.</p>
       <p class="foot__copy">© 2026 Energia AI</p>
     </div>
   </footer>

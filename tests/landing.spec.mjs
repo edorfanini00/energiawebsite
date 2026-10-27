@@ -1,5 +1,6 @@
 // Behaviour, layout and render checks for the Energia AI landing preview
-// (direction A). These prove gates and behaviour; they do not judge taste.
+// (V3, "one building, one day"). These prove gates and behaviour; they do not
+// judge taste.
 // Run: npm test            (checks only)
 //      npm run shots       (checks + screenshots into SHOT_DIR)
 import { test, expect } from "@playwright/test";
@@ -14,20 +15,23 @@ const SHOTS = process.env.SHOTS === "1";
 const SHOT_DIR = process.env.SHOT_DIR || "test-results/shots";
 if (SHOTS) mkdirSync(SHOT_DIR, { recursive: true });
 
-// kind: which type gates apply (the brief sets desktop and phone ranges).
-// Lede paragraphs are 18px desktop / 16px phone. Secondary text (step, rule
-// and FAQ answers) is a deliberate 16px at every width.
+// kind: which type gates apply. Ledes are 17 to 18px. Secondary text (steps,
+// the day's moments, limits, start steps and FAQ answers) is a deliberate 16px
+// at every width.
 const viewports = [
   { name: "desktop-1440", width: 1440, height: 900, phone: false, kind: "desktop" },
   { name: "tablet-768", width: 768, height: 1024, phone: true, kind: "tablet" },
   { name: "phone-390", width: 390, height: 844, phone: true, kind: "phone" },
   { name: "phone-375", width: 375, height: 812, phone: true, kind: "phone" },
+  { name: "narrow-320", width: 320, height: 740, phone: true, kind: "phone" },
+  { name: "landscape-844", width: 844, height: 390, phone: true, kind: "tablet" },
 ];
 const TYPE = {
-  desktop: { h1: [52, 60], h2: [36, 44], h3: [23, 25], lede: [17, 18], secondary: [16, 16] },
-  tablet: { h1: [30, 46], h2: [26, 36], h3: [22, 25], lede: [16, 18], secondary: [16, 16] },
-  phone: { h1: [28, 34], h2: [26, 30], h3: [22, 23], lede: [16, 16], secondary: [16, 16] },
+  desktop: { h1: [56, 60], h1Lines: [2, 3], h2: [42, 44], h3: [21.5, 22], lede: [17, 18], secondary: [16, 16] },
+  tablet: { h1: [38, 46], h1Lines: [2, 3], h2: [30, 36], h3: [20, 21], lede: [17, 18], secondary: [16, 16] },
+  phone: { h1: [34, 34], h1Lines: [2, 4], h2: [30, 30], h3: [20, 20], lede: [17, 17.5], secondary: [16, 16] },
 };
+const MOMENTS = ["dawn", "morning", "afternoon", "dusk"];
 
 // Collect console errors, page errors, failed or off-origin requests.
 function watch(page) {
@@ -48,12 +52,13 @@ function watch(page) {
 }
 
 // Scroll through the page so lazy images load and reveals fire.
+// Explicit instant scrolling prevents rectangle/screenshot drift during pixel probes.
 async function settle(page) {
   await page.evaluate(async () => {
     const step = Math.round(innerHeight * 0.6);
     // Bounded: at most 40 steps even if the page grows while scrolling.
     for (let y = 0, n = 0; y <= document.documentElement.scrollHeight && n < 40; y += step, n++) {
-      window.scrollTo(0, y);
+      window.scrollTo({ top: y, behavior: "instant" });
       await new Promise((r) => setTimeout(r, 90));
     }
     await new Promise((r) => setTimeout(r, 300));
@@ -65,7 +70,7 @@ async function settle(page) {
         setTimeout(r, 8000);
       });
     await Promise.all([...document.images].map(loaded));
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: "instant" });
   });
   await page.waitForTimeout(400);
 }
@@ -123,7 +128,7 @@ async function worstPixelContrast(page, browser, selector) {
         worst = Math.min(worst, (Math.max(bg, fg) + 0.05) / (Math.min(bg, fg) + 0.05));
       }
     }
-    return { worst: +worst.toFixed(2), boxes: boxes.length };
+    return { worst, boxes: boxes.length };
   }, { b64: png.toString("base64"), boxes });
   await ctx.close();
   return worst;
@@ -250,7 +255,7 @@ async function ringContrast(page, probe) {
       }
     }
     // No sampled pixels means the band was mis-measured: report it as a failure.
-    return samples > 20 ? +worst.toFixed(2) : 0;
+    return samples > 20 ? worst : 0;
   }, { b64: png.toString("base64"), ring });
   return { el: ring.el, worst };
 }
@@ -345,19 +350,25 @@ for (const vp of viewports) {
       expect(problems).toEqual([]);
     });
 
-    test("art: hero render for this viewport, a different render in the first feature", async ({ page }) => {
+    test("art: own render per viewport for the hero, the day and the plan; nothing repeated", async ({ page }) => {
       await page.goto("/");
       await settle(page);
       const art = await page.evaluate(() => ({
         hero: document.querySelector(".hero__art img").currentSrc,
-        feature: document.querySelector(".feature__art img").currentSrc,
-        all: [...document.querySelectorAll("main img")].map((i) => i.currentSrc),
+        day: [...document.querySelectorAll("[data-moment]")].map((m) => ({ id: m.id, hidden: m.hidden, src: m.querySelector("img").currentSrc })),
+        plan: document.querySelector(".plan img").currentSrc,
+        all: [...document.querySelectorAll("main img")].map((i) => i.currentSrc).filter(Boolean),
       }));
       const narrow = vp.width <= 700;
       expect(art.hero).toMatch(narrow ? /\/assets\/img\/hero-phone-\d+\.(avif|webp)$/ : /\/assets\/img\/hero-desktop-\d+\.(avif|webp)$/);
-      expect(art.feature).toMatch(narrow ? /\/assets\/img\/feature-phone-\d+\.(avif|webp)$/ : /\/assets\/img\/feature-desktop-\d+\.(avif|webp)$/);
-      // The hero render is never repeated later on the page.
+      expect(art.plan).toMatch(narrow ? /\/assets\/img\/plan-phone-\d+\.(avif|webp)$/ : /\/assets\/img\/plan-desktop-\d+\.(avif|webp)$/);
+      // The selected moment (15:30) shows its own render, in the portrait cut on narrow screens.
+      const shown = art.day.filter((m) => !m.hidden);
+      expect(shown.map((m) => m.id)).toEqual(["moment-afternoon"]);
+      expect(shown[0].src).toMatch(vp.width <= 860 ? /day-afternoon-phone-\d+\.(avif|webp)$/ : /day-afternoon-desktop-\d+\.(avif|webp)$/);
+      // Each loaded render appears once: the hero is not reused in the day or the plan.
       expect(art.all.filter((src) => /hero-/.test(src))).toHaveLength(1);
+      expect(new Set(art.all).size).toBe(art.all.length);
     });
 
     test("type gates: light display type, 18/16 lede, 16px secondary text", async ({ page }) => {
@@ -379,9 +390,9 @@ for (const vp of viewports) {
         return {
           h1: read(document.querySelector("h1")),
           h2: [...document.querySelectorAll("h2.title")].map(read),
-          h3: [...document.querySelectorAll(".step h3")].map(read),
+          h3: [...document.querySelectorAll(".step h3, .start__steps h3, .moment:not([hidden]) .moment__title")].map(read),
           lede: [...document.querySelectorAll(".lede")].map(read),
-          secondary: [...document.querySelectorAll(".step p, .rule dd, .faq__item p")].map(read),
+          secondary: [...document.querySelectorAll(".step p, .ledger dd, .faq__item p, .moment__part p, .start__steps p")].map(read),
         };
       });
       const g = TYPE[vp.kind];
@@ -392,9 +403,9 @@ for (const vp of viewports) {
       expect(t.h1.family).toMatch(/^"?Satoshi/);
       expect(t.h1.weight).toBe("300");
       within(t.h1.size, g.h1, "h1 size");
-      within(t.h1.ratio, [1.08, 1.12], "h1 line height");
-      expect(Math.abs(t.h1.tracking + 0.02)).toBeLessThan(0.006);
-      within(t.h1.lines, [2, 3], "h1 lines");
+      within(t.h1.ratio, [1.02, 1.06], "h1 line height");
+      expect(Math.abs(t.h1.tracking + 0.03)).toBeLessThan(0.006);
+      within(t.h1.lines, g.h1Lines, "h1 lines");
       expect(t.h2.length).toBe(4);
       for (const h of t.h2) {
         expect(h.weight, h.text).toBe("300");
@@ -402,13 +413,14 @@ for (const vp of viewports) {
         within(h.lines, [1, 3], `h2 lines ${h.text}`);
       }
       for (const h of t.h3) within(h.size, g.h3, `h3 ${h.text}`);
-      expect(t.lede.length).toBe(4);
+      expect(t.h3.length).toBe(7);
+      expect(t.lede.length).toBe(5);
       for (const b of t.lede) within(b.size, g.lede, `lede ${b.text}`);
-      expect(t.secondary.length).toBe(14);
+      expect(t.secondary.length).toBe(23);
       for (const b of t.secondary) within(b.size, g.secondary, `secondary ${b.text}`);
     });
 
-    test("one hero idea: short copy, no eyebrows, one visible CTA", async ({ page }) => {
+    test("one hero idea: headline plus one sentence pair, no eyebrows, one visible CTA", async ({ page }) => {
       await page.goto("/");
       await settle(page);
       const hero = await page.evaluate(() => {
@@ -418,6 +430,8 @@ for (const vp of viewports) {
           return r.height > 0 && r.bottom <= innerHeight && el.checkVisibility({ opacityProperty: true, visibilityProperty: true });
         };
         return {
+          h1Words: top.querySelector("h1").innerText.split(/\s+/).length,
+          paragraphs: top.querySelectorAll("p").length,
           words: [...top.querySelectorAll("p")].map((p) => p.innerText.split(/\s+/).length),
           ctas: [...document.querySelectorAll(".bar__cta, .hero__cta, .button")].filter(shown).map((a) => ({
             cls: a.className, href: a.getAttribute("href"), h: a.getBoundingClientRect().height,
@@ -426,21 +440,23 @@ for (const vp of viewports) {
           eyebrows: document.querySelectorAll(".eyebrow, .pill, .chip, .badge, .stat").length,
         };
       });
-      for (const n of hero.words) expect(n).toBeLessThanOrEqual(8);
+      expect(hero.h1Words).toBeLessThanOrEqual(8);
+      expect(hero.paragraphs).toBe(1);
+      for (const n of hero.words) expect(n).toBeLessThanOrEqual(32);
       expect(hero.eyebrows).toBe(0);
       expect(hero.ctas, JSON.stringify(hero.ctas)).toHaveLength(1);
       expect(hero.ctas[0].href).toBe(CTA_HREF);
       expect(hero.ctas[0].h).toBeGreaterThanOrEqual(44);
       if (vp.phone) {
-        // Phone header is wordmark and Menu only; the CTA is quiet ink text in the sky.
-        expect(hero.ctas[0].cls).toBe("hero__cta");
+        // Phone header is wordmark and Menu only; the CTA is quiet ink text on paper.
+        expect(hero.ctas[0].cls).toBe("hero__cta textlink");
         expect(hero.ctas[0].bg).toBe("rgba(0, 0, 0, 0)");
       } else {
         expect(hero.ctas[0].cls).toBe("bar__cta");
       }
     });
 
-    test("hero text contrast against the rendered image", async ({ page, browser }) => {
+    test("hero text contrast against the actual rendered background", async ({ page, browser }) => {
       await page.goto("/");
       await settle(page);
       await page.waitForTimeout(600);
@@ -468,9 +484,9 @@ for (const vp of viewports) {
           return [255, 255, 255];
         };
         const out = [];
-        const sel = "main section:not(#top) :is(h2, h3, p, dt, dd, li, summary, a, figcaption), .foot :is(p, a)";
+        const sel = "main section:not(#top) :is(h2, h3, h4, p, dt, dd, li, summary, a, figcaption, button .t, button .l, .plan__label), .foot :is(p, a)";
         for (const el of document.querySelectorAll(sel)) {
-          if (!el.textContent.trim()) continue;
+          if (!el.textContent.trim() || !el.checkVisibility()) continue;
           const cs = getComputedStyle(el);
           const fg = lum(rgb(cs.color)), bg = lum(bgOf(el));
           const ratio = (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05);
@@ -553,14 +569,14 @@ for (const vp of viewports) {
 
     test("FAQ opens and closes from the keyboard", async ({ page }) => {
       await page.goto("/");
-      const item = page.locator(".faq__item").nth(2);
+      const item = page.locator(".faq__item").nth(1);
       const summary = item.locator("summary");
       await summary.focus();
       await expect(item).not.toHaveAttribute("open", "");
       await page.keyboard.press("Enter");
       await expect(item).toHaveAttribute("open", "");
       await expect(item.locator("p")).toBeVisible();
-      await expect(item.locator("p")).toContainText("not a guarantee of savings");
+      await expect(item.locator("p")).toContainText("trend history");
       await page.keyboard.press("Space");
       await expect(item).not.toHaveAttribute("open", "");
     });
@@ -576,6 +592,115 @@ for (const vp of viewports) {
       // the page says what they do not do rather than "treat every day the same".
       expect(text).not.toMatch(/treat every day the same/i);
       expect(text).toContain("A fixed schedule does not adjust when the weather or occupancy changes.");
+      // Simulation is not presented as a result, and the day is labelled as illustrative.
+      expect(text).toContain("Simulation results are not a guarantee of savings in your building.");
+      expect(text).toMatch(/illustrative day in a fictional building/i);
+      expect(text).not.toMatch(/\b\d+(\.\d+)?\s?(°|deg|kwh|kw\b|ppm)/i);
+    });
+
+    // The day: four illustrative moments as WAI-ARIA tabs on a day line.
+    test("day tabs: roles, selection, arrows, Home/End and Tab into the panel", async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.goto("/");
+      const tabs = page.locator("[data-day-list] [role=tab]");
+      await expect(page.locator("[data-day-list]")).toHaveAttribute("role", "tablist");
+      await expect(page.locator("[data-day-list]")).toHaveAttribute("aria-label", "Times of day");
+      await expect(tabs).toHaveCount(4);
+      const state = () => page.evaluate(() => ({
+        selected: [...document.querySelectorAll("[role=tab]")].filter((t) => t.getAttribute("aria-selected") === "true").map((t) => t.id),
+        tabindex: [...document.querySelectorAll("[role=tab]")].map((t) => t.tabIndex),
+        shown: [...document.querySelectorAll("[role=tabpanel]")].filter((p) => !p.hidden && p.checkVisibility()).map((p) => p.id),
+        at: document.querySelector("[data-dayline]").style.getPropertyValue("--at"),
+        focus: document.activeElement.id,
+      }));
+      // Each tab controls its own panel; each panel is labelled by its tab.
+      for (const [i, m] of MOMENTS.entries()) {
+        await expect(tabs.nth(i)).toHaveAttribute("aria-controls", `moment-${m}`);
+        await expect(page.locator(`#moment-${m}`)).toHaveAttribute("aria-labelledby", `tab-${m}`);
+      }
+      expect(await state()).toMatchObject({ selected: ["tab-afternoon"], tabindex: [-1, -1, 0, -1], shown: ["moment-afternoon"], at: "0.656" });
+
+      await expect(page.locator("[role=tablist]")).toHaveAttribute("aria-orientation", vp.phone ? "horizontal" : "vertical");
+      await tabs.nth(2).focus();
+      await page.keyboard.press("ArrowRight");
+      expect(await state()).toMatchObject({ selected: ["tab-dusk"], shown: ["moment-dusk"], focus: "tab-dusk", at: "0.906" });
+      await page.keyboard.press("ArrowRight");   // wraps to the first moment
+      expect(await state()).toMatchObject({ selected: ["tab-dawn"], shown: ["moment-dawn"], focus: "tab-dawn" });
+      await page.keyboard.press("ArrowLeft");    // wraps back to the last
+      expect(await state()).toMatchObject({ selected: ["tab-dusk"], focus: "tab-dusk" });
+      await page.keyboard.press("Home");
+      expect(await state()).toMatchObject({ selected: ["tab-dawn"], tabindex: [0, -1, -1, -1] });
+      await page.keyboard.press("End");
+      expect(await state()).toMatchObject({ selected: ["tab-dusk"], tabindex: [-1, -1, -1, 0] });
+      await page.keyboard.press("ArrowDown");
+      expect(await state()).toMatchObject({ selected: ["tab-dawn"] });
+      await page.keyboard.press("ArrowRight");
+
+      // Tab leaves the tab row for the selected panel, which carries its content.
+      await page.keyboard.press("Tab");
+      expect((await state()).focus).toBe("moment-morning");
+      await expect(page.locator("#moment-morning")).toBeFocused();
+      await expect(page.locator("#moment-morning")).toContainText("Floors fill up");
+      await expect(page.locator("#moment-morning")).toContainText("What Energia AI does");
+      // Shift+Tab returns to the selected tab, not to a hidden one.
+      await page.keyboard.press("Shift+Tab");
+      expect((await state()).focus).toBe("tab-morning");
+    });
+
+    test("day tabs: pointer and touch select a moment and load its render", async ({ browser }) => {
+      const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, hasTouch: vp.phone, isMobile: vp.phone, reducedMotion: "reduce" });
+      const page = await ctx.newPage();
+      const problems = watch(page);
+      await page.goto("/");
+      await page.locator("#day").scrollIntoViewIfNeeded();
+      const seen = [];
+      for (const m of ["dawn", "dusk", "morning", "afternoon"]) {
+        const tab = page.locator(`#tab-${m}`);
+        if (vp.phone) await tab.tap(); else await tab.click();
+        await expect(tab).toHaveAttribute("aria-selected", "true");
+        await expect(page.locator(`#moment-${m}`)).toBeVisible();
+        await expect(page.locator("[data-moment]:visible")).toHaveCount(1);
+        const img = page.locator(`#moment-${m} img`);
+        await expect.poll(() => img.evaluate((i) => i.complete && i.naturalWidth > 0), { timeout: 10000 }).toBe(true);
+        seen.push(await img.evaluate((i) => i.currentSrc.split("/").pop()));
+      }
+      // Four different renders, all of this viewport's cut.
+      expect(new Set(seen).size, seen.join(",")).toBe(4);
+      for (const src of seen) expect(src).toMatch(vp.width <= 860 ? /-phone-\d+\.(avif|webp)$/ : /-desktop-\d+\.(avif|webp)$/);
+      // Targets on the day line stay large enough to tap.
+      for (const box of await page.locator("[role=tab]").evaluateAll((ts) => ts.map((t) => t.getBoundingClientRect().toJSON()))) {
+        expect(box.height).toBeGreaterThanOrEqual(44);
+        expect(box.width).toBeGreaterThanOrEqual(44);
+      }
+      expect(problems).toEqual([]);
+      await ctx.close();
+    });
+
+    test("plan: zone outlines and labels sit on this viewport's render", async ({ page }) => {
+      await page.goto("/");
+      await page.locator("#model").scrollIntoViewIfNeeded();
+      await settle(page);
+      const plan = await page.evaluate(() => {
+        const frame = document.querySelector(".plan__frame").getBoundingClientRect();
+        const img = document.querySelector(".plan img");
+        const svg = [...document.querySelectorAll(".plan__zones")].filter((s) => s.checkVisibility());
+        const labels = [...document.querySelectorAll(".plan__label")].filter((l) => l.checkVisibility()).map((l) => {
+          const r = l.getBoundingClientRect();
+          return { text: l.textContent, inside: r.left >= frame.left - 1 && r.right <= frame.right + 1 && r.top >= frame.top - 1 && r.bottom <= frame.bottom + 1 };
+        });
+        const ir = img.getBoundingClientRect();
+        return {
+          svg: svg.map((s) => s.getAttribute("class")), labels,
+          aspect: +(frame.width / frame.height).toFixed(3), natural: +(img.naturalWidth / img.naturalHeight).toFixed(3),
+          fills: Math.abs(ir.width - frame.width) < 1 && Math.abs(ir.height - frame.height) < 1,
+        };
+      });
+      expect(plan.svg).toEqual([vp.width <= 700 ? "plan__zones plan__zones--phone" : "plan__zones plan__zones--desktop"]);
+      expect(plan.labels.map((l) => l.text)).toEqual(["West zone", "Corner", "South zone", "Interior"]);
+      for (const l of plan.labels) expect(l.inside, l.text).toBe(true);
+      // The overlay is drawn in plan metres, so the frame must keep the render's exact aspect (no crop).
+      expect(Math.abs(plan.aspect - plan.natural)).toBeLessThan(0.01);
+      expect(plan.fills).toBe(true);
     });
 
     if (vp.phone) {
@@ -612,7 +737,7 @@ for (const vp of viewports) {
             return el.closest("[data-nav]") ? "nav" : el.matches("[data-toggle]") ? "toggle" : el.className || el.tagName;
           }));
         }
-        expect(order.slice(0, 4), order.join(",")).toEqual(["skip", "bar__brand", "toggle", "hero__cta"]);
+        expect(order.slice(0, 4), order.join(",")).toEqual(["skip", "bar__brand", "toggle", "hero__cta textlink"]);
         expect(order, order.join(",")).not.toContain("nav");
 
         // Keyboard open moves focus into the menu.
@@ -631,7 +756,7 @@ for (const vp of viewports) {
       test("desktop nav is visible and the menu toggle is hidden", async ({ page }) => {
         await page.goto("/");
         await expect(page.locator("[data-toggle]")).toBeHidden();
-        await expect(page.locator("[data-nav] a")).toHaveCount(4);
+        await expect(page.locator("[data-nav] a")).toHaveCount(5);
         for (const a of await page.locator("[data-nav] a").all()) await expect(a).toBeVisible();
         await expect(page.locator("[data-nav]")).not.toHaveAttribute("inert", "");
         await expect(page.locator(".hero__cta")).toBeHidden();
@@ -650,6 +775,13 @@ for (const vp of viewports) {
           .filter((el) => parseFloat(getComputedStyle(el).opacity) < 1).length
       );
       expect(hidden).toBe(0);
+      // Every moment of the day is on the page in order, with no inert tab controls.
+      const day = await page.evaluate(() => ({
+        shown: [...document.querySelectorAll("[data-moment]")].filter((m) => m.checkVisibility()).map((m) => m.id),
+        tabsShown: document.querySelector(".day__tabs").checkVisibility(),
+        roles: document.querySelectorAll("[role=tab], [role=tabpanel]").length,
+      }));
+      expect(day).toEqual({ shown: ["moment-dawn", "moment-morning", "moment-afternoon", "moment-dusk"], tabsShown: false, roles: 0 });
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow).toBeLessThanOrEqual(0);
       await ctx.close();
@@ -710,7 +842,7 @@ for (const vp of viewports) {
         await page.locator("[data-toggle]").click();
         await expect(page.locator("[data-toggle]")).toHaveAttribute("aria-expanded", "true");
       } else {
-        expect(early.navLinksVisible).toBe(4);
+        expect(early.navLinksVisible).toBe(5);
       }
       await ctx.close();
     });
@@ -739,7 +871,7 @@ for (const vp of viewports) {
       await page.waitForTimeout(500);
       const state = await headerState(page);
       expect(state.html).not.toMatch(/\bjs\b/);
-      expect(state.navLinksVisible).toBe(4);
+      expect(state.navLinksVisible).toBe(5);
       expect(state.toggleVisible).toBe(false);
       expect((await overlaps(page)).list).toEqual([]);
       expect(await shiftTotal(page)).toBeLessThan(0.1);
@@ -754,7 +886,7 @@ for (const vp of viewports) {
       await page.waitForTimeout(400);
       const state = await headerState(page);
       expect(state.html).not.toMatch(/\bjs\b/);
-      expect(state.navLinksVisible).toBe(4);
+      expect(state.navLinksVisible).toBe(5);
       expect(state.toggleVisible).toBe(false);
       expect((await overlaps(page)).list).toEqual([]);
       const hidden = await page.evaluate(() => [...document.querySelectorAll("[data-reveal]")].filter((el) => parseFloat(getComputedStyle(el).opacity) < 1).length);
@@ -791,6 +923,8 @@ for (const vp of viewports) {
       expect(state.hidden).toEqual([]);
       for (const a of await page.locator("[data-nav] a").all()) await expect(a).toBeVisible();
       await expect(page.locator("[data-toggle]")).toBeHidden();
+      await expect(page.locator("[data-moment]:visible")).toHaveCount(4);
+      await expect(page.locator(".day__tabs")).toBeHidden();
       const hits = await overlaps(page);
       expect(hits.list, JSON.stringify(hits.list)).toEqual([]);
       await ctx.close();
@@ -806,6 +940,9 @@ for (const vp of viewports) {
           .map((el) => el.className || el.tagName)
       );
       expect(hidden).toEqual([]);
+      // With the tabs wired, print still shows all four moments and no tab row.
+      await expect(page.locator("[data-moment]:visible")).toHaveCount(4);
+      await expect(page.locator(".day__tabs")).toBeHidden();
     });
 
     test("focus rings reach 3:1 against the pixels around them", async ({ page, browser }) => {
@@ -824,7 +961,7 @@ for (const vp of viewports) {
           if (r) results.push({ ...r, label });
         }
       };
-      // From the top: skip link, then the bar and hero over the sky, then on
+      // From the top: skip link, then the bar and hero on paper, then on
       // through the sections (the bar turns white once the page scrolls).
       await measureStops("page", 22);
       if (vp.phone) {
@@ -842,16 +979,18 @@ for (const vp of viewports) {
       expect(names).toMatch(vp.phone ? /bar__toggle/ : /bar__cta/);
       if (vp.phone) expect(names).toContain("hero__cta");
       expect(names).toContain("button");
+      expect(names).toContain("dayline__tab");
+      expect(names).toContain("ARTICLE.moment");
       expect(names).toContain("SUMMARY");
       expect(names).toContain("contact__mail");
 
-      // Sampler control: the brand link with a green ring over the sky (the
-      // 42fd9e1 defect) must still measure under 3:1.
+      // Sampler control: a pale ring on paper must measure under 3:1.
+      // Keep a deliberately failing control after removing sky-backed text.
       if (vp.phone) await page.keyboard.press("Escape");
       await page.evaluate(() => window.scrollTo(0, 0));
       await page.waitForTimeout(300);
       await page.focus(".bar__brand");
-      await page.evaluate(() => document.querySelector(".bar__brand").style.setProperty("outline-color", "#567740", "important"));
+      await page.evaluate(() => document.querySelector(".bar__brand").style.setProperty("outline-color", "#dddddd", "important"));
       const control = await ringContrast(page, probe);
       expect(control, "control ring measured").not.toBeNull();
       expect(control.worst, JSON.stringify(control)).toBeLessThan(3);
