@@ -390,9 +390,9 @@ for (const vp of viewports) {
         return {
           h1: read(document.querySelector("h1")),
           h2: [...document.querySelectorAll("h2.title")].map(read),
-          h3: [...document.querySelectorAll(".step h3, .start__steps h3, .moment:not([hidden]) .moment__title")].map(read),
+          h3: [...document.querySelectorAll(".benefits dt, .step h3, .start__steps h3, .moment:not([hidden]) .moment__title")].map(read),
           lede: [...document.querySelectorAll(".lede")].map(read),
-          secondary: [...document.querySelectorAll(".step p, .ledger dd, .faq__item p, .moment__part p, .start__steps p")].map(read),
+          secondary: [...document.querySelectorAll(".benefits dd, .step p, .ledger dd, .faq__item p, .moment__part p, .start__steps p")].map(read),
         };
       });
       const g = TYPE[vp.kind];
@@ -413,10 +413,10 @@ for (const vp of viewports) {
         within(h.lines, [1, 3], `h2 lines ${h.text}`);
       }
       for (const h of t.h3) within(h.size, g.h3, `h3 ${h.text}`);
-      expect(t.h3.length).toBe(7);
+      expect(t.h3.length).toBe(10);
       expect(t.lede.length).toBe(5);
       for (const b of t.lede) within(b.size, g.lede, `lede ${b.text}`);
-      expect(t.secondary.length).toBe(23);
+      expect(t.secondary.length).toBe(27);
       for (const b of t.secondary) within(b.size, g.secondary, `secondary ${b.text}`);
     });
 
@@ -569,7 +569,7 @@ for (const vp of viewports) {
 
     test("FAQ opens and closes from the keyboard", async ({ page }) => {
       await page.goto("/");
-      const item = page.locator(".faq__item").nth(1);
+      const item = page.locator(".faq__item").filter({ has: page.locator("summary", { hasText: "What data do you need?" }) });
       const summary = item.locator("summary");
       await summary.focus();
       await expect(item).not.toHaveAttribute("open", "");

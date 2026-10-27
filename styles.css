@@ -373,6 +373,35 @@ html:not(.js) .bar { position: absolute; }
   }
 }
 
+/* ------------------------------------------------------------ benefits */
+/* Three outcomes on the hero's paper, set like the model steps: a rule,
+   an H3 sized term and 16px text. No cards. */
+.benefits { padding-top: clamp(48px, 5vw, 72px); }
+.benefits__list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: clamp(32px, 3.4vw, 48px);
+}
+.benefits__list > div { padding: 22px 0 0; border-top: 1px solid var(--ink); }
+.benefits dt {
+  font-weight: 400;
+  font-size: var(--h3);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.benefits dd {
+  margin-top: 10px;
+  max-width: 36ch;
+  font-size: 16px;
+  color: var(--ink-soft);
+  text-wrap: pretty;
+}
+@media (max-width: 860px) {
+  .benefits__list { grid-template-columns: 1fr; row-gap: 32px; }
+  .benefits__list > div + div { border-top-color: var(--line); }
+}
+
 /* --------------------------------------------------------- the day */
 
 .day {
@@ -723,7 +752,7 @@ html:not(.js) .bar { position: absolute; }
   letter-spacing: -0.03em;
   text-wrap: balance;
 }
-.contact__title strong { font-weight: 700; }
+.contact__title strong { display: block; font-weight: 700; }
 .contact__row {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);

@@ -6,10 +6,10 @@ const evidence = process.env.COPY_EVIDENCE_DIR || "test-results/copy-correction"
 const forbidden = /illustrati(?:ve|on)|fictional|renderings?|rendered|\bdemo\b|\bconcept\b|simulated visual|sample imagery|not readings from a real site|not a client installation/i;
 const caption = "The dark area is the building core. Outlines divide the floor into zones. The fine grid represents the control volumes used to calculate heat flow.";
 const actions = {
-  dawn: "Plans the day from the forecast and your occupancy schedule",
-  morning: "Keeps occupied zones inside the setpoint range you approved",
-  afternoon: "Began cooling the west zones before the sun reached them",
-  dusk: "Lets empty zones move within the wider unoccupied range you set",
+  dawn: "Starts each zone just early enough to be comfortable when people arrive",
+  morning: "Keeps occupied rooms comfortable inside your approved setpoint range",
+  afternoon: "Began cooling the west rooms before the sun reached them",
+  dusk: "Stops spending energy on empty rooms",
 };
 
 for (const [width, height] of [[1440, 900], [768, 1024], [390, 844], [375, 812], [320, 740]]) {

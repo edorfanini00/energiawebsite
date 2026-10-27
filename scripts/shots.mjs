@@ -88,7 +88,7 @@ for (const route of routes) {
         overflowX: document.documentElement.scrollWidth > innerWidth,
         hero: box(hero),
         h1: type("h1"),
-        h2: type("h2"),
+        h2: type("h2.title"),
         body: type("#day .lede"),
         ctaAboveFold: [...document.querySelectorAll(".bar__cta, .hero__cta")].some((a) => {
           const r = a.getBoundingClientRect();
@@ -112,7 +112,7 @@ for (const route of routes) {
           await new Promise(resolve => setTimeout(resolve, 70));
         }
       });
-      for (const id of ["day", "model", "limits", "start", "contact"]) {
+      for (const id of ["benefits", "day", "model", "limits", "start", "contact"]) {
         await page.evaluate((id) => {
           const el = document.getElementById(id);
           window.scrollTo(0, el.getBoundingClientRect().top + scrollY);
