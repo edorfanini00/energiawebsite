@@ -39,7 +39,9 @@ for (const [width, height] of [[1440, 900], [768, 1024], [390, 844], [375, 812],
       await expect(page.locator(".plan figcaption")).toHaveText(caption);
       await expect(page.locator(".day__caption, .foot__note")).toHaveCount(0);
       await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /designed to/);
-      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
+      // Indexable since the Meta pixel release: no robots meta, one canonical.
+      await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://www.energiaigroup.com/");
       await expect(page.locator(".steps")).toContainText("across simulated weather and occupancy");
       await expect(page.locator("body")).toContainText("Simulation results are not a guarantee of savings in your building.");
 

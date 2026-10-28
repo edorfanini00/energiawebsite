@@ -1,10 +1,10 @@
 # Energia AI landing preview
 
 A static landing page for Energia AI, an AI control platform for commercial HVAC.
-It is plain HTML, CSS and JavaScript with no framework or analytics. The contact section holds an inquiry form that stores answers in the site's own private database (Prisma Postgres through Vercel), read by the owner at `/admin`. The selected B implementation uses a paper headline over a panorama, a keyboard/touch four-state building day, a plan cut, operator limits, an assessment sequence and FAQ.
+It is plain HTML, CSS and JavaScript with no framework. The only measurement is the Meta pixel (dataset “Energia AI Web”, `2313981812785333`) on the public pages. The contact section holds an inquiry form that stores answers in the site's own private database (Prisma Postgres through Vercel), read by the owner at `/admin`. The selected B implementation uses a paper headline over a panorama, a keyboard/touch four-state building day, a plan cut, operator limits, an assessment sequence and FAQ.
 
-**Status: draft preview.** API mode for local runs: `API=1 DATABASE_URL=... INQUIRY_ORIGINS=http://127.0.0.1:4173 INQUIRY_HASH_SECRET=... ADMIN_PASSWORD_HASH=... npm run serve`. Every page carries `noindex` (meta tag, `X-Robots-Tag` header and `robots.txt`).
-Do not deploy to production or change domains without owner approval.
+**Status: published** at `https://energiawebsite.vercel.app` (owner approved); the custom domain `www.energiaigroup.com` is the canonical host. API mode for local runs: `API=1 DATABASE_URL=... INQUIRY_ORIGINS=http://127.0.0.1:4173 INQUIRY_HASH_SECRET=... ADMIN_PASSWORD_HASH=... npm run serve`. The home and privacy pages are indexable, with canonical links to `https://www.energiaigroup.com`, `robots.txt` and `sitemap.xml`; `/admin` and `/api` stay `noindex`.
+Do not change domains without owner approval.
 
 ## Files
 
@@ -13,11 +13,13 @@ Do not deploy to production or change domains without owner approval.
 | `index.html` | The page |
 | `styles.css` | Layout, type, color and motion (V3). Phone and tablet rules sit next to each component. Selected B places the headline on paper and the desktop day list beside its changing render. Frozen prototype styles remain local-only. |
 | `boot.js` | Tiny synchronous bootstrap in `<head>`: sets the header state before first paint, and restores the static fallback if `main.js` fails to load or throws during setup |
-| `main.js` | Header state, the inquiry form (validation, ALTCHA proof of work with Web Crypto, idempotent retry, CTA scroll and focus), the phone menu (Escape, focus return, inert when closed; the toggle is enabled once wired), the day tabs (WAI-ARIA tabs with arrow keys, Home/End and a focusable panel; every moment stays visible without it) and section reveals |
+| `pixel.js` | Meta pixel base code served from this site (no inline script): loads `connect.facebook.net/en_US/fbevents.js`, automatic configuration off, `PageView`. Skipped on loopback hosts and file pages, so local runs and tests send nothing to Meta. Not on `/admin` |
+| `main.js` | Header state, the inquiry form (validation, ALTCHA proof of work with Web Crypto, idempotent retry, CTA scroll and focus, one Meta `Lead` with the reference as `eventID` only when the server stored a new inquiry), the phone menu (Escape, focus return, inert when closed; the toggle is enabled once wired), the day tabs (WAI-ARIA tabs with arrow keys, Home/End and a focusable panel; every moment stays visible without it) and section reveals |
 | `assets/fonts/` | Self-hosted Satoshi woff2 (300 Light, 400, 700) |
 | `assets/brand/` | Official wordmark recolored to ink, and the favicon |
 | `assets/img/` | Responsive AVIF and WebP exports of the V3 Blender renders: hero, the four moments of the day and the floor plan, each with its own phone render |
-| `vercel.json` | Security headers (strict CSP with `connect-src` and `form-action 'self'`, nosniff, frame deny, noindex), asset caching, static build into `dist/`, functions and the daily cleanup cron |
+| `vercel.json` | Security headers (strict CSP: same origin plus `https://connect.facebook.net` for scripts and `https://www.facebook.com` for the pixel's images and beacons; `/admin` keeps the same origin only policy; `form-action 'self'`, nosniff, frame deny; `noindex` on `/admin` and `/api`), asset caching, static build into `dist/`, functions and the daily cleanup cron |
+| `robots.txt`, `sitemap.xml` | Allow indexing of the public pages, keep `/admin` and `/api/` out, list the canonical URLs |
 | `privacy.html` | Privacy page linked from the form |
 | `admin.html`, `admin.js`, `admin.css` | Private dashboard at `/admin` (never linked): list newest first, detail, CSV export, mark contacted, erase one record, sign out |
 | `api/` | Vercel functions: `inquiry` (POST), `challenge` (POST, ALTCHA), `admin`, `cleanup` (cron) |
@@ -78,7 +80,8 @@ The tests run at 1440×900, 768×1024, 390×844, 375×812, 320×740 and 844×390
 - focus rings reach 3:1 against the actual rendered pixels around them, on paper, the white bar and inside the phone menu; a deliberately pale ring on paper must fail
 - first paint with `main.js` held back matches the final header (no fallback menu, layout shift under 0.1, hero contact link usable, Menu disabled until wired), and five cold loads per viewport stay under 0.1 layout shift
 - `boot.js` blocked keeps the static fallback with no late jump; `main.js` throwing during setup restores the fallback
-- exactly two scripts (synchronous `boot.js` before the stylesheet, deferred `main.js`), no inline script or handler attributes, and a CSP that allows same-origin scripts only
+- exactly three scripts (synchronous `boot.js` before the stylesheet, deferred `main.js` and `pixel.js`), no inline script or handler attributes, and a CSP that allows same-origin scripts plus Meta's script host only
+- the Meta pixel (`tests/pixel.spec.mjs`, through a stand-in hostname with Meta's script answered by a recorder, so nothing reaches Meta): loaded once with the Energia dataset on the public pages, never on `/admin` or loopback; one `Lead` with the reference as `eventID` only after a newly stored inquiry, none for validation errors, failures, a replayed reference, a filled honeypot or a double submit; the form works with Meta's script blocked; a foreign script, inline script, connection and image are still blocked by the CSP; robots, sitemap, canonical links and no `noindex` on public pages; the privacy wording
 - the local server answers a malformed URL with 400 and keeps serving (tooling only, not deployed)
 - text contrast measured against actual hero background pixels (3:1 for the headline, 4.5:1 for smaller text) and on every solid section
 - the type scale: Satoshi 300 headline at 56 to 60 px on desktop and 34 px on phones, line height and tracking, H2 and H3 sizes, 17 to 18 px ledes and 16 px secondary text (steps, rules, FAQ answers)
@@ -93,10 +96,10 @@ scripts/export-art.sh ~/.hermes/workspace/energia-landing-v3-20261027/art/master
 
 This needs `ffmpeg`, `cwebp` and `avifenc`.
 
-## Deploy (preview only)
+## Deploy
 
-The Vercel project is `energiawebsite` (owner `edorfanini00s-projects`). Deploy a preview only, without `--prod`.
-Then verify the deployed HTML, assets and headers before sharing the link.
+The Vercel project is `energiawebsite` (owner `edorfanini00s-projects`). Vercel's Git integration builds a preview for every pushed branch and production from `main`, so a push to `main` is a production release: merge only a head that passed two independent reviews.
+Verify the deployed HTML, assets, headers and the pixel on the preview before merging, and on the live site afterwards.
 
 ## Retained artwork verification
 

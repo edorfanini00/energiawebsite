@@ -269,3 +269,10 @@ Applied after two independent reviews of 0dd04f6.
 - Without the form (no JavaScript, or the form could not start), “Prefer email?” is hidden; the one email line remains.
 - Privacy: “campaign tags (UTM parameters)”, and “You can ask us to show you or delete the details you sent at any time.” (the dashboard cannot edit an answer, so corrections are no longer promised).
 - Dashboard: campaign rows read “Campaign source”, “Campaign medium”, “Campaign name”, “Campaign term”, “Campaign content”; a failed sign out says “Could not sign out. Try again.”
+
+## Meta pixel and indexing · 2026-10-28
+
+Owner approved the Meta campaign and publication of the site.
+
+- Privacy, section “Meta pixel” (was “No tracking”): the site uses the Meta pixel from Meta Platforms to learn whether ads on Facebook and Instagram bring people to the site and lead to inquiries; it tells Meta the page viewed and, if the browser shares it, the page the visitor came from; Meta also gets the IP address and browser type; it may set `_fbp` and `_fbc` cookies; on a sent form it reports that an inquiry was sent, with its reference, never the answers; no other analytics, advertising tools, third party scripts or cookies. The lede adds “and what the site measures when you visit.” Selling, marketing sharing and mailing list promises are unchanged.
+- Indexing: `noindex, nofollow` removed from the page and privacy meta tags and from the site wide `X-Robots-Tag`; canonical links to `https://www.energiaigroup.com/` and `/privacy`; `robots.txt` allows the site, keeps `/admin` and `/api/` out and names the sitemap. `/admin` and `/api` stay `noindex`.

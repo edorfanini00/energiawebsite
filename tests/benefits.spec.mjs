@@ -30,7 +30,8 @@ test.describe("benefits pass copy", () => {
     await expect(page.locator(".contact .button")).toHaveText("Send");
     await expect(page).toHaveTitle("Energia AI · Spend less on commercial HVAC");
     await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /AI control platform for commercial HVAC, designed to reduce wasted heating and cooling/);
-    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
+    await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://www.energiaigroup.com/");
   });
 
   test("benefits sit between the hero and the day, with a heading for assistive tech", async ({ page }) => {

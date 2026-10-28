@@ -262,13 +262,14 @@ async function ringContrast(page, probe) {
 
 // Script contract: exactly one tiny synchronous same-origin bootstrap in
 // <head> before the stylesheet (so the header state is set before first
-// paint), then the deferred main.js. No inline script or handler
-// attributes, and the CSP allows same-origin scripts only.
-test("scripts: synchronous boot.js before CSS, deferred main.js, no inline; CSP self only", async () => {
+// paint), then the deferred main.js and the deferred same-origin Meta pixel
+// loader. No inline script or handler attributes, and the CSP allows
+// same-origin scripts plus Meta's script host only.
+test("scripts: synchronous boot.js before CSS, deferred main.js and pixel.js, no inline; CSP self and Meta only", async () => {
   const { readFileSync, statSync } = await import("node:fs");
   const html = readFileSync("index.html", "utf8");
   const tags = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].map((m) => ({ attrs: m[1].trim(), body: m[2].trim() }));
-  expect(tags.map((t) => t.attrs)).toEqual(['src="boot.js"', 'src="main.js" defer']);
+  expect(tags.map((t) => t.attrs)).toEqual(['src="boot.js"', 'src="main.js" defer', 'src="pixel.js" defer']);
   for (const t of tags) expect(t.body).toBe("");
   expect(html.indexOf('src="boot.js"')).toBeLessThan(html.indexOf('rel="stylesheet"'));
   expect(html).not.toMatch(/\son[a-z]+\s*=/i);
@@ -276,7 +277,7 @@ test("scripts: synchronous boot.js before CSS, deferred main.js, no inline; CSP 
   expect(statSync("boot.js").size).toBeLessThan(1500);
   expect(boot).not.toMatch(/\beval\b|new Function|document\.write|innerHTML/);
   const csp = JSON.parse(readFileSync("vercel.json", "utf8")).headers[0].headers.find((h) => h.key === "Content-Security-Policy").value;
-  expect(csp).toMatch(/script-src 'self';/);
+  expect(csp).toMatch(/script-src 'self' https:\/\/connect\.facebook\.net;/);
   expect(csp).not.toMatch(/sha256-|unsafe-inline|unsafe-eval/);
 });
 
@@ -591,7 +592,8 @@ for (const vp of viewports) {
       for (const banned of [/\b\d{1,3}\s?%/, /patent/i, /guarantee(d|s)? (savings|results)/i, /\b(save|saves|saving|cut|cuts|reduce|reduces) (up to|over|as much|\d|you|your (bills?|costs?))/i, /revolution/i, /unlock/i, /seamless/i, /testimonial/i, /trusted by/i, /no hardware/i, /tenant billing/i, /carbon credit/i, /forecasts weather/i, /deployed (in|at|across)/i, /[–—]/]) {
         expect(text, String(banned)).not.toMatch(banned);
       }
-      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+      await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://www.energiaigroup.com/");
       // Precise wording (review fix): fixed schedules vary by day of week, so
       // the page says what they do not do rather than "treat every day the same".
       expect(text).not.toMatch(/treat every day the same/i);

@@ -348,6 +348,16 @@
       failure.appendChild(document.createTextNode("."));
     }
 
+    // One Meta Lead per newly stored inquiry, with its reference as the event
+    // ID so Meta can drop duplicates. Never for a replay that returns an
+    // existing reference (fresh: false), a filled honeypot or any failure,
+    // and only once: after a success the form stays hidden and sending.
+    // The pixel may be absent or blocked; the form never depends on it.
+    function lead(reference) {
+      if (typeof window.fbq !== "function") return;
+      try { window.fbq("track", "Lead", {}, { eventID: reference }); } catch (error) { /* measurement only */ }
+    }
+
     async function post(payload) {
       var t = withTimeout(20000);
       try {
@@ -397,6 +407,7 @@
           done.hidden = false;
           doneTitle.focus();
           sent = null;
+          if (result.data.fresh === true && payload.website === "") lead(reference);
           return;
         }
         if (result.code === 422 && result.data.status === "invalid_fields" && result.data.fields) {

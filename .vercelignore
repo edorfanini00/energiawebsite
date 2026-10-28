@@ -14,8 +14,10 @@
 !/admin.css
 !/boot.js
 !/main.js
+!/pixel.js
 !/admin.js
 !/robots.txt
+!/sitemap.xml
 !/package.json
 !/package-lock.json
 !/vercel.json
