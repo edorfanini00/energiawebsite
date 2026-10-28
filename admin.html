@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inquiries · Energia AI</title>
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" href="/assets/brand/favicon.png" type="image/png">
+  <link rel="stylesheet" href="/admin.css">
+  <script src="/admin.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <img class="top__mark" src="/assets/brand/energia-ai-wordmark-ink.png" width="424" height="48" alt="Energia AI">
+    <span class="top__title">Inquiries</span>
+    <button class="link" type="button" hidden data-logout>Sign out</button>
+  </header>
+
+  <main id="main">
+    <section class="login" data-login hidden aria-labelledby="login-title">
+      <h1 id="login-title">Sign in</h1>
+      <form data-login-form novalidate>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required aria-describedby="login-error">
+        <button class="primary" type="submit">Sign in</button>
+        <p class="error" id="login-error" role="alert" data-login-error></p>
+      </form>
+    </section>
+
+    <section class="board" data-board hidden aria-labelledby="board-title">
+      <div class="board__head">
+        <h1 id="board-title">Newest first</h1>
+        <div class="board__tools">
+          <button class="link" type="button" data-refresh>Refresh</button>
+          <a class="link" href="/api/admin?action=export" data-export download>Export CSV</a>
+        </div>
+      </div>
+      <p class="note" role="status" data-board-status></p>
+      <ol class="list" data-list></ol>
+      <div class="pager">
+        <button class="link" type="button" data-newer hidden>Newer</button>
+        <button class="link" type="button" data-older hidden>Older</button>
+      </div>
+    </section>
+
+    <section class="detail" data-detail hidden aria-labelledby="detail-title">
+      <button class="link" type="button" data-back>Back to the list</button>
+      <h1 id="detail-title" tabindex="-1" data-detail-title></h1>
+      <dl class="answers" data-detail-answers></dl>
+      <h2>History</h2>
+      <ol class="history" data-detail-history></ol>
+    </section>
+
+    <p class="error" role="alert" data-error></p>
+  </main>
+</body>
+</html>

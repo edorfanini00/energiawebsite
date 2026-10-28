@@ -8,6 +8,8 @@ const port = Number(process.env.PORT || 4173);
 
 export default defineConfig({
   testDir: "tests",
+  // Node unit and Postgres tests live in tests/node and tests/postgres.
+  testMatch: "*.spec.mjs",
   timeout: 60_000,
   fullyParallel: false,
   workers: 1,

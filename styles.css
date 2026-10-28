@@ -41,6 +41,7 @@
   --green-deep: #46632f;
   --green-light: #82c95e;
   --sun: #c98a3a;
+  --error: #9b2a1d;
 
   --font: "Satoshi", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --wrap: 1296px;
@@ -751,6 +752,8 @@ html:not(.js) .bar { position: absolute; }
 }
 
 /* ---------------------------------------------------------------- contact */
+/* The contact section holds the inquiry form: labels above fields, ink
+   rules, the green button and the page's type scale. No cards. */
 
 .contact {
   padding-block: var(--section);
@@ -767,35 +770,213 @@ html:not(.js) .bar { position: absolute; }
 .contact__title strong { display: block; font-weight: 700; }
 /* Keep the noun phrase together once there is room for it (278px of 280 at 320). */
 @media (min-width: 360px) { .contact__keep { white-space: nowrap; } }
-.contact__row {
+.contact__grid {
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  column-gap: 48px;
-  align-items: end;
-  margin-top: 32px;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  column-gap: 56px;
+  align-items: start;
+  margin-top: clamp(32px, 4vw, 56px);
 }
-.contact__actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px 28px;
-  justify-self: end;
+.contact__alt {
+  margin-top: 20px;
+  font-size: 16px;
+  color: var(--ink-soft);
 }
 .contact__mail {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
   font-size: 16px;
+  color: var(--ink);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-decoration-color: rgba(22, 23, 26, 0.3);
   text-underline-offset: 6px;
+  overflow-wrap: anywhere;
 }
 .contact__mail:hover { text-decoration-color: currentColor; }
-@media (max-width: 860px) {
-  .contact__row { grid-template-columns: 1fr; row-gap: 28px; }
-  .contact__actions { justify-self: start; }
+/* Without JavaScript (or if the form could not start) the form stays out
+   and the email link carries the conversation. */
+.contact__fallback { font-size: var(--body); }
+.js .contact__fallback { display: none; }
+html:not(.js) .inquiry,
+.contact[data-form-off] .inquiry { display: none; }
+.contact[data-form-off] .contact__fallback { display: block; }
+
+.inquiry__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 24px;
 }
+.field { display: flex; flex-direction: column; min-width: 0; }
+.field[hidden] { display: none; }
+.field--wide { grid-column: 1 / -1; }
+.field__label {
+  margin-bottom: 8px;
+  font-size: 16px;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.field__input {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 14px;
+  border: 1px solid var(--ink-soft);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 17px/1.4 var(--font);
+  appearance: none;
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.field__input:hover { border-color: var(--ink); }
+.field__input:focus-visible { outline-offset: 2px; border-color: var(--ink); }
+.field__input[aria-invalid="true"] { border-color: var(--error); box-shadow: inset 0 0 0 1px var(--error); }
+.field__input--area { min-height: 132px; resize: vertical; }
+.field__select { position: relative; display: block; }
+.field__select select { padding-right: 44px; cursor: pointer; }
+.field__select::after {
+  content: "";
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -6px;
+  border-right: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.field__hint {
+  margin-top: 6px;
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+.field__error {
+  padding-top: 8px;
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--error);
+}
+.field__error:empty { display: none; }
+
+.inquiry__more {
+  margin: 40px 0 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.inquiry__legend {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+
+/* Hidden from people and assistive tech; automated senders fill it. */
+.inquiry__trap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.inquiry__trap input { width: 1px; height: 1px; padding: 0; border: 0; }
+
+.inquiry__send {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 28px;
+  margin-top: 16px;
+}
+.inquiry .button { border: 0; cursor: pointer; font-family: var(--font); }
+.inquiry .button:disabled { cursor: default; }
+.inquiry[aria-busy="true"] .button { background: var(--green-deep); }
+.inquiry__consent {
+  flex: 1 1 18em;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+/* A 44px target with clear space around it, so its focus ring never
+   crosses the sentence. */
+.inquiry__privacy {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  margin-left: 4px;
+  vertical-align: middle;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+.inquiry__status:empty,
+.inquiry__failure:empty { display: none; }
+.inquiry__status { margin-top: 16px; font-size: 16px; color: var(--ink-soft); }
+.inquiry__failure {
+  margin-top: 20px;
+  padding-left: 16px;
+  border-left: 2px solid var(--error);
+  font-size: 16px;
+  color: var(--ink);
+  max-width: 52ch;
+}
+.inquiry__failure a { color: var(--ink); text-underline-offset: 5px; overflow-wrap: anywhere; }
+
+.inquiry__done { padding-top: 22px; border-top: 1px solid var(--ink); }
+.inquiry__done:focus { outline: none; }
+.inquiry__done:focus-visible { outline: 2px solid var(--green); outline-offset: 6px; }
+.inquiry__done-title {
+  font-weight: 300;
+  font-size: var(--h2);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.inquiry__done p { margin-top: 16px; max-width: 46ch; font-size: 16px; color: var(--ink-soft); }
+/* Inline in a sentence: a 44px target without stretching the line. */
+.inquiry__done .contact__mail { display: inline-block; min-height: 0; padding: 12px 0; margin: -12px 0; }
+.inquiry__done strong { color: var(--ink); font-weight: 700; letter-spacing: 0.02em; }
+
+@media (min-width: 961px) {
+  .contact__intro { position: sticky; top: calc(var(--bar-h) + 32px); }
+}
+@media (max-width: 960px) {
+  .contact__grid { grid-template-columns: 1fr; row-gap: 40px; }
+}
+@media (max-width: 600px) {
+  .inquiry__grid { grid-template-columns: 1fr; }
+  .inquiry__send .button { width: 100%; justify-content: space-between; }
+}
+
+/* ---------------------------------------------------------------- legal */
+/* The privacy page: the landing page's paper, wordmark and type scale. */
+.legal-bar { display: flex; align-items: center; min-height: var(--bar-h); }
+.legal { max-width: calc(var(--wrap) * 0.62 + var(--edge) * 2); padding-block: clamp(40px, 6vw, 88px) var(--section); }
+.legal__title {
+  font-weight: 300;
+  font-size: var(--h1);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+.legal > .lede { margin-top: 20px; max-width: 46ch; }
+.legal__part { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line); }
+.legal__part h2 {
+  font-weight: 400;
+  font-size: var(--h3);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.legal__part p { margin-top: 10px; max-width: 62ch; font-size: 16px; color: var(--ink-soft); text-wrap: pretty; }
+.legal__part .contact__mail { min-height: 0; color: var(--ink); }
+.legal__updated { margin-top: 48px; font-size: 15px; color: var(--ink-soft); }
 
 /* ----------------------------------------------------------------- foot */
 

@@ -1,9 +1,9 @@
 # Energia AI landing preview
 
 A static landing page for Energia AI, an AI control platform for commercial HVAC.
-It is plain HTML, CSS and JavaScript with no build step, framework, analytics or data collection. The selected B implementation uses a paper headline over a panorama, a keyboard/touch four-state building day, a plan cut, operator limits, an assessment sequence and FAQ.
+It is plain HTML, CSS and JavaScript with no framework or analytics. The contact section holds an inquiry form that stores answers in the site's own private database (Prisma Postgres through Vercel), read by the owner at `/admin`. The selected B implementation uses a paper headline over a panorama, a keyboard/touch four-state building day, a plan cut, operator limits, an assessment sequence and FAQ.
 
-**Status: draft preview.** Every page carries `noindex` (meta tag, `X-Robots-Tag` header and `robots.txt`).
+**Status: draft preview.** API mode for local runs: `API=1 DATABASE_URL=... INQUIRY_ORIGINS=http://127.0.0.1:4173 INQUIRY_HASH_SECRET=... ADMIN_PASSWORD_HASH=... npm run serve`. Every page carries `noindex` (meta tag, `X-Robots-Tag` header and `robots.txt`).
 Do not deploy to production or change domains without owner approval.
 
 ## Files
@@ -13,17 +13,32 @@ Do not deploy to production or change domains without owner approval.
 | `index.html` | The page |
 | `styles.css` | Layout, type, color and motion (V3). Phone and tablet rules sit next to each component. Selected B places the headline on paper and the desktop day list beside its changing render. Frozen prototype styles remain local-only. |
 | `boot.js` | Tiny synchronous bootstrap in `<head>`: sets the header state before first paint, and restores the static fallback if `main.js` fails to load or throws during setup |
-| `main.js` | Header state, the phone menu (Escape, focus return, inert when closed; the toggle is enabled once wired), the day tabs (WAI-ARIA tabs with arrow keys, Home/End and a focusable panel; every moment stays visible without it) and section reveals |
+| `main.js` | Header state, the inquiry form (validation, ALTCHA proof of work with Web Crypto, idempotent retry, CTA scroll and focus), the phone menu (Escape, focus return, inert when closed; the toggle is enabled once wired), the day tabs (WAI-ARIA tabs with arrow keys, Home/End and a focusable panel; every moment stays visible without it) and section reveals |
 | `assets/fonts/` | Self-hosted Satoshi woff2 (300 Light, 400, 700) |
 | `assets/brand/` | Official wordmark recolored to ink, and the favicon |
 | `assets/img/` | Responsive AVIF and WebP exports of the V3 Blender renders: hero, the four moments of the day and the floor plan, each with its own phone render |
-| `vercel.json` | Security headers (strict CSP, nosniff, frame deny, noindex) and asset caching |
+| `vercel.json` | Security headers (strict CSP with `connect-src` and `form-action 'self'`, nosniff, frame deny, noindex), asset caching, static build into `dist/`, functions and the daily cleanup cron |
+| `privacy.html` | Privacy page linked from the form |
+| `admin.html`, `admin.js`, `admin.css` | Private dashboard at `/admin` (never linked): list newest first, detail, CSV export, mark contacted, erase one record, sign out |
+| `api/` | Vercel functions: `inquiry` (POST), `challenge` (ALTCHA), `admin`, `cleanup` (cron) |
+| `server/` | Field contract, validation, ALTCHA, Postgres pool with transaction local timeouts, store, admin auth, CSV |
+| `migrations/` | Explicit reversible SQL (`001_inquiries.up.sql` / `.down.sql`); `scripts/migrate.mjs status|up|down --confirm-drop-inquiries` |
+| `scripts/build-static.mjs`, `scripts/public-files.mjs` | The one allowlist of served files, used by the Vercel build and the local server |
 | `.vercelignore` | Keeps tooling, tests and docs out of the deployed bundle |
 | `scripts/serve.mjs` | Local static server that sends the same headers as `vercel.json` |
 | `scripts/export-art.sh` | Exports the Blender PNG masters (hero, day moments, plan; desktop and phone) to responsive AVIF and WebP |
 | `scripts/shots.mjs` | Fresh-load captures of the hero, each section and the full page at desktop, tablet, phone, narrow and landscape viewports, plus measured type |
 | `tests/landing.spec.mjs` | Playwright behavior, layout and render checks |
 | `COPY.md`, `SOURCES.md` | Final copy and editing record; provenance for assets and claims |
+
+## Inquiries
+
+- Required answers: name, work email, company, building type, total floor area; the rest are optional. The server (`server/fields.js`) is the authority: exact choices, length caps, no control characters.
+- Abuse controls: ALTCHA proof of work (signed, origin bound, single use), honeypot, per address, per email and global limits, exact origin checks (this deployment's own URL, its branch alias, the production host on production, plus `INQUIRY_ORIGINS`), JSON only, 8 KB body cap. Logs carry status words only.
+- Every submission carries an idempotency key; a retry of the same answers returns the original reference and stores nothing new.
+- Inquiries are kept until the owner erases one in the dashboard. Nothing deletes them on a schedule: the daily `/api/cleanup` cron removes only expired rate limit, proof and session rows.
+- Environment (all sensitive, Preview and Production): `DATABASE_URL` (from the Prisma integration), `INQUIRY_HASH_SECRET`, `ADMIN_PASSWORD_HASH` (scrypt; the password lives in the owner's Keychain), `CRON_SECRET`, `NOTIFY_TOKEN_SHA256` (read only notifier).
+- Notifications: `~/.hermes/scripts/energia_inquiry_notify.py` polls `GET /api/admin?action=notify` with the notify token and prints new inquiries. No email.
 
 ## Run locally
 
@@ -37,7 +52,9 @@ Opening `index.html` directly from disk also works. The server is only needed to
 
 ```bash
 PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 PLAYWRIGHT_SKIP_BROWSER_GC=1 npm ci        # pinned @playwright/test 1.64.1
-npm test                                     # all checks
+npm test                                     # all browser checks
+npm run test:unit                            # field contract, ALTCHA, config, CSV, no automatic deletion
+npm run test:postgres                        # API, migrations and an end to end browser run on a disposable local Postgres
 SHOTS=1 SHOT_DIR=shots npm test              # checks plus screenshots
 ```
 

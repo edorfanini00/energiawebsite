@@ -246,3 +246,14 @@ Applied after two independent reviews of 7e6dbd1.
 - Contact lede avoids the repeated “HVAC” and names what is measured: “…whether Energia AI fits your equipment and BMS, and how integration and savings measurement would work.”
 - American English in alt text: “sidewalk” instead of “pavement” (hero and 15:30), “across an intersection” instead of “across a crossing” (hero). The plan overlay source comment now says “meters” and “centered”.
 - Headlines keep their sentences and phrases together: each hero promise is its own line at every width, “savings opportunity” stays on one line from 360px up, and below 360px the day heading sets “changes by the hour.” on its own line instead of splitting “your building”.
+
+## Inquiry form · 2026-10-27
+
+Owner request: “build a database where we receive the forms. The ‘let’s talk to us’ needs to have a simple form with valuable info they submit.”
+
+- “Discuss savings” (header) and “Discuss your savings” (hero) now scroll to the form in the contact section and put the cursor in Name. Title and lede are unchanged; “Prefer email? edo.orfanini@energiaigroup.com” keeps the mailto as a text link.
+- Required: Name, Work email, Company, Building type, Total floor area. Under “Optional details”: Role, Phone, Number of buildings, Annual energy spend, Building management system with “Which one?” (shown for Yes), “What would you like to improve?” (up to 1,000 characters). Choice wording exactly as briefed; ranges use “to”.
+- Button “Send”; consent “We use these details only to reply about your building. Privacy”.
+- Confirmation: “Thanks. We’ll be in touch shortly.” plus the reference. The brief offered “within one business day” only if the owner had committed to it; that is not on record, so the neutral line is used (open decision).
+- Failure: “Your details were not sent.” / “Your details could not be sent.” followed by “Please try again, or email edo.orfanini@energiaigroup.com.” The answers stay in the form.
+- New `/privacy` page: what is collected and why, who can see it, spam protection, no tracking, “We keep inquiries until we no longer need them or you ask us to delete them.”, deletion by email.

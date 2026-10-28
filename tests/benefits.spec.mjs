@@ -26,7 +26,8 @@ test.describe("benefits pass copy", () => {
     await expect(page.locator(".hero__line")).toHaveText("Energia AI is an AI control platform for commercial HVAC, designed to reduce wasted heating and cooling and the routine adjustments your team handles every day.");
     await expect(page.locator(".hero__cta")).toHaveText("Discuss your savings");
     await expect(page.locator(".bar__cta")).toHaveText("Discuss savings");
-    await expect(page.locator(".contact .button")).toHaveText("Discuss your savings");
+    // The contact section now holds the inquiry form; its button sends it.
+    await expect(page.locator(".contact .button")).toHaveText("Send");
     await expect(page).toHaveTitle("Energia AI · Spend less on commercial HVAC");
     await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /AI control platform for commercial HVAC, designed to reduce wasted heating and cooling/);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
@@ -77,7 +78,9 @@ test.describe("benefits pass copy", () => {
     }
     // No promise of an instant estimate, free audit, report or booking tool.
     await expect(lede).not.toContainText(/estimate|free|audit|report|book|calendar|guarantee/i);
-    await expect(page.locator("form, input, textarea, iframe")).toHaveCount(0);
+    // One inquiry form, no embedded third party widgets.
+    await expect(page.locator("form")).toHaveCount(1);
+    await expect(page.locator("iframe")).toHaveCount(0);
   });
 
   test("savings FAQ answers plainly without a number", async ({ page }) => {
@@ -97,7 +100,11 @@ test.describe("benefits pass copy", () => {
 
   test("no unsupported numbers, results, customers or guarantees", async ({ page }) => {
     await page.goto("/");
-    const copy = await allCopy(page);
+    let copy = await allCopy(page);
+    // The form's answer choices and length hint (ranges and spend bands the
+    // owner asked for) are inputs, not claims; set them aside for this check.
+    const formText = new Set((await page.locator("#inquiry option, #inquiry .field__hint").allInnerTexts()).map((t) => t.trim()));
+    copy = copy.split("\n").filter((line) => !formText.has(line.trim())).join("\n");
     // The only digits are the four day times, ASHRAE 62.1 and the copyright year.
     const digits = copy.replace(/\b\d{2}:\d{2}\b/g, "").replace("ASHRAE 62.1", "").replace("© 2026", "");
     expect(digits.match(/.{0,20}\d.{0,20}/g)).toBeNull();
@@ -121,11 +128,12 @@ test.describe("benefits pass copy", () => {
   test("mailtos are exactly the established addresses and subjects", async ({ page }) => {
     await page.goto("/");
     const mailtos = await page.locator('a[href^="mailto:"]').evaluateAll((as) => as.map((a) => [a.className, a.getAttribute("href")]));
+    // The CTAs now open the form; email stays as text links (the success
+    // note and the no-JavaScript fallback are hidden until needed).
     expect(mailtos).toEqual([
-      ["bar__cta", CTA_HREF],
-      ["hero__cta textlink", CTA_HREF],
-      ["button", CTA_HREF],
       ["contact__mail", `mailto:${MAIL}`],
+      ["contact__mail", `mailto:${MAIL}`],
+      ["contact__mail", CTA_HREF],
       ["", `mailto:${MAIL}`],
     ]);
   });

@@ -1,12 +1,31 @@
-# Deploy only the static site. Tooling, tests and docs stay out of the bundle.
-node_modules
-package.json
-package-lock.json
-playwright.config.mjs
-tests
-test-results
-playwright-report
-scripts
-*.md
-.gitignore
-prototypes
+# Allowlist: upload only what the deployment needs. The public files are
+# copied to dist/ by scripts/build-static.mjs; api/ and server/ are the
+# functions; the manifests install pg and altcha-lib. Everything else
+# (tests, tooling, docs, migrations, untracked files) stays local.
+/*
+!/api
+!/server
+!/assets
+!/scripts
+!/index.html
+!/privacy.html
+!/admin.html
+!/styles.css
+!/admin.css
+!/boot.js
+!/main.js
+!/admin.js
+!/robots.txt
+!/package.json
+!/package-lock.json
+!/vercel.json
+/scripts/*
+!/scripts/build-static.mjs
+!/scripts/public-files.mjs
+# Credentials never cross the upload boundary, at any depth.
+**/.*
+**/*credential*
+**/*secret*
+**/*.pem
+**/*.key
+**/*.env

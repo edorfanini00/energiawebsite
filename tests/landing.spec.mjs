@@ -445,7 +445,7 @@ for (const vp of viewports) {
       for (const n of hero.words) expect(n).toBeLessThanOrEqual(32);
       expect(hero.eyebrows).toBe(0);
       expect(hero.ctas, JSON.stringify(hero.ctas)).toHaveLength(1);
-      expect(hero.ctas[0].href).toBe(CTA_HREF);
+      expect(hero.ctas[0].href).toBe("#contact");
       expect(hero.ctas[0].h).toBeGreaterThanOrEqual(44);
       if (vp.phone) {
         // Phone header is wordmark and Menu only; the CTA is quiet ink text on paper.
@@ -498,7 +498,7 @@ for (const vp of viewports) {
       expect(fails).toEqual([]);
     });
 
-    test("links resolve and the CTAs are real mailtos", async ({ page, request }) => {
+    test("links resolve, the CTAs open the inquiry form and mailtos are real", async ({ page, request }) => {
       await page.goto("/");
       const links = await page.$$eval("a[href]", (as) => as.map((a) => a.getAttribute("href")));
       expect(links.length).toBeGreaterThan(5);
@@ -508,16 +508,20 @@ for (const vp of viewports) {
           expect(await page.locator(`[id="${id}"]`).count(), `anchor ${href}`).toBe(1);
         } else if (href.startsWith("mailto:")) {
           expect(href.split("?")[0]).toBe(`mailto:${MAIL}`);
+        } else if (href === "/privacy") {
+          expect((await request.get(href)).status(), href).toBe(200);
         } else {
           expect(href, "only the published LinkedIn page is external").toBe(LINKEDIN);
         }
       }
-      const ctas = page.locator(".bar__cta, .hero__cta, .button");
-      expect(await ctas.count()).toBe(3);
+      const ctas = page.locator(".bar__cta, .hero__cta");
+      expect(await ctas.count()).toBe(2);
       for (const href of await ctas.evaluateAll((as) => as.map((a) => a.getAttribute("href")))) {
-        expect(href).toBe(CTA_HREF);
+        expect(href).toBe("#contact");
       }
-      await expect(page.locator("form")).toHaveCount(0);
+      await expect(page.locator("form")).toHaveCount(1);
+      await expect(page.locator(".contact .button")).toHaveAttribute("type", "submit");
+      await expect(page.locator(".contact__alt .contact__mail")).toHaveAttribute("href", `mailto:${MAIL}`);
 
       // Every local asset referenced by the markup is served.
       const assets = await page.evaluate(() => {
@@ -979,7 +983,8 @@ for (const vp of viewports) {
       };
       // From the top: skip link, then the bar and hero on paper, then on
       // through the sections (the bar turns white once the page scrolls).
-      await measureStops("page", 22);
+      // 22 stops reached the old contact links; the form adds 13 controls.
+      await measureStops("page", 36);
       if (vp.phone) {
         await page.evaluate(() => window.scrollTo(0, 0));
         await page.waitForTimeout(300);
@@ -999,6 +1004,7 @@ for (const vp of viewports) {
       expect(names).toContain("ARTICLE.moment");
       expect(names).toContain("SUMMARY");
       expect(names).toContain("contact__mail");
+      expect(names).toContain("field__input");
 
       // Sampler control: a pale ring on paper must measure under 3:1.
       // Keep a deliberately failing control after removing sky-backed text.

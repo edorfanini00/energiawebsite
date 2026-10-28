@@ -28,7 +28,7 @@
         <a href="#model">How it learns</a>
         <a href="#limits">Limits</a>
         <a href="#questions">Questions</a>
-        <a class="bar__cta" href="mailto:edo.orfanini@energiaigroup.com?subject=Energia%20AI%3A%20our%20building">Discuss savings<svg class="arrow" viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M0 5h14.5M10 1l4.5 4-4.5 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
+        <a class="bar__cta" href="#contact" data-cta>Discuss savings<svg class="arrow" viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M0 5h14.5M10 1l4.5 4-4.5 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
       </nav>
       <button class="bar__toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-toggle disabled>
         <span class="bar__toggle-label" data-toggle-label>Menu</span>
@@ -42,7 +42,7 @@
       <div class="hero__copy">
         <h1 class="hero__title" id="hero-title"><span class="hero__title-line">Spend less on HVAC.</span> <span class="hero__title-line">Keep people comfortable.</span></h1>
         <p class="hero__line">Energia AI is an AI control platform for commercial HVAC, designed to reduce wasted heating and cooling and the routine adjustments your team handles every day.</p>
-        <a class="hero__cta textlink" href="mailto:edo.orfanini@energiaigroup.com?subject=Energia%20AI%3A%20our%20building">Discuss your savings<svg class="arrow" viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M0 5h14.5M10 1l4.5 4-4.5 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
+        <a class="hero__cta textlink" href="#contact" data-cta>Discuss your savings<svg class="arrow" viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M0 5h14.5M10 1l4.5 4-4.5 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
       </div>
       <picture class="hero__art">
         <source media="(max-width: 700px)" type="image/avif" srcset="assets/img/hero-phone-780.avif 780w, assets/img/hero-phone-1170.avif 1170w" sizes="100vw">
@@ -328,12 +328,159 @@
     <section class="contact" id="contact" aria-labelledby="contact-title">
       <div class="wrap">
         <h2 class="contact__title" id="contact-title" data-reveal>Find the <span class="contact__keep">savings opportunity</span> <strong>in your building.</strong></h2>
-        <div class="contact__row" data-reveal>
-          <p class="lede">Tell us your building type, current HVAC and operating schedules. A first conversation covers where energy may be wasted, whether Energia AI fits your equipment and BMS, and how integration and savings measurement would work.</p>
-          <div class="contact__actions">
-            <a class="button" href="mailto:edo.orfanini@energiaigroup.com?subject=Energia%20AI%3A%20our%20building">Discuss your savings<svg class="arrow" viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M0 5h14.5M10 1l4.5 4-4.5 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></a>
-            <a class="contact__mail" href="mailto:edo.orfanini@energiaigroup.com">edo.orfanini@energiaigroup.com</a>
+      </div>
+      <div class="wrap contact__grid">
+        <div class="contact__intro">
+          <p class="lede" data-reveal>Tell us your building type, current HVAC and operating schedules. A first conversation covers where energy may be wasted, whether Energia AI fits your equipment and BMS, and how integration and savings measurement would work.</p>
+          <p class="contact__alt" data-reveal>Prefer email? <a class="contact__mail" href="mailto:edo.orfanini@energiaigroup.com">edo.orfanini@energiaigroup.com</a></p>
+        </div>
+
+        <div class="contact__form">
+          <form class="inquiry" id="inquiry" aria-labelledby="inquiry-title" novalidate data-inquiry>
+            <h3 class="visually-hidden" id="inquiry-title">Tell us about your building</h3>
+            <div class="inquiry__grid">
+              <div class="field">
+                <label class="field__label" for="inquiry-name">Name</label>
+                <input class="field__input" id="inquiry-name" name="name" type="text" autocomplete="name" required maxlength="100" aria-describedby="inquiry-name-error">
+                <p class="field__error" id="inquiry-name-error" data-error></p>
+              </div>
+              <div class="field">
+                <label class="field__label" for="inquiry-email">Work email</label>
+                <input class="field__input" id="inquiry-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" required maxlength="160" aria-describedby="inquiry-email-error">
+                <p class="field__error" id="inquiry-email-error" data-error></p>
+              </div>
+              <div class="field field--wide">
+                <label class="field__label" for="inquiry-company">Company</label>
+                <input class="field__input" id="inquiry-company" name="company" type="text" autocomplete="organization" required maxlength="120" aria-describedby="inquiry-company-error">
+                <p class="field__error" id="inquiry-company-error" data-error></p>
+              </div>
+              <div class="field">
+                <label class="field__label" for="inquiry-building-type">Building type</label>
+                <span class="field__select">
+                  <select class="field__input" id="inquiry-building-type" name="buildingType" autocomplete="off" required aria-describedby="inquiry-building-type-error">
+                    <option value="">Select</option>
+                    <option>Office</option>
+                    <option>Retail</option>
+                    <option>Healthcare</option>
+                    <option>Education</option>
+                    <option>Hotel</option>
+                    <option>Industrial or warehouse</option>
+                    <option>Mixed use</option>
+                    <option>Other</option>
+                  </select>
+                </span>
+                <p class="field__error" id="inquiry-building-type-error" data-error></p>
+              </div>
+              <div class="field">
+                <label class="field__label" for="inquiry-floor-area">Total floor area</label>
+                <span class="field__select">
+                  <select class="field__input" id="inquiry-floor-area" name="floorArea" autocomplete="off" required aria-describedby="inquiry-floor-area-error">
+                    <option value="">Select</option>
+                    <option>Under 50,000 sq ft</option>
+                    <option>50,000 to 200,000 sq ft</option>
+                    <option>200,000 to 500,000 sq ft</option>
+                    <option>Over 500,000 sq ft</option>
+                    <option>Not sure</option>
+                  </select>
+                </span>
+                <p class="field__error" id="inquiry-floor-area-error" data-error></p>
+              </div>
+            </div>
+
+            <fieldset class="inquiry__more">
+              <legend class="inquiry__legend">Optional details</legend>
+              <div class="inquiry__grid">
+                <div class="field">
+                  <label class="field__label" for="inquiry-role">Role</label>
+                  <span class="field__select">
+                    <select class="field__input" id="inquiry-role" name="role" autocomplete="off" aria-describedby="inquiry-role-error">
+                      <option value="">Select</option>
+                      <option>Owner or executive</option>
+                      <option>Facilities or engineering</option>
+                      <option>Energy or sustainability</option>
+                      <option>Property manager</option>
+                      <option>Other</option>
+                    </select>
+                  </span>
+                  <p class="field__error" id="inquiry-role-error" data-error></p>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="inquiry-phone">Phone</label>
+                  <input class="field__input" id="inquiry-phone" name="phone" type="tel" autocomplete="tel" maxlength="40" aria-describedby="inquiry-phone-error">
+                  <p class="field__error" id="inquiry-phone-error" data-error></p>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="inquiry-building-count">Number of buildings</label>
+                  <span class="field__select">
+                    <select class="field__input" id="inquiry-building-count" name="buildingCount" autocomplete="off" aria-describedby="inquiry-building-count-error">
+                      <option value="">Select</option>
+                      <option>1</option>
+                      <option>2 to 5</option>
+                      <option>6 to 20</option>
+                      <option>More than 20</option>
+                    </select>
+                  </span>
+                  <p class="field__error" id="inquiry-building-count-error" data-error></p>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="inquiry-energy-spend">Annual energy spend</label>
+                  <span class="field__select">
+                    <select class="field__input" id="inquiry-energy-spend" name="energySpend" autocomplete="off" aria-describedby="inquiry-energy-spend-error">
+                      <option value="">Select</option>
+                      <option>Under $100,000</option>
+                      <option>$100,000 to $500,000</option>
+                      <option>$500,000 to $1M</option>
+                      <option>Over $1M</option>
+                      <option>Prefer not to say</option>
+                    </select>
+                  </span>
+                  <p class="field__error" id="inquiry-energy-spend-error" data-error></p>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="inquiry-bms">Building management system</label>
+                  <span class="field__select">
+                    <select class="field__input" id="inquiry-bms" name="bms" autocomplete="off" aria-describedby="inquiry-bms-error">
+                      <option value="">Select</option>
+                      <option>Yes</option>
+                      <option>No</option>
+                      <option>Not sure</option>
+                    </select>
+                  </span>
+                  <p class="field__error" id="inquiry-bms-error" data-error></p>
+                </div>
+                <div class="field" data-bms-name hidden>
+                  <label class="field__label" for="inquiry-bms-name">Which one?</label>
+                  <input class="field__input" id="inquiry-bms-name" name="bmsName" type="text" autocomplete="off" maxlength="80" aria-describedby="inquiry-bms-name-error">
+                  <p class="field__error" id="inquiry-bms-name-error" data-error></p>
+                </div>
+                <div class="field field--wide">
+                  <label class="field__label" for="inquiry-improve">What would you like to improve?</label>
+                  <textarea class="field__input field__input--area" id="inquiry-improve" name="improve" rows="4" maxlength="1000" autocomplete="off" aria-describedby="inquiry-improve-hint inquiry-improve-error"></textarea>
+                  <p class="field__hint" id="inquiry-improve-hint">Up to 1,000 characters.</p>
+                  <p class="field__error" id="inquiry-improve-error" data-error></p>
+                </div>
+              </div>
+            </fieldset>
+
+            <div class="inquiry__trap" aria-hidden="true">
+              <label for="inquiry-website">Leave this field empty</label>
+              <input id="inquiry-website" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
+
+            <div class="inquiry__send">
+              <button class="button" type="submit" disabled data-submit><span data-submit-label>Send</span><svg class="arrow" viewBox="0 0 16 10" width="16" height="10" aria-hidden="true" focusable="false"><path d="M0 5h14.5M10 1l4.5 4-4.5 4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></button>
+              <p class="inquiry__consent">We use these details only to reply about your building. <a class="inquiry__privacy" href="/privacy">Privacy</a></p>
+            </div>
+            <p class="inquiry__status" role="status" data-status></p>
+            <div class="inquiry__failure" role="alert" data-failure></div>
+          </form>
+
+          <div class="inquiry__done" id="inquiry-done" tabindex="-1" hidden data-done>
+            <h3 class="inquiry__done-title">Thanks. We’ll be in touch shortly.</h3>
+            <p>Your reference is <strong data-reference></strong>. If anything changes, email <a class="contact__mail" href="mailto:edo.orfanini@energiaigroup.com">edo.orfanini@energiaigroup.com</a>.</p>
           </div>
+
+          <p class="contact__fallback">Email us about your building at <a class="contact__mail" href="mailto:edo.orfanini@energiaigroup.com?subject=Energia%20AI%3A%20our%20building">edo.orfanini@energiaigroup.com</a>.</p>
         </div>
       </div>
     </section>

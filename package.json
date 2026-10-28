@@ -2,11 +2,24 @@
   "name": "energia-landing",
   "private": true,
   "version": "0.1.0",
-  "description": "Energia AI landing page preview (static HTML/CSS/JS)",
+  "description": "Energia AI landing page (static HTML/CSS/JS) with a private inquiry form, database and dashboard",
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "serve": "node scripts/serve.mjs",
+    "build": "node scripts/build-static.mjs",
     "test": "playwright test",
-    "shots": "SHOTS=1 playwright test"
+    "test:unit": "node --test tests/node/*.test.mjs",
+    "test:postgres": "node --test --test-concurrency=1 tests/postgres/*.test.mjs",
+    "shots": "SHOTS=1 playwright test",
+    "db:migrate": "node scripts/migrate.mjs up",
+    "db:status": "node scripts/migrate.mjs status"
+  },
+  "dependencies": {
+    "altcha-lib": "2.7.0",
+    "pg": "8.16.3"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1"

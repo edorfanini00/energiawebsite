@@ -1,5 +1,6 @@
-// Energia AI landing preview: header state, mobile menu, the day tabs and section reveals.
-// No analytics, no network requests, no form handling.
+// Energia AI landing preview: header state, mobile menu, the day tabs, the
+// inquiry form and section reveals. No analytics or third party requests; the
+// form talks only to this site's own /api endpoints.
 (function () {
   "use strict";
 
@@ -153,6 +154,295 @@
         warm();
       }
     }
+  }
+
+  // The inquiry form. Same origin only: a challenge from /api/challenge,
+  // solved here with Web Crypto (ALTCHA proof of work, no third party
+  // script), then one JSON POST to /api/inquiry. Nothing is fetched until
+  // someone types or sends, and nothing is stored in the browser.
+  var contact = document.querySelector("#contact");
+  var form = document.querySelector("[data-inquiry]");
+  if (contact && form) {
+    try {
+      setupInquiry(contact, form);
+    } catch (error) {
+      // Never leave a form that cannot send: fall back to the email link.
+      contact.setAttribute("data-form-off", "");
+    }
+  }
+
+  function setupInquiry(contact, form) {
+    var MAIL = "edo.orfanini@energiaigroup.com";
+    var submit = form.querySelector("[data-submit]");
+    var submitLabel = form.querySelector("[data-submit-label]");
+    var status = form.querySelector("[data-status]");
+    var failure = form.querySelector("[data-failure]");
+    var done = contact.querySelector("[data-done]");
+    var bms = form.elements.namedItem("bms");
+    var bmsName = form.querySelector("[data-bms-name]");
+    var names = ["name", "email", "company", "buildingType", "floorArea", "role", "buildingCount", "bms", "bmsName", "energySpend", "improve", "phone"];
+    var required = {
+      name: "Enter your name.",
+      email: "Enter your work email.",
+      company: "Enter your company.",
+      buildingType: "Choose a building type.",
+      floorArea: "Choose a floor area."
+    };
+    var EMAIL = /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)+$/;
+    var PHONE = /^\+?[0-9 ().-]{7,40}(?:\s*(?:x|ext\.?)\s*[0-9]{1,6})?$/i;
+    var sending = false;
+    var sent = null; // { body, key } of the last attempt that may have reached the server
+    var proof = null; // { promise, at }
+
+    if (!window.crypto || !crypto.subtle || !window.fetch || !window.TextEncoder) throw new Error("unsupported");
+
+    function control(name) { return form.elements.namedItem(name); }
+    function errorFor(name) { return document.getElementById(control(name).id + "-error"); }
+
+    function check(name) {
+      var value = control(name).value.trim();
+      if (!value) return required[name] || "";
+      if (name === "email" && !EMAIL.test(value)) return "Enter an email address like name@company.com.";
+      if (name === "phone" && !PHONE.test(value)) return "Enter a phone number using digits, spaces, + or brackets.";
+      return "";
+    }
+    function show(name, message) {
+      var input = control(name);
+      errorFor(name).textContent = message;
+      if (message) input.setAttribute("aria-invalid", "true");
+      else input.removeAttribute("aria-invalid");
+    }
+
+    // Once a field has shown an error, it rechecks as the visitor fixes it.
+    names.forEach(function (name) {
+      var input = control(name);
+      var recheck = function () {
+        if (input.getAttribute("aria-invalid") === "true") show(name, check(name));
+      };
+      input.addEventListener("input", recheck);
+      input.addEventListener("change", recheck);
+    });
+
+    function syncBms() {
+      var on = bms.value === "Yes";
+      bmsName.hidden = !on;
+      if (!on) { control("bmsName").value = ""; show("bmsName", ""); }
+    }
+    bms.addEventListener("change", syncBms);
+    syncBms();
+
+    // Start the security check as soon as someone begins typing, so it is
+    // usually finished before they send.
+    form.addEventListener("input", function () { freshProof(); }, { once: true });
+
+    function hex(bytes) {
+      var out = "";
+      for (var i = 0; i < bytes.length; i++) out += (bytes[i] < 16 ? "0" : "") + bytes[i].toString(16);
+      return out;
+    }
+    function unhex(text) {
+      var out = new Uint8Array(text.length / 2);
+      for (var i = 0; i < out.length; i++) out[i] = parseInt(text.substr(i * 2, 2), 16);
+      return out;
+    }
+    // PBKDF2 over nonce + big endian counter, as altcha-lib derives it.
+    function derive(nonce, salt, counter, cost, length) {
+      var password = new Uint8Array(nonce.length + 4);
+      password.set(nonce, 0);
+      new DataView(password.buffer).setUint32(nonce.length, counter, false);
+      return crypto.subtle.importKey("raw", password, "PBKDF2", false, ["deriveBits"]).then(function (key) {
+        return crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: salt, iterations: cost }, key, length * 8);
+      }).then(function (bits) { return hex(new Uint8Array(bits)); });
+    }
+    async function solve(challenge) {
+      var p = challenge.parameters;
+      if (!p || p.algorithm !== "PBKDF2/SHA-256") throw new Error("unexpected challenge");
+      var nonce = unhex(p.nonce);
+      var salt = unhex(p.salt);
+      for (var start = 0; start <= 100000; start += 16) {
+        var batch = [];
+        for (var n = start; n < start + 16; n++) batch.push(derive(nonce, salt, n, p.cost, p.keyLength || 32));
+        var keys = await Promise.all(batch);
+        for (var i = 0; i < keys.length; i++) {
+          if (keys[i].indexOf(p.keyPrefix) === 0) {
+            return btoa(JSON.stringify({ challenge: challenge, solution: { counter: start + i, derivedKey: keys[i] } }));
+          }
+        }
+      }
+      throw new Error("unsolved");
+    }
+    function withTimeout(ms) {
+      var controller = new AbortController();
+      var timer = setTimeout(function () { controller.abort(); }, ms);
+      return { signal: controller.signal, done: function () { clearTimeout(timer); } };
+    }
+    async function fetchProof() {
+      var t = withTimeout(10000);
+      try {
+        var response = await fetch("/api/challenge", { headers: { Accept: "application/json" }, credentials: "same-origin", cache: "no-store", signal: t.signal });
+        if (!response.ok) throw new Error("challenge " + response.status);
+        return await solve(await response.json());
+      } finally {
+        t.done();
+      }
+    }
+    // A solved proof is good for five minutes; ask for a new one after four.
+    function freshProof(force) {
+      if (force || !proof || Date.now() - proof.at > 240000) {
+        proof = { at: Date.now(), promise: fetchProof() };
+        proof.promise.catch(function () { proof = null; });
+      }
+      return proof.promise;
+    }
+
+    function uuid() {
+      if (crypto.randomUUID) return crypto.randomUUID();
+      var b = crypto.getRandomValues(new Uint8Array(16));
+      b[6] = (b[6] & 15) | 64;
+      b[8] = (b[8] & 63) | 128;
+      var h = hex(b);
+      return h.slice(0, 8) + "-" + h.slice(8, 12) + "-" + h.slice(12, 16) + "-" + h.slice(16, 20) + "-" + h.slice(20);
+    }
+
+    function setSending(on) {
+      sending = on;
+      submit.disabled = on;
+      if (on) form.setAttribute("aria-busy", "true");
+      else form.removeAttribute("aria-busy");
+      submitLabel.textContent = on ? "Sending" : "Send";
+      status.textContent = on ? "Sending your details." : "";
+    }
+    function fail(message) {
+      failure.textContent = "";
+      failure.appendChild(document.createTextNode(message + " Please try again, or email "));
+      var link = document.createElement("a");
+      link.href = "mailto:" + MAIL;
+      link.textContent = MAIL;
+      failure.appendChild(link);
+      failure.appendChild(document.createTextNode("."));
+    }
+
+    async function post(payload) {
+      var t = withTimeout(20000);
+      try {
+        var response = await fetch("/api/inquiry", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          credentials: "same-origin",
+          cache: "no-store",
+          body: JSON.stringify(payload),
+          signal: t.signal
+        });
+        var data = null;
+        try { data = await response.json(); } catch (e) { data = null; }
+        return { code: response.status, data: data || {} };
+      } finally {
+        t.done();
+      }
+    }
+
+    async function send(answers) {
+      setSending(true);
+      failure.textContent = "";
+      try {
+        // A retry of the same answers reuses the same key, so a request that
+        // reached the server before timing out is never stored twice.
+        var body = JSON.stringify(answers);
+        if (!sent || sent.body !== body) sent = { body: body, key: uuid() };
+        var payload = Object.assign({}, answers, {
+          idempotencyKey: sent.key,
+          sourcePath: location.pathname,
+          utm: location.search.slice(0, 2000),
+          website: control("website").value,
+          altcha: await freshProof()
+        });
+        var result = await post(payload);
+        if (result.code === 422 && result.data.status === "verification_required") {
+          payload.altcha = await freshProof(true);
+          result = await post(payload);
+        }
+        proof = null; // each proof is single use
+        var reference = result.data.reference;
+        if (result.code === 200 && result.data.status === "accepted" && typeof reference === "string" && /^EA-[0-9A-Z]{8}$/.test(reference)) {
+          done.querySelector("[data-reference]").textContent = reference;
+          form.hidden = true;
+          done.hidden = false;
+          done.focus();
+          sent = null;
+          return;
+        }
+        if (result.code === 422 && result.data.status === "invalid_fields" && result.data.fields) {
+          var first = null;
+          names.forEach(function (name) {
+            var message = result.data.fields[name];
+            if (typeof message === "string") {
+              show(name, message);
+              if (!first) first = name;
+            }
+          });
+          if (first) {
+            setSending(false);
+            control(first).focus();
+            return;
+          }
+        }
+        if (result.code === 409) sent = null; // start a clean attempt next time
+        fail(result.code === 429 ? "Too many messages were sent from here just now." : "Your details were not sent.");
+      } catch (error) {
+        // Timeout or network failure: the answers stay, and the same key is
+        // reused when the visitor tries again.
+        proof = null;
+        fail("Your details could not be sent.");
+      }
+      setSending(false);
+      submit.focus();
+    }
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      if (sending) return;
+      var first = null;
+      names.forEach(function (name) {
+        if (name === "bmsName" && bmsName.hidden) return;
+        var message = check(name);
+        show(name, message);
+        if (message && !first) first = name;
+      });
+      if (first) {
+        failure.textContent = "";
+        control(first).focus();
+        return;
+      }
+      var answers = {};
+      names.forEach(function (name) { answers[name] = control(name).value.trim(); });
+      send(answers);
+    });
+
+    // Every "Discuss savings" link brings the form into view and puts the
+    // cursor in the first field. Without this script they are plain anchors.
+    var firstField = control("name");
+    document.querySelectorAll("a[data-cta]").forEach(function (link) {
+      link.addEventListener("click", function (event) {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        var target = form.hidden ? done : firstField;
+        var barHeight = bar.getBoundingClientRect().height;
+        var sectionTop = contact.getBoundingClientRect().top + window.scrollY - barHeight - 8;
+        var fieldBox = target.getBoundingClientRect();
+        var fieldBottom = fieldBox.bottom + window.scrollY;
+        // Show the section heading too when the field still fits below it.
+        var top = fieldBottom - sectionTop <= window.innerHeight - barHeight - 24 ? sectionTop : fieldBox.top + window.scrollY - barHeight - 48;
+        var smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        window.scrollTo({ top: Math.max(0, top), behavior: smooth ? "smooth" : "auto" });
+        target.focus({ preventScroll: true });
+        if (location.hash !== "#contact" && history.pushState) history.pushState(null, "", "#contact");
+      });
+    });
+
+    // Wired: enable the button (disabled in the markup so a press before the
+    // script runs is never lost or sent as a page navigation).
+    submit.disabled = false;
+    form.setAttribute("data-ready", "");
   }
 
   // Section reveals. Content is visible by default; it is only hidden for
