@@ -1,6 +1,7 @@
 // Energia AI landing preview: header state, mobile menu, the day tabs, the
-// inquiry form and section reveals. No analytics or third party requests; the
-// form talks only to this site's own /api endpoints.
+// inquiry form and section reveals. The form talks only to this site's own
+// /api endpoints; after a newly stored inquiry it adds one Meta Lead through
+// the pixel (pixel.js) when that has loaded.
 (function () {
   "use strict";
 

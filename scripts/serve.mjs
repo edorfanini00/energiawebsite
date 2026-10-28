@@ -30,7 +30,8 @@ const headersFor = (path) => {
   }
   return out;
 };
-const headers = headersFor("/");
+// A malformed URL gets the site-wide headers only (the catch-all rule).
+const headers = headersFor("/\0");
 // Hero and first-feature prototypes are local-only and never deployed.
 const prototypes = process.env.PROTOTYPES === "1" ? /^\/prototypes\/(?:[ab]\.html|styles\.css)$/ : /^$/;
 const api = {};
@@ -50,7 +51,7 @@ createServer(async (req, res) => {
   if (api[path]) return api[path](req, res);
   const target = cleanUrls[path] ?? path;
   if ((!publicFile.test(target) && !prototypes.test(target)) || target.includes("..")) {
-    res.writeHead(404, headers).end("Not found");
+    res.writeHead(404, headersFor(path)).end("Not found");
     return;
   }
   const file = normalize(join(root, target));
@@ -60,6 +61,6 @@ createServer(async (req, res) => {
     res.writeHead(200, { ...headersFor(path), "Content-Type": types[extname(file)] || "application/octet-stream" });
     res.end(body);
   } catch {
-    res.writeHead(404, headers).end("Not found");
+    res.writeHead(404, headersFor(path)).end("Not found");
   }
 }).listen(port, "127.0.0.1", () => console.log(`Serving ${root} on http://127.0.0.1:${port}`));

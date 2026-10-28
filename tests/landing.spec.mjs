@@ -263,9 +263,9 @@ async function ringContrast(page, probe) {
 // Script contract: exactly one tiny synchronous same-origin bootstrap in
 // <head> before the stylesheet (so the header state is set before first
 // paint), then the deferred main.js and the deferred same-origin Meta pixel
-// loader. No inline script or handler attributes, and the CSP allows
-// same-origin scripts plus Meta's script host only.
-test("scripts: synchronous boot.js before CSS, deferred main.js and pixel.js, no inline; CSP self and Meta only", async () => {
+// loader. No inline script or handler attributes. The site-wide CSP allows
+// same-origin scripts only; the home and privacy pages add Meta's script host.
+test("scripts: synchronous boot.js before CSS, deferred main.js and pixel.js, no inline; CSP self, plus Meta on public pages", async () => {
   const { readFileSync, statSync } = await import("node:fs");
   const html = readFileSync("index.html", "utf8");
   const tags = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].map((m) => ({ attrs: m[1].trim(), body: m[2].trim() }));
@@ -276,9 +276,12 @@ test("scripts: synchronous boot.js before CSS, deferred main.js and pixel.js, no
   const boot = readFileSync("boot.js", "utf8");
   expect(statSync("boot.js").size).toBeLessThan(1500);
   expect(boot).not.toMatch(/\beval\b|new Function|document\.write|innerHTML/);
-  const csp = JSON.parse(readFileSync("vercel.json", "utf8")).headers[0].headers.find((h) => h.key === "Content-Security-Policy").value;
-  expect(csp).toMatch(/script-src 'self' https:\/\/connect\.facebook\.net;/);
-  expect(csp).not.toMatch(/sha256-|unsafe-inline|unsafe-eval/);
+  const rules = JSON.parse(readFileSync("vercel.json", "utf8")).headers;
+  const csp = (source) => rules.find((r) => r.source === source).headers.find((h) => h.key === "Content-Security-Policy").value;
+  expect(rules[0].source).toBe("/(.*)");
+  expect(csp("/(.*)")).toMatch(/script-src 'self';/);
+  for (const page of ["/", "/privacy"]) expect(csp(page)).toMatch(/script-src 'self' https:\/\/connect\.facebook\.net;/);
+  for (const page of ["/(.*)", "/", "/privacy"]) expect(csp(page)).not.toMatch(/sha256-|unsafe-inline|unsafe-eval/);
 });
 
 // The local preview server is tooling, not the deployed site. It must answer

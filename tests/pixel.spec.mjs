@@ -110,6 +110,8 @@ test.describe("Meta pixel", () => {
     const seen = await watchMeta(page);
     await open(page);
     expect(await calls(page)).toEqual([["set", "autoConfig", false, PIXEL_ID], ["init", PIXEL_ID], ["track", "PageView"]]);
+    // fbevents.js counts pushState as a page view; the CTA uses pushState.
+    expect(await page.evaluate(() => window.fbq.disablePushState)).toBe(true);
     expect(await page.locator(`script[src="${FBEVENTS}"]`).count()).toBe(1);
     expect(await page.locator('script[src="pixel.js"]').count()).toBe(1);
     expect(seen.fbevents).toBe(1);
@@ -243,16 +245,34 @@ test.describe("Meta pixel", () => {
   });
 });
 
+// The headers vercel.json gives a path: every matching rule in order, later
+// rules overriding earlier ones (as Vercel and scripts/serve.mjs apply them).
+const vercel = JSON.parse(readFileSync("vercel.json", "utf8"));
+const headersFor = (path) => {
+  const out = {};
+  for (const rule of vercel.headers) {
+    if (new RegExp("^" + rule.source.replace(/\(\.\*\)/g, ".*") + "$").test(path)) for (const h of rule.headers) out[h.key] = h.value;
+  }
+  return out;
+};
+
 test.describe("CSP", () => {
-  test("public pages allow Meta's hosts only; /admin keeps the strict policy", async ({ request }) => {
+  test("only the home and privacy pages allow Meta's hosts; everything else keeps the strict policy", async ({ request }) => {
     for (const path of ["/", "/privacy"]) expect((await request.get(path)).headers()["content-security-policy"], path).toBe(PUBLIC);
-    expect((await request.get("/admin")).headers()["content-security-policy"]).toBe(STRICT);
-    const vercel = JSON.parse(readFileSync("vercel.json", "utf8"));
-    const csp = (source) => vercel.headers.find((r) => r.source === source).headers.find((h) => h.key === "Content-Security-Policy").value;
-    expect(csp("/(.*)")).toBe(PUBLIC);
-    expect(csp("/admin")).toBe(STRICT);
-    // The /admin rule comes after the catch all, so its policy wins.
-    expect(vercel.headers.findIndex((r) => r.source === "/admin")).toBeGreaterThan(vercel.headers.findIndex((r) => r.source === "/(.*)"));
+    for (const path of ["/admin", "/admin.js", "/styles.css", "/robots.txt", "/missing"]) expect((await request.get(path)).headers()["content-security-policy"], path).toBe(STRICT);
+    // The site-wide default is exactly the policy production had before.
+    expect(vercel.headers[0].source).toBe("/(.*)");
+    expect(headersFor("/x")["Content-Security-Policy"]).toBe(STRICT);
+    for (const path of ["/", "/privacy"]) expect(headersFor(path)["Content-Security-Policy"], path).toBe(PUBLIC);
+    // Vercel also serves the dashboard at /admin/ (and the privacy page at
+    // /privacy/): those variants must fall back to the strict policy, and the
+    // dashboard keeps no-store, no-referrer and noindex on every variant.
+    for (const path of ["/admin", "/admin/", "/admin%2F", "/admin.html", "/admin.js", "/privacy/", "/privacy.html", "/index.html"]) {
+      expect(headersFor(path)["Content-Security-Policy"], path).toBe(STRICT);
+    }
+    for (const path of ["/admin", "/admin/", "/admin%2F", "/admin.html"]) {
+      expect(headersFor(path), path).toMatchObject({ "Cache-Control": "no-store", "Referrer-Policy": "no-referrer", "X-Robots-Tag": "noindex, nofollow, noarchive" });
+    }
   });
 
   test("a foreign script, connection or image is still blocked on the public page", async ({ page }) => {
@@ -346,7 +366,6 @@ test.describe("indexing", () => {
     expect(admin.headers()["cache-control"]).toBe("no-store");
     expect(await admin.text()).toContain('<meta name="robots" content="noindex, nofollow, noarchive">');
     // /api is served by functions on Vercel; the header comes from vercel.json.
-    const vercel = JSON.parse(readFileSync("vercel.json", "utf8"));
     const api = vercel.headers.find((r) => r.source === "/api/(.*)");
     expect(api.headers).toContainEqual({ key: "X-Robots-Tag", value: "noindex, nofollow" });
     expect(vercel.headers.find((r) => r.source === "/(.*)").headers.map((h) => h.key)).not.toContain("X-Robots-Tag");
@@ -359,13 +378,16 @@ test.describe("privacy wording", () => {
     await page.goto(HOST + "/privacy");
     const text = await page.locator("main").innerText();
     expect(text).toContain("This website uses the Meta pixel, a measurement tool from Meta Platforms");
-    expect(text).toContain("tells Meta which page you viewed and, if your browser shares it, the page you came from, such as a Meta ad.");
-    expect(text).toContain("this also gives Meta your IP address and browser type.");
-    expect(text).toContain("The pixel may set cookies named _fbp and _fbc");
+    expect(text).toContain("tells Meta the address of the page you viewed, including any campaign tags in it, and, if your browser shares it, the page you came from, such as Facebook or Instagram.");
+    expect(text).toContain("It also gives Meta your IP address and details about your browser and device, such as its screen size and time zone.");
+    expect(text).toContain("The pixel may set two cookies on this site: _fbp, which lets Meta recognize your browser on later visits, and _fbc, which records that you arrived through a link on Facebook or Instagram, such as one of our ads.");
+    expect(text).toContain("Meta may also read or set its own cookies on facebook.com, which can let it connect your visit to a Facebook or Instagram account you are signed in to.");
+    expect(text).toContain("Meta handles this information under its own privacy policy.");
     expect(text).toContain("When you send the form, the pixel tells Meta that an inquiry was sent, with its reference number. It does not send your answers.");
-    expect(text).toContain("The site uses no other analytics, advertising tools or third party scripts, and sets no other cookies for visitors.");
+    expect(text).toContain("Apart from the Meta pixel, the site uses no analytics, advertising tools or third party scripts, and sets no cookies of its own for visitors.");
     // The old claims are gone.
-    expect(text).not.toMatch(/No tracking|uses no analytics, advertising pixels|sets no cookies/);
+    expect(text).not.toMatch(/No tracking|uses no analytics, advertising pixels|sets no cookies for visitors|browser type|such as a Meta ad/);
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", "How Energia AI handles the details you send through the inquiry form, and what the Meta pixel measures on this site.");
     // Unchanged promises.
     expect(text).toContain("We do not sell them, share them for marketing or add you to a mailing list.");
     expect(text).toContain("We keep inquiries until we no longer need them or you ask us to delete them.");
