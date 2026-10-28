@@ -41,9 +41,10 @@ if (process.env.API === "1") {
 
 createServer(async (req, res) => {
   // A malformed URL or percent-escape gets a 400; it must not stop the server.
-  let path;
+  let path, rawPath;
   try {
-    path = decodeURIComponent(new URL(req.url, "http://x").pathname);
+    rawPath = new URL(req.url, "http://x").pathname;
+    path = decodeURIComponent(rawPath);
   } catch {
     res.writeHead(400, headers).end("Bad request");
     return;
@@ -51,16 +52,18 @@ createServer(async (req, res) => {
   if (api[path]) return api[path](req, res);
   const target = cleanUrls[path] ?? path;
   if ((!publicFile.test(target) && !prototypes.test(target)) || target.includes("..")) {
-    res.writeHead(404, headersFor(path)).end("Not found");
+    res.writeHead(404, headersFor(rawPath)).end("Not found");
     return;
   }
   const file = normalize(join(root, target));
   try {
     if (!(await stat(file)).isFile()) throw new Error("not a file");
     const body = await readFile(file);
-    res.writeHead(200, { ...headersFor(path), "Content-Type": types[extname(file)] || "application/octet-stream" });
+    // Vercel matches headers against the encoded request path, even when
+    // it resolves an encoded filename to the same public file.
+    res.writeHead(200, { ...headersFor(rawPath), "Content-Type": types[extname(file)] || "application/octet-stream" });
     res.end(body);
   } catch {
-    res.writeHead(404, headersFor(path)).end("Not found");
+    res.writeHead(404, headersFor(rawPath)).end("Not found");
   }
 }).listen(port, "127.0.0.1", () => console.log(`Serving ${root} on http://127.0.0.1:${port}`));

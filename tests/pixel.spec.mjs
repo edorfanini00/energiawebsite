@@ -257,6 +257,26 @@ const headersFor = (path) => {
 };
 
 test.describe("CSP", () => {
+  test("encoded admin filenames retain the complete private response policy", async ({ request }) => {
+    for (const path of ["/%61dmin", "/ad%6din", "/%61%64%6d%69%6e", "/%61%64%6D%69%6E", "/%61dmin.html"]) {
+      const response = await request.get(path);
+      expect(response.status(), path).toBe(200);
+      expect(await response.text(), path).toContain('<title>Inquiries · Energia AI</title>');
+      expect(response.headers(), path).toMatchObject({
+        "content-security-policy": STRICT,
+        "cache-control": "no-store",
+        "referrer-policy": "no-referrer",
+        "x-robots-tag": "noindex, nofollow, noarchive",
+      });
+      expect(headersFor(path), path).toMatchObject({
+        "Content-Security-Policy": STRICT,
+        "Cache-Control": "no-store",
+        "Referrer-Policy": "no-referrer",
+        "X-Robots-Tag": "noindex, nofollow, noarchive",
+      });
+    }
+  });
+
   test("only the home and privacy pages allow Meta's hosts; everything else keeps the strict policy", async ({ request }) => {
     for (const path of ["/", "/privacy"]) expect((await request.get(path)).headers()["content-security-policy"], path).toBe(PUBLIC);
     for (const path of ["/admin", "/admin.js", "/styles.css", "/robots.txt", "/missing"]) expect((await request.get(path)).headers()["content-security-policy"], path).toBe(STRICT);
