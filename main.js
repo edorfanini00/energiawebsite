@@ -178,6 +178,7 @@
     var status = form.querySelector("[data-status]");
     var failure = form.querySelector("[data-failure]");
     var done = contact.querySelector("[data-done]");
+    var doneTitle = done.querySelector("[data-done-title]");
     var bms = form.elements.namedItem("bms");
     var bmsName = form.querySelector("[data-bms-name]");
     var names = ["name", "email", "company", "buildingType", "floorArea", "role", "buildingCount", "bms", "bmsName", "energySpend", "improve", "phone"];
@@ -203,14 +204,19 @@
       var value = control(name).value.trim();
       if (!value) return required[name] || "";
       if (name === "email" && !EMAIL.test(value)) return "Enter an email address like name@company.com.";
-      if (name === "phone" && !PHONE.test(value)) return "Enter a phone number using digits, spaces, + or brackets.";
+      if (name === "phone" && !PHONE.test(value)) return "Enter a phone number using digits, spaces, + or parentheses.";
       return "";
     }
     function show(name, message) {
       var input = control(name);
       errorFor(name).textContent = message;
-      if (message) input.setAttribute("aria-invalid", "true");
-      else input.removeAttribute("aria-invalid");
+      if (message) {
+        input.setAttribute("aria-invalid", "true");
+        // An error inside the closed optional details opens them, so the
+        // message is seen and focus can reach the field.
+        var details = input.closest("details");
+        if (details) details.open = true;
+      } else input.removeAttribute("aria-invalid");
     }
 
     // Once a field has shown an error, it rechecks as the visitor fixes it.
@@ -230,6 +236,18 @@
     }
     bms.addEventListener("change", syncBms);
     syncBms();
+
+    // Near the limit, the hint counts. It is announced only once the limit
+    // is reached; before that it is read with the field's description.
+    var improve = control("improve");
+    var count = form.querySelector("[data-count]");
+    var MAX_IMPROVE = improve.maxLength;
+    improve.addEventListener("input", function () {
+      var n = improve.value.length;
+      if (n >= MAX_IMPROVE) count.setAttribute("aria-live", "polite");
+      else count.removeAttribute("aria-live");
+      count.textContent = n > 800 ? n.toLocaleString("en-US") + " of " + MAX_IMPROVE.toLocaleString("en-US") + " characters" : "Up to " + MAX_IMPROVE.toLocaleString("en-US") + " characters.";
+    });
 
     // Start the security check as soon as someone begins typing, so it is
     // usually finished before they send.
@@ -279,7 +297,15 @@
     async function fetchProof() {
       var t = withTimeout(10000);
       try {
-        var response = await fetch("/api/challenge", { headers: { Accept: "application/json" }, credentials: "same-origin", cache: "no-store", signal: t.signal });
+        // A POST, so every browser sends its Origin, even without Fetch Metadata.
+        var response = await fetch("/api/challenge", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          credentials: "same-origin",
+          cache: "no-store",
+          body: "{}",
+          signal: t.signal
+        });
         if (!response.ok) throw new Error("challenge " + response.status);
         return await solve(await response.json());
       } finally {
@@ -364,10 +390,12 @@
         proof = null; // each proof is single use
         var reference = result.data.reference;
         if (result.code === 200 && result.data.status === "accepted" && typeof reference === "string" && /^EA-[0-9A-Z]{8}$/.test(reference)) {
-          done.querySelector("[data-reference]").textContent = reference;
+          // Shown with a space: no dashes in anything a visitor reads. The
+          // stored reference keeps its hyphen.
+          done.querySelector("[data-reference]").textContent = reference.replace("-", " ");
           form.hidden = true;
           done.hidden = false;
-          done.focus();
+          doneTitle.focus();
           sent = null;
           return;
         }
@@ -425,7 +453,7 @@
       link.addEventListener("click", function (event) {
         if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
-        var target = form.hidden ? done : firstField;
+        var target = form.hidden ? doneTitle : firstField;
         var barHeight = bar.getBoundingClientRect().height;
         var sectionTop = contact.getBoundingClientRect().top + window.scrollY - barHeight - 8;
         var fieldBox = target.getBoundingClientRect();

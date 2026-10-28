@@ -63,7 +63,7 @@ export async function startStack() {
   }
   const same = { "Sec-Fetch-Site": "same-origin" };
   async function proof() {
-    const r = await call("GET", "/api/challenge", { headers: same });
+    const r = await call("POST", "/api/challenge", { headers: { Origin: origin, ...same }, body: {} });
     if (r.status !== 200) throw new Error(`challenge ${r.status}`);
     const solution = await solveChallenge({ challenge: r.json, deriveKey });
     return Buffer.from(JSON.stringify({ challenge: r.json, solution })).toString("base64");

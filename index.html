@@ -387,80 +387,83 @@
               </div>
             </div>
 
-            <fieldset class="inquiry__more">
-              <legend class="inquiry__legend">Optional details</legend>
-              <div class="inquiry__grid">
-                <div class="field">
-                  <label class="field__label" for="inquiry-role">Role</label>
-                  <span class="field__select">
-                    <select class="field__input" id="inquiry-role" name="role" autocomplete="off" aria-describedby="inquiry-role-error">
-                      <option value="">Select</option>
-                      <option>Owner or executive</option>
-                      <option>Facilities or engineering</option>
-                      <option>Energy or sustainability</option>
-                      <option>Property manager</option>
-                      <option>Other</option>
-                    </select>
-                  </span>
-                  <p class="field__error" id="inquiry-role-error" data-error></p>
+            <details class="inquiry__more" data-more>
+              <summary>Add optional details <span>role, buildings, BMS, energy spend</span></summary>
+              <fieldset>
+                <legend class="visually-hidden">Optional details</legend>
+                <div class="inquiry__grid">
+                  <div class="field">
+                    <label class="field__label" for="inquiry-role">Role</label>
+                    <span class="field__select">
+                      <select class="field__input" id="inquiry-role" name="role" autocomplete="off" aria-describedby="inquiry-role-error">
+                        <option value="">Select</option>
+                        <option>Owner or executive</option>
+                        <option>Facilities or engineering</option>
+                        <option>Energy or sustainability</option>
+                        <option>Property manager</option>
+                        <option>Other</option>
+                      </select>
+                    </span>
+                    <p class="field__error" id="inquiry-role-error" data-error></p>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="inquiry-phone">Phone</label>
+                    <input class="field__input" id="inquiry-phone" name="phone" type="tel" autocomplete="tel" maxlength="40" aria-describedby="inquiry-phone-error">
+                    <p class="field__error" id="inquiry-phone-error" data-error></p>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="inquiry-building-count">Number of buildings</label>
+                    <span class="field__select">
+                      <select class="field__input" id="inquiry-building-count" name="buildingCount" autocomplete="off" aria-describedby="inquiry-building-count-error">
+                        <option value="">Select</option>
+                        <option>1</option>
+                        <option>2 to 5</option>
+                        <option>6 to 20</option>
+                        <option>More than 20</option>
+                      </select>
+                    </span>
+                    <p class="field__error" id="inquiry-building-count-error" data-error></p>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="inquiry-energy-spend">Annual energy spend</label>
+                    <span class="field__select">
+                      <select class="field__input" id="inquiry-energy-spend" name="energySpend" autocomplete="off" aria-describedby="inquiry-energy-spend-error">
+                        <option value="">Select</option>
+                        <option>Under $100,000</option>
+                        <option>$100,000 to $500,000</option>
+                        <option>$500,000 to $1M</option>
+                        <option>Over $1M</option>
+                        <option>Prefer not to say</option>
+                      </select>
+                    </span>
+                    <p class="field__error" id="inquiry-energy-spend-error" data-error></p>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="inquiry-bms">Building management system</label>
+                    <span class="field__select">
+                      <select class="field__input" id="inquiry-bms" name="bms" autocomplete="off" aria-describedby="inquiry-bms-error">
+                        <option value="">Select</option>
+                        <option>Yes</option>
+                        <option>No</option>
+                        <option>Not sure</option>
+                      </select>
+                    </span>
+                    <p class="field__error" id="inquiry-bms-error" data-error></p>
+                  </div>
+                  <div class="field" data-bms-name hidden>
+                    <label class="field__label" for="inquiry-bms-name">Which one?</label>
+                    <input class="field__input" id="inquiry-bms-name" name="bmsName" type="text" autocomplete="off" maxlength="80" aria-describedby="inquiry-bms-name-error">
+                    <p class="field__error" id="inquiry-bms-name-error" data-error></p>
+                  </div>
+                  <div class="field field--wide">
+                    <label class="field__label" for="inquiry-improve">What would you like to improve?</label>
+                    <textarea class="field__input field__input--area" id="inquiry-improve" name="improve" rows="4" maxlength="1000" autocomplete="off" aria-describedby="inquiry-improve-hint inquiry-improve-error"></textarea>
+                    <p class="field__hint" id="inquiry-improve-hint" data-count>Up to 1,000 characters.</p>
+                    <p class="field__error" id="inquiry-improve-error" data-error></p>
+                  </div>
                 </div>
-                <div class="field">
-                  <label class="field__label" for="inquiry-phone">Phone</label>
-                  <input class="field__input" id="inquiry-phone" name="phone" type="tel" autocomplete="tel" maxlength="40" aria-describedby="inquiry-phone-error">
-                  <p class="field__error" id="inquiry-phone-error" data-error></p>
-                </div>
-                <div class="field">
-                  <label class="field__label" for="inquiry-building-count">Number of buildings</label>
-                  <span class="field__select">
-                    <select class="field__input" id="inquiry-building-count" name="buildingCount" autocomplete="off" aria-describedby="inquiry-building-count-error">
-                      <option value="">Select</option>
-                      <option>1</option>
-                      <option>2 to 5</option>
-                      <option>6 to 20</option>
-                      <option>More than 20</option>
-                    </select>
-                  </span>
-                  <p class="field__error" id="inquiry-building-count-error" data-error></p>
-                </div>
-                <div class="field">
-                  <label class="field__label" for="inquiry-energy-spend">Annual energy spend</label>
-                  <span class="field__select">
-                    <select class="field__input" id="inquiry-energy-spend" name="energySpend" autocomplete="off" aria-describedby="inquiry-energy-spend-error">
-                      <option value="">Select</option>
-                      <option>Under $100,000</option>
-                      <option>$100,000 to $500,000</option>
-                      <option>$500,000 to $1M</option>
-                      <option>Over $1M</option>
-                      <option>Prefer not to say</option>
-                    </select>
-                  </span>
-                  <p class="field__error" id="inquiry-energy-spend-error" data-error></p>
-                </div>
-                <div class="field">
-                  <label class="field__label" for="inquiry-bms">Building management system</label>
-                  <span class="field__select">
-                    <select class="field__input" id="inquiry-bms" name="bms" autocomplete="off" aria-describedby="inquiry-bms-error">
-                      <option value="">Select</option>
-                      <option>Yes</option>
-                      <option>No</option>
-                      <option>Not sure</option>
-                    </select>
-                  </span>
-                  <p class="field__error" id="inquiry-bms-error" data-error></p>
-                </div>
-                <div class="field" data-bms-name hidden>
-                  <label class="field__label" for="inquiry-bms-name">Which one?</label>
-                  <input class="field__input" id="inquiry-bms-name" name="bmsName" type="text" autocomplete="off" maxlength="80" aria-describedby="inquiry-bms-name-error">
-                  <p class="field__error" id="inquiry-bms-name-error" data-error></p>
-                </div>
-                <div class="field field--wide">
-                  <label class="field__label" for="inquiry-improve">What would you like to improve?</label>
-                  <textarea class="field__input field__input--area" id="inquiry-improve" name="improve" rows="4" maxlength="1000" autocomplete="off" aria-describedby="inquiry-improve-hint inquiry-improve-error"></textarea>
-                  <p class="field__hint" id="inquiry-improve-hint">Up to 1,000 characters.</p>
-                  <p class="field__error" id="inquiry-improve-error" data-error></p>
-                </div>
-              </div>
-            </fieldset>
+              </fieldset>
+            </details>
 
             <div class="inquiry__trap" aria-hidden="true">
               <label for="inquiry-website">Leave this field empty</label>
@@ -475,8 +478,8 @@
             <div class="inquiry__failure" role="alert" data-failure></div>
           </form>
 
-          <div class="inquiry__done" id="inquiry-done" tabindex="-1" hidden data-done>
-            <h3 class="inquiry__done-title">Thanks. We’ll be in touch shortly.</h3>
+          <div class="inquiry__done" id="inquiry-done" hidden data-done>
+            <h3 class="inquiry__done-title" tabindex="-1" data-done-title>Thanks. We’ll be in touch shortly.</h3>
             <p>Your reference is <strong data-reference></strong>. If anything changes, email <a class="contact__mail" href="mailto:edo.orfanini@energiaigroup.com">edo.orfanini@energiaigroup.com</a>.</p>
           </div>
 

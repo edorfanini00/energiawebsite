@@ -1,4 +1,4 @@
-// POST /api/inquiry and GET /api/challenge.
+// POST /api/inquiry and POST /api/challenge.
 import { intakeConfig } from "./config.js";
 import { database, rateLimit } from "./db.js";
 import { issueChallenge, verifyProof } from "./challenge.js";
@@ -17,19 +17,24 @@ const log = (status) => console.log(JSON.stringify({ event: "inquiry", status })
 export function createChallengeHandler(deps = {}) {
   return async (req, res) => {
     const env = deps.env ?? process.env;
-    if (req.method !== "GET") return sendJson(res, 405, { status: "method_not_allowed" }, { Allow: "GET" });
+    if (req.method !== "POST") return sendJson(res, 405, { status: "method_not_allowed" }, { Allow: "POST" });
     const config = intakeConfig(env);
     if (!config) return sendJson(res, 503, { status: "unavailable" });
-    const origin = requestOrigin(req, config.origins, { env });
+    const origin = requestOrigin(req, config.origins);
     if (!origin) return sendJson(res, 403, { status: "origin_rejected" });
+    if (!isJson(req)) return sendJson(res, 415, { status: "json_required" });
     const ip = trustedIp(req, env);
     if (!ip) return sendJson(res, 503, { status: "unavailable" });
     try {
       const pool = deps.pool ?? database(config.databaseUrl);
       if (!(await rateLimit(pool, `challenge-ip:${keyedHash(config.hashSecret, "ip", ip)}`, CHALLENGE_LIMIT, 600)))
         return sendJson(res, 429, { status: "rate_limited" });
+      // The body carries nothing; the browser sends an empty JSON object.
+      const body = await readBody(req);
+      if (!body || typeof body !== "object" || Array.isArray(body) || Object.keys(body).length) return sendJson(res, 422, { status: "invalid_request" });
       return sendJson(res, 200, await issueChallenge(config.hashSecret, origin, deps.now?.() ?? Date.now()));
-    } catch {
+    } catch (error) {
+      if (error === 400 || error === 413) return sendJson(res, error, { status: error === 400 ? "invalid_json" : "too_large" });
       return sendJson(res, 503, { status: "unavailable" });
     }
   };
@@ -42,7 +47,7 @@ export function createInquiryHandler(deps = {}) {
     if (req.method === "GET") return sendJson(res, config ? 200 : 503, { status: config ? "ready" : "unavailable" });
     if (req.method !== "POST") return sendJson(res, 405, { status: "method_not_allowed" }, { Allow: "GET, POST" });
     if (!config) return sendJson(res, 503, { status: "unavailable" });
-    const origin = requestOrigin(req, config.origins, { requireHeader: true, env });
+    const origin = requestOrigin(req, config.origins);
     if (!origin) return sendJson(res, 403, { status: "origin_rejected" });
     if (!isJson(req)) return sendJson(res, 415, { status: "json_required" });
     const ip = trustedIp(req, env);

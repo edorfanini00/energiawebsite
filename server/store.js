@@ -30,37 +30,44 @@ export const GLOBAL_LIMIT = 300; // accepted inquiries per day, all visitors
 // original reference; the same key with different answers is a conflict.
 // The proof is consumed in the same transaction as the insert, so a rolled
 // back attempt leaves it usable for the retry.
+const OVER_BUDGET = Symbol("over_budget");
 export async function submit(pool, { key, payloadHash, proof, contact, answers, sourceUrl, utm }) {
-  return transaction(pool, async (c) => {
-    await c.query("SELECT pg_advisory_xact_lock(hashtext($1))", [`inquiry:${key}`]);
-    const existing = await c.query("SELECT reference, payload_hash FROM inquiries WHERE idempotency_key = $1", [key]);
-    if (existing.rowCount) {
-      const row = existing.rows[0];
-      return row.payload_hash === payloadHash ? { status: "accepted", reference: row.reference, fresh: false } : { status: "idempotency_conflict" };
-    }
-    const used = await c.query("INSERT INTO used_proofs(hash, expires_at) VALUES ($1, now() + interval '10 minutes') ON CONFLICT DO NOTHING RETURNING hash", [proof]);
-    if (!used.rowCount) return { status: "verification_required" };
-    // Check both daily budgets before spending either.
-    const budgets = await c.query("SELECT key, count FROM rate_limits WHERE key = ANY($1::text[]) AND expires_at > now()", [[`contact:${contact}`, "global"]]);
-    if (budgets.rows.some((r) => r.count >= (r.key === "global" ? GLOBAL_LIMIT : CONTACT_LIMIT))) return { status: "rate_limited" };
-    await rate(c, `contact:${contact}`, CONTACT_LIMIT, 86400);
-    await rate(c, "global", GLOBAL_LIMIT, 86400);
-    const names = ["reference", "idempotency_key", "payload_hash", ...Object.values(columns), "source_url", ...utmColumns];
-    const base = [key, payloadHash, ...Object.keys(columns).map((f) => answers[f] || null), sourceUrl, ...utmColumns.map((u) => utm[u] || null)];
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const reference = newReference();
-      const inserted = await c.query(
-        `INSERT INTO inquiries(${names.join(", ")}) VALUES (${names.map((_, i) => `$${i + 1}`).join(", ")})
-         ON CONFLICT (reference) DO NOTHING RETURNING reference`,
-        [reference, ...base],
-      );
-      if (inserted.rowCount) {
-        await c.query("INSERT INTO inquiry_events(reference, action) VALUES ($1, 'received')", [reference]);
-        return { status: "accepted", reference, fresh: true };
+  try {
+    return await transaction(pool, async (c) => {
+      await c.query("SELECT pg_advisory_xact_lock(hashtext($1))", [`inquiry:${key}`]);
+      const existing = await c.query("SELECT reference, payload_hash FROM inquiries WHERE idempotency_key = $1", [key]);
+      if (existing.rowCount) {
+        const row = existing.rows[0];
+        return row.payload_hash === payloadHash ? { status: "accepted", reference: row.reference, fresh: false } : { status: "idempotency_conflict" };
       }
-    }
-    throw new Error("reference space exhausted");
-  });
+      const used = await c.query("INSERT INTO used_proofs(hash, expires_at) VALUES ($1, now() + interval '10 minutes') ON CONFLICT DO NOTHING RETURNING hash", [proof]);
+      if (!used.rowCount) return { status: "verification_required" };
+      // The upserts lock each budget row until commit, so concurrent
+      // submissions count one at a time. Over either budget, the rollback
+      // undoes both increments and the proof.
+      const contactOk = await rate(c, `contact:${contact}`, CONTACT_LIMIT, 86400);
+      const globalOk = await rate(c, "global", GLOBAL_LIMIT, 86400);
+      if (!contactOk || !globalOk) throw OVER_BUDGET;
+      const names = ["reference", "idempotency_key", "payload_hash", ...Object.values(columns), "source_url", ...utmColumns];
+      const base = [key, payloadHash, ...Object.keys(columns).map((f) => answers[f] || null), sourceUrl, ...utmColumns.map((u) => utm[u] || null)];
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const reference = newReference();
+        const inserted = await c.query(
+          `INSERT INTO inquiries(${names.join(", ")}) VALUES (${names.map((_, i) => `$${i + 1}`).join(", ")})
+           ON CONFLICT (reference) DO NOTHING RETURNING reference`,
+          [reference, ...base],
+        );
+        if (inserted.rowCount) {
+          await c.query("INSERT INTO inquiry_events(reference, action) VALUES ($1, 'received')", [reference]);
+          return { status: "accepted", reference, fresh: true };
+        }
+      }
+      throw new Error("reference space exhausted");
+    });
+  } catch (error) {
+    if (error === OVER_BUDGET) return { status: "rate_limited" };
+    throw error;
+  }
 }
 
 const LIST_COLUMNS = `id, reference, created_at, status, contacted_at, ${Object.values(columns).join(", ")}, source_url, ${utmColumns.join(", ")}`;

@@ -257,3 +257,15 @@ Owner request: “build a database where we receive the forms. The ‘let’s ta
 - Confirmation: “Thanks. We’ll be in touch shortly.” plus the reference. The brief offered “within one business day” only if the owner had committed to it; that is not on record, so the neutral line is used (open decision).
 - Failure: “Your details were not sent.” / “Your details could not be sent.” followed by “Please try again, or email edo.orfanini@energiaigroup.com.” The answers stay in the form.
 - New `/privacy` page: what is collected and why, who can see it, spam protection, no tracking, “We keep inquiries until we no longer need them or you ask us to delete them.”, deletion by email.
+
+## Inquiry form, fix round 1 · 2026-10-28
+
+Applied after two independent reviews of 0dd04f6.
+
+- Phone error in American English: “Enter a phone number using digits, spaces, + or parentheses.” (was “brackets”), in the browser and the server.
+- The optional questions sit behind a closed disclosure, “Add optional details” with the hint “role, buildings, BMS, energy spend”, so the first view is five fields and Send. It opens by itself when one of its answers needs fixing.
+- The reference in the confirmation reads “EA 7K2M9QXR” (a space, no hyphen). It is stored, exported and shown in the dashboard as EA-7K2M9QXR.
+- “What would you like to improve?” counts once past 800 characters: “801 of 1,000 characters”.
+- Without the form (no JavaScript, or the form could not start), “Prefer email?” is hidden; the one email line remains.
+- Privacy: “campaign tags (UTM parameters)”, and “You can ask us to show you or delete the details you sent at any time.” (the dashboard cannot edit an answer, so corrections are no longer promised).
+- Dashboard: campaign rows read “Campaign source”, “Campaign medium”, “Campaign name”, “Campaign term”, “Campaign content”; a failed sign out says “Could not sign out. Try again.”

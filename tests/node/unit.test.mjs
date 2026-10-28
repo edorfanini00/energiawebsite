@@ -10,6 +10,8 @@ import { CHALLENGE_SECONDS, issueChallenge, verifyProof } from "../../server/cha
 import { allowedOrigins, databaseUrl, intakeConfig } from "../../server/config.js";
 import { csvCell, toCsv } from "../../server/csv.js";
 import { hashPassword, passwordMatches } from "../../server/admin.js";
+import { cleanupDatabaseUrl } from "../../server/cleanup.js";
+import { requestOrigin } from "../../server/http.js";
 import { expiringTables } from "../../server/store.js";
 
 const root = new URL("../../", import.meta.url);
@@ -164,6 +166,16 @@ describe("configuration", () => {
     assert.equal(databaseUrl("prisma+postgres://accelerate.prisma-data.net/?api_key=x", true), null);
   });
 
+  test("the cleanup cron uses the direct host, like migrations; app traffic stays pooled", () => {
+    for (const host of ["db.prisma.io", "pooled.db.prisma.io"]) {
+      const raw = `postgres://user:pass@${host}:5432/postgres?sslmode=require`;
+      const url = new URL(cleanupDatabaseUrl({ VERCEL: "1", DATABASE_URL: raw }));
+      assert.equal(url.hostname, "db.prisma.io", host);
+      assert.equal(new URL(intakeConfig({ VERCEL: "1", VERCEL_URL: "energiawebsite-abc-team.vercel.app", DATABASE_URL: raw, INQUIRY_HASH_SECRET: SECRET }).databaseUrl).hostname, "pooled.db.prisma.io");
+    }
+    assert.equal(cleanupDatabaseUrl({ VERCEL: "1", DATABASE_URL: "postgres://user:pass@evil.example:5432/postgres?sslmode=require" }), null);
+  });
+
   test("allowed origins are this deployment's exact hosts", () => {
     const env = { VERCEL: "1", VERCEL_ENV: "preview", VERCEL_URL: "energiawebsite-abc-team.vercel.app", VERCEL_BRANCH_URL: "energiawebsite-git-x-team.vercel.app", VERCEL_PROJECT_PRODUCTION_URL: "energia.example" };
     assert.deepEqual(allowedOrigins(env), ["https://energiawebsite-abc-team.vercel.app", "https://energiawebsite-git-x-team.vercel.app"]);
@@ -172,12 +184,52 @@ describe("configuration", () => {
     assert.deepEqual(allowedOrigins({ INQUIRY_ORIGINS: "http://127.0.0.1:4000" }), ["http://127.0.0.1:4000"]);
   });
 
+  test("INQUIRY_ORIGINS adds every other served host on production; bad entries are dropped", () => {
+    const env = { VERCEL: "1", VERCEL_ENV: "production", VERCEL_URL: "energiawebsite-abc-team.vercel.app", VERCEL_PROJECT_PRODUCTION_URL: "energia.example" };
+    assert.deepEqual(allowedOrigins({ ...env, INQUIRY_ORIGINS: " https://www.energia.example , HTTPS://Energiawebsite.vercel.app/,https://energia.example" }), [
+      "https://energiawebsite-abc-team.vercel.app",
+      "https://energia.example",
+      "https://www.energia.example",
+      "https://energiawebsite.vercel.app",
+    ]);
+    for (const bad of ["energia.example", "https://energia.example/path", "https://energia.example?x=1", "https://energia.example#x", "https://user@energia.example", "http://energia.example", "ftp://energia.example", "https://*.energia.example"])
+      assert.deepEqual(allowedOrigins({ ...env, INQUIRY_ORIGINS: bad }), ["https://energiawebsite-abc-team.vercel.app", "https://energia.example"], bad);
+    assert.deepEqual(allowedOrigins({ ...env, INQUIRY_ORIGINS: undefined }), ["https://energiawebsite-abc-team.vercel.app", "https://energia.example"]);
+  });
+
+  test("intake origin: the exact Origin header is required, with or without Fetch Metadata", () => {
+    const origins = ["https://energia.example"];
+    const req = (headers) => ({ headers });
+    assert.equal(requestOrigin(req({ origin: "https://energia.example", "sec-fetch-site": "same-origin" }), origins), "https://energia.example");
+    // Safari before 16.4 sends Origin on a POST but no Sec-Fetch-Site.
+    assert.equal(requestOrigin(req({ origin: "https://energia.example" }), origins), "https://energia.example");
+    assert.equal(requestOrigin(req({ "sec-fetch-site": "same-origin", host: "energia.example" }), origins), null, "Host alone is never enough");
+    assert.equal(requestOrigin(req({ origin: "https://energia.example", "sec-fetch-site": "same-site" }), origins), null);
+    assert.equal(requestOrigin(req({ origin: "https://www.energia.example" }), origins), null);
+    assert.equal(requestOrigin(req({ origin: "null" }), origins), null);
+    assert.equal(requestOrigin(req({}), origins), null);
+  });
+
   test("intake is off unless database, origin and secret are all valid", () => {
     const env = { DATABASE_URL: "postgresql://u@127.0.0.1:5432/x", INQUIRY_ORIGINS: "http://127.0.0.1:4000", INQUIRY_HASH_SECRET: SECRET };
     assert.ok(intakeConfig(env));
     assert.equal(intakeConfig({ ...env, INQUIRY_HASH_SECRET: "short" }), null);
     assert.equal(intakeConfig({ ...env, INQUIRY_ORIGINS: "" }), null);
     assert.equal(intakeConfig({ ...env, DATABASE_URL: "" }), null);
+  });
+});
+
+describe("American English", () => {
+  test("no British spellings or words in any visitor or owner facing file", async () => {
+    // Words this project has already corrected once, plus the usual suspects.
+    const british = /\b(?:brackets?|pavements?|(?:col|fav|behavi|neighb|hon|lab|harb)ours?|\w*(?:organ|real|optim|minim|maxim|prior|summar|util|author|recogn|emphas|special|standard|categor|custom)is(?:e[ds]?|ing|ation)|analys(?:e[ds]?|ing)|centres?|licence|programmes?|catalogue|cheques?|(?:kilo|centi)?metres?|whilst|amongst|postcode|enquir(?:y|ies)|labelled|cancelled|travelled|modelled|fulfil|enrol|grey|tonnes?|storeys?|car park|full stop|mobile number)\b/gi;
+    const files = ["index.html", "privacy.html", "admin.html", "admin.js", "main.js", "server/fields.js", "server/admin.js", "server/inquiry.js"];
+    const hits = [];
+    for (const f of files) {
+      const text = await read(f);
+      for (const m of text.matchAll(british)) hits.push(`${f}: ${text.slice(Math.max(0, m.index - 30), m.index + m[0].length + 30).replace(/\s+/g, " ")}`);
+    }
+    assert.deepEqual(hits, []);
   });
 });
 

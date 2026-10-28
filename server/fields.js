@@ -37,7 +37,7 @@ export const messages = {
     floorArea: "Choose a floor area.",
   },
   email: "Enter an email address like name@company.com.",
-  phone: "Enter a phone number using digits, spaces, + or brackets.",
+  phone: "Enter a phone number using digits, spaces, + or parentheses.",
   choice: "Choose an option from the list.",
   characters: "Remove unsupported characters.",
   text: "Use text for this field.",

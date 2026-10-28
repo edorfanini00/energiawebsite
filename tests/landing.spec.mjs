@@ -983,8 +983,16 @@ for (const vp of viewports) {
       };
       // From the top: skip link, then the bar and hero on paper, then on
       // through the sections (the bar turns white once the page scrolls).
-      // 22 stops reached the old contact links; the form adds 13 controls.
+      // 22 stops reached the old contact links; the form adds its five
+      // required fields, the closed optional details, Send and Privacy, and
+      // 36 stops still walk past the footer.
       await measureStops("page", 36);
+      // The six optional controls, with their disclosure opened by keyboard.
+      await page.focus("[data-more] > summary");
+      await page.keyboard.press("Enter");
+      await expect(page.locator("[data-more]")).toHaveAttribute("open", "");
+      await measureStops("optional details", 6);
+      expect(results.filter((r) => r.label === "optional details").map((r) => r.el).join(" | ")).toMatch(/(field__input.*){6}/);
       if (vp.phone) {
         await page.evaluate(() => window.scrollTo(0, 0));
         await page.waitForTimeout(300);

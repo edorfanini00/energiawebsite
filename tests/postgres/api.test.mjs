@@ -4,9 +4,12 @@
 import { after, before, beforeEach, describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { ADMIN_PASSWORD, NOTIFY_TOKEN, startStack } from "../support/stack.mjs";
+import { hashPassword } from "../../server/admin.js";
 import { messages } from "../../server/fields.js";
-import { CONTACT_LIMIT } from "../../server/store.js";
+import { CONTACT_LIMIT, GLOBAL_LIMIT } from "../../server/store.js";
 import { IP_LIMIT } from "../../server/inquiry.js";
 import { query, transaction } from "../../server/db.js";
 
@@ -104,16 +107,54 @@ describe("intake", () => {
     assert.equal((await s.call("PUT", "/api/inquiry")).status, 405);
   });
 
-  test("challenge: same origin only and rate limited", async () => {
-    assert.equal((await s.call("GET", "/api/challenge")).status, 403, "no same-origin signal");
-    assert.equal((await s.call("GET", "/api/challenge", { headers: { "Sec-Fetch-Site": "cross-site" } })).status, 403);
-    assert.equal((await s.call("GET", "/api/challenge", { headers: { Origin: "https://evil.example" } })).status, 403);
-    const ok = await s.call("GET", "/api/challenge", { headers: { "Sec-Fetch-Site": "same-origin" } });
+  test("challenge: a POST from an allowed Origin only, and rate limited", async () => {
+    const post = (headers, opts = { body: {} }) => s.call("POST", "/api/challenge", { headers, ...opts });
+    const get = await s.call("GET", "/api/challenge", { headers: { Origin: s.origin, "Sec-Fetch-Site": "same-origin" } });
+    assert.deepEqual([get.status, get.headers.allow], [405, "POST"]);
+    assert.equal((await post({ "Sec-Fetch-Site": "same-origin" })).status, 403, "no Origin header");
+    assert.equal((await post({ Origin: "https://evil.example" })).status, 403);
+    assert.equal((await post({ Origin: "null" })).status, 403);
+    assert.equal((await post({ Origin: s.origin, "Sec-Fetch-Site": "cross-site" })).status, 403);
+    assert.equal((await post({ Origin: s.origin, "Sec-Fetch-Site": "same-site" })).status, 403);
+    assert.equal((await post({ Origin: s.origin, "Content-Type": "text/plain" }, { raw: "{}" })).status, 415);
+    assert.equal((await post({ Origin: s.origin }, { body: { extra: 1 } })).status, 422);
+    assert.equal((await post({ Origin: s.origin }, { raw: "{nope" })).status, 400);
+    const ok = await post({ Origin: s.origin, "Sec-Fetch-Site": "same-origin" });
     assert.equal(ok.status, 200);
     assert.equal(ok.json.parameters.data.origin, s.origin);
+    // Safari before 16.4: Origin on the POST, no Fetch Metadata at all.
+    const safari = await post({ Origin: s.origin });
+    assert.equal(safari.status, 200);
+    assert.equal(safari.json.parameters.data.origin, s.origin);
     let last;
-    for (let i = 0; i < 30; i++) last = await s.call("GET", "/api/challenge", { headers: { "Sec-Fetch-Site": "same-origin" } });
+    for (let i = 0; i < 30; i++) last = await post({ Origin: s.origin, "Sec-Fetch-Site": "same-origin" });
     assert.equal(last.status, 429);
+  });
+
+  test("release gate: scripts/check-origins.mjs passes an allowed host and fails one that is not", async () => {
+    const run = async (...origins) => {
+      try {
+        const { stdout } = await promisify(execFile)(process.execPath, ["scripts/check-origins.mjs", ...origins]);
+        return { code: 0, out: JSON.parse(stdout) };
+      } catch (e) {
+        return { code: e.code, out: JSON.parse(e.stdout) };
+      }
+    };
+    const ok = await run(s.origin);
+    assert.equal(ok.code, 0);
+    assert.deepEqual(ok.out.results, [{ origin: s.origin, sameOrigin: 200, noFetchMetadata: 200, crossOrigin: 403, ok: true }]);
+    // Same server, a host name that is not on the allowlist: the gate fails.
+    const other = s.origin.replace("127.0.0.1", "localhost");
+    const bad = await run(s.origin, other);
+    assert.equal(bad.code, 1);
+    assert.equal(bad.out.passed, false);
+    assert.deepEqual(bad.out.results.map((r) => [r.sameOrigin, r.crossOrigin, r.ok]), [[200, 403, true], [403, 403, false]]);
+  });
+
+  test("intake without Fetch Metadata (older Safari) is accepted from the allowed Origin", async () => {
+    const r = await s.call("POST", "/api/inquiry", { headers: { Origin: s.origin }, body: await payload() });
+    assert.equal(r.status, 200, r.text);
+    assert.equal(r.json.status, "accepted");
   });
 });
 
@@ -206,6 +247,32 @@ describe("honeypot and rate limits", () => {
     for (let i = 0; i <= CONTACT_LIMIT; i++) statuses.push((await s.submit(await payload({ email }))).status);
     assert.deepEqual(statuses, [...Array(CONTACT_LIMIT).fill(200), 429]);
   });
+
+  test("per email: eight concurrent submissions store exactly five", async () => {
+    const email = `race+${randomUUID().slice(0, 6)}@example.com`;
+    const bodies = [];
+    for (let i = 0; i < 8; i++) bodies.push(await payload({ email })); // fresh proof and key each
+    const statuses = (await Promise.all(bodies.map((b) => s.submit(b)))).map((r) => r.status);
+    assert.equal(statuses.filter((c) => c === 200).length, CONTACT_LIMIT, JSON.stringify(statuses));
+    assert.equal(statuses.filter((c) => c === 429).length, 8 - CONTACT_LIMIT, JSON.stringify(statuses));
+    assert.equal(Number((await s.q("SELECT count(*) FROM inquiries WHERE email = $1", [email])).rows[0].count), CONTACT_LIMIT);
+    // A refused attempt rolls back: its proof stays unspent for a retry.
+    assert.equal(Number((await s.q("SELECT count(*) FROM used_proofs")).rows[0].count), CONTACT_LIMIT);
+    assert.equal((await s.q("SELECT count FROM rate_limits WHERE key = 'global'")).rows[0].count, CONTACT_LIMIT);
+  });
+
+  test("global: concurrent submissions never pass the daily total", async () => {
+    await s.q("INSERT INTO rate_limits(key, count, expires_at) VALUES ('global', $1, now() + interval '1 day')", [GLOBAL_LIMIT - 2]);
+    const bodies = [];
+    for (let i = 0; i < 6; i++) bodies.push(await payload()); // six different emails
+    const before = await count();
+    const statuses = (await Promise.all(bodies.map((b) => s.submit(b)))).map((r) => r.status);
+    assert.deepEqual([...statuses].sort(), [200, 200, 429, 429, 429, 429], JSON.stringify(statuses));
+    assert.equal(await count(), before + 2);
+    assert.equal((await s.q("SELECT count FROM rate_limits WHERE key = 'global'")).rows[0].count, GLOBAL_LIMIT);
+    // A refused attempt spends no per email budget either.
+    assert.equal(Number((await s.q("SELECT count(*) FROM rate_limits WHERE key LIKE 'contact:%'")).rows[0].count), 2);
+  });
 });
 
 describe("dashboard API", () => {
@@ -284,6 +351,59 @@ describe("dashboard API", () => {
     assert.equal((await s.admin(session, "GET", "?action=list")).status, 401);
     assert.equal((await s.admin(session, "POST", "", { action: "erase", reference: older.json.reference, confirm: older.json.reference })).status, 401);
     assert.equal((await s.q("SELECT count(*) FROM inquiries WHERE reference = $1", [older.json.reference])).rows[0].count, "1");
+  });
+
+  test("login limits hold under concurrent attempts", async () => {
+    // Eight wrong passwords at once from one address: the per address
+    // budget of five is spent atomically, so exactly five reach scrypt.
+    const statuses = (await Promise.all(Array.from({ length: 8 }, () => s.login("wrong password")))).map((r) => r.status);
+    assert.deepEqual([...statuses].sort(), [401, 401, 401, 401, 401, 429, 429, 429], JSON.stringify(statuses));
+    assert.equal((await s.q("SELECT count FROM rate_limits WHERE key LIKE 'admin-login:%'")).rows[0].count, 6, "capped at the limit plus one");
+    // The global budget: 50 per 15 minutes across every address.
+    await s.q("TRUNCATE rate_limits");
+    await s.q("INSERT INTO rate_limits(key, count, expires_at) VALUES ('admin-login-global', 47, now() + interval '15 minutes')");
+    const global = (await Promise.all(Array.from({ length: 5 }, () => s.login("wrong password")))).map((r) => r.status);
+    assert.deepEqual([...global].sort(), [401, 401, 401, 429, 429], JSON.stringify(global));
+  });
+
+  test("the challenge limit holds under concurrent requests", async () => {
+    const statuses = (await Promise.all(Array.from({ length: 34 }, () => s.call("POST", "/api/challenge", { headers: { Origin: s.origin }, body: {} })))).map((r) => r.status);
+    assert.equal(statuses.filter((c) => c === 200).length, 30, JSON.stringify(statuses));
+    assert.equal(statuses.filter((c) => c === 429).length, 4);
+  });
+
+  test("an expired session gets 401 for reads and writes", async () => {
+    const r = await s.submit(await payload({ company: "Expiry Synthetic Co" }));
+    await s.q("TRUNCATE rate_limits");
+    const session = await s.login();
+    assert.equal((await s.admin(session, "GET", "?action=list")).status, 200);
+    await s.q("UPDATE admin_sessions SET expires_at = now() - interval '1 second'");
+    assert.equal((await s.admin(session, "GET", "?action=list")).status, 401);
+    assert.equal((await s.admin(session, "GET", "?action=session")).status, 401);
+    assert.equal((await s.admin(session, "POST", "", { action: "erase", reference: r.json.reference, confirm: r.json.reference })).status, 401);
+    assert.equal((await s.admin(session, "POST", "", { action: "status", reference: r.json.reference, status: "contacted" })).status, 401);
+    const row = (await s.q("SELECT status FROM inquiries WHERE reference = $1", [r.json.reference])).rows[0];
+    assert.equal(row.status, "new", "nothing changed and nothing was erased");
+  });
+
+  test("changing the password ends every existing session", async () => {
+    const r = await s.submit(await payload({ company: "Rotation Synthetic Co" }));
+    await s.q("TRUNCATE rate_limits");
+    const session = await s.login();
+    assert.equal((await s.admin(session, "GET", "?action=list")).status, 200);
+    const original = s.env.ADMIN_PASSWORD_HASH;
+    try {
+      s.env.ADMIN_PASSWORD_HASH = await hashPassword("a rotated synthetic password");
+      assert.equal((await s.admin(session, "GET", "?action=list")).status, 401);
+      assert.equal((await s.admin(session, "POST", "", { action: "erase", reference: r.json.reference, confirm: r.json.reference })).status, 401);
+      assert.equal((await s.login(ADMIN_PASSWORD)).status, 401, "the old password no longer signs in");
+      const fresh = await s.login("a rotated synthetic password");
+      assert.equal(fresh.status, 200);
+      assert.equal((await s.admin(fresh, "GET", "?action=list")).status, 200);
+    } finally {
+      s.env.ADMIN_PASSWORD_HASH = original;
+    }
+    assert.equal(Number((await s.q("SELECT count(*) FROM inquiries WHERE reference = $1", [r.json.reference])).rows[0].count), 1);
   });
 
   test("the notify token reads new inquiries after a cursor, and nothing else", async () => {

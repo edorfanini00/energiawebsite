@@ -17,6 +17,7 @@
   var newer = $("[data-newer]");
   var csrf = "";
   var page = 0;
+  var currentRef = "";
 
   var FIELDS = [
     ["email", "Work email"],
@@ -31,11 +32,11 @@
     ["phone", "Phone"],
     ["improve", "What they want to improve"],
     ["source_url", "Source page"],
-    ["utm_source", "utm_source"],
-    ["utm_medium", "utm_medium"],
-    ["utm_campaign", "utm_campaign"],
-    ["utm_term", "utm_term"],
-    ["utm_content", "utm_content"]
+    ["utm_source", "Campaign source"],
+    ["utm_medium", "Campaign medium"],
+    ["utm_campaign", "Campaign name"],
+    ["utm_term", "Campaign term"],
+    ["utm_content", "Campaign content"]
   ];
 
   function el(tag, cls, text) {
@@ -76,9 +77,11 @@
     $("#password").focus();
   }
 
-  function answers(dl, row) {
+  // The list title already shows the company; the detail view repeats it.
+  function answers(dl, row, skip) {
     dl.textContent = "";
     FIELDS.forEach(function (f) {
+      if (skip && skip.indexOf(f[0]) !== -1) return;
       var value = row[f[0]];
       if (value === null || value === undefined || value === "") return;
       dl.appendChild(el("dt", "", f[1]));
@@ -105,20 +108,28 @@
     head.appendChild(meta);
     li.appendChild(head);
     var dl = el("dl", "answers");
-    answers(dl, row);
+    answers(dl, row, ["company"]);
     li.appendChild(dl);
 
     var actions = el("div", "item__actions");
     var open = el("button", "link", "Details");
     open.type = "button";
+    open.setAttribute("data-open", "");
     open.addEventListener("click", function () { showDetail(row.reference); });
     var mark = el("button", "link", row.status === "contacted" ? "Mark as new" : "Mark contacted");
     mark.type = "button";
+    mark.setAttribute("data-mark", "");
     mark.addEventListener("click", async function () {
       mark.disabled = true;
       var r = await api("POST", "", { action: "status", reference: row.reference, status: row.status === "contacted" ? "new" : "contacted" });
-      if (r.code === 200) await loadList();
-      else { mark.disabled = false; errorEl.textContent = "Could not update the status. Try again."; }
+      if (r.code === 200) {
+        await loadList();
+        focusItem(row.reference, "[data-mark]");
+      } else if (r.code !== 401) {
+        mark.disabled = false;
+        errorEl.textContent = "Could not update the status. Try again.";
+        mark.focus();
+      }
     });
     var erase = el("button", "link link--danger", "Erase");
     erase.type = "button";
@@ -146,12 +157,24 @@
       if (r.code === 200) {
         await loadList();
         boardStatus.textContent = row.reference + " was erased.";
-      } else {
+        $("#board-title").focus();
+      } else if (r.code !== 401) {
         yes.disabled = false;
         errorEl.textContent = "Could not erase " + row.reference + ". Try again.";
+        yes.focus();
       }
     });
     return li;
+  }
+
+  // The list is rebuilt after every action, so the button that had focus is
+  // gone; put focus back on the same control of the same inquiry, or on the
+  // list heading when that inquiry is no longer shown.
+  function focusItem(reference, selector) {
+    if (board.hidden) return; // the list did not load; the error says so
+    var target = listEl.querySelector('[data-reference="' + reference + '"] ' + selector);
+    if (target && !target.disabled) target.focus();
+    else $("#board-title").focus();
   }
 
   async function loadList() {
@@ -175,6 +198,7 @@
       return;
     }
     var row = r.data.inquiry;
+    currentRef = row.reference;
     view("detail");
     var title = $("[data-detail-title]");
     title.textContent = row.company + ", " + row.name + " (" + row.reference + ")";
@@ -215,19 +239,37 @@
       }
     } catch (e) {
       loginError.textContent = "Sign in is unavailable right now.";
+      input.focus(); // the disabled button lost focus while waiting
     }
     button.disabled = false;
   });
 
+  // Only a confirmed sign out (or a session that is already gone) leaves the
+  // dashboard; otherwise the session may still be valid on the server.
   logout.addEventListener("click", async function () {
-    await api("POST", "", { action: "logout" });
+    var r;
+    try {
+      r = await api("POST", "", { action: "logout" });
+    } catch (e) {
+      r = { code: 0 };
+    }
+    if (r.code !== 200 && r.code !== 401) {
+      errorEl.textContent = "Could not sign out. Try again.";
+      logout.focus();
+      return;
+    }
     listEl.textContent = "";
     showLogin();
   });
   $("[data-refresh]").addEventListener("click", function () { loadList(); });
-  $("[data-back]").addEventListener("click", function () { loadList(); });
-  older.addEventListener("click", function () { page++; loadList(); });
-  newer.addEventListener("click", function () { page = Math.max(0, page - 1); loadList(); });
+  $("[data-back]").addEventListener("click", async function () {
+    var ref = currentRef;
+    await loadList();
+    focusItem(ref, "[data-open]");
+  });
+  // Paging replaces the whole list and may hide the button just pressed.
+  older.addEventListener("click", async function () { page++; await loadList(); $("#board-title").focus(); });
+  newer.addEventListener("click", async function () { page = Math.max(0, page - 1); await loadList(); $("#board-title").focus(); });
   $("#board-title").tabIndex = -1;
 
   // Resume an existing session, otherwise ask for the password.

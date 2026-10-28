@@ -7,7 +7,7 @@ import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 import { hexSecret, intakeConfig } from "./config.js";
 import { database, query, rateLimit } from "./db.js";
-import { equalSecret, isJson, keyedHash, readBody, requestOrigin, sendJson, sha256, trustedIp } from "./http.js";
+import { equalSecret, isJson, keyedHash, readBody, sendJson, sha256, trustedIp } from "./http.js";
 import { REFERENCE, detail, erase, exportAll, list, setStatus, since } from "./store.js";
 import { toCsv } from "./csv.js";
 

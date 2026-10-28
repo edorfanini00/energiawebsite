@@ -20,7 +20,7 @@ Do not deploy to production or change domains without owner approval.
 | `vercel.json` | Security headers (strict CSP with `connect-src` and `form-action 'self'`, nosniff, frame deny, noindex), asset caching, static build into `dist/`, functions and the daily cleanup cron |
 | `privacy.html` | Privacy page linked from the form |
 | `admin.html`, `admin.js`, `admin.css` | Private dashboard at `/admin` (never linked): list newest first, detail, CSV export, mark contacted, erase one record, sign out |
-| `api/` | Vercel functions: `inquiry` (POST), `challenge` (ALTCHA), `admin`, `cleanup` (cron) |
+| `api/` | Vercel functions: `inquiry` (POST), `challenge` (POST, ALTCHA), `admin`, `cleanup` (cron) |
 | `server/` | Field contract, validation, ALTCHA, Postgres pool with transaction local timeouts, store, admin auth, CSV |
 | `migrations/` | Explicit reversible SQL (`001_inquiries.up.sql` / `.down.sql`); `scripts/migrate.mjs status|up|down --confirm-drop-inquiries` |
 | `scripts/build-static.mjs`, `scripts/public-files.mjs` | The one allowlist of served files, used by the Vercel build and the local server |
@@ -36,8 +36,11 @@ Do not deploy to production or change domains without owner approval.
 - Required answers: name, work email, company, building type, total floor area; the rest are optional. The server (`server/fields.js`) is the authority: exact choices, length caps, no control characters.
 - Abuse controls: ALTCHA proof of work (signed, origin bound, single use), honeypot, per address, per email and global limits, exact origin checks (this deployment's own URL, its branch alias, the production host on production, plus `INQUIRY_ORIGINS`), JSON only, 8 KB body cap. Logs carry status words only.
 - Every submission carries an idempotency key; a retry of the same answers returns the original reference and stores nothing new.
-- Inquiries are kept until the owner erases one in the dashboard. Nothing deletes them on a schedule: the daily `/api/cleanup` cron removes only expired rate limit, proof and session rows.
+- Inquiries are kept until the owner erases one in the dashboard. Nothing deletes them on a schedule: the daily `/api/cleanup` cron removes only expired rate limit, proof and session rows, over the direct (not pooled) Prisma host.
 - Environment (all sensitive, Preview and Production): `DATABASE_URL` (from the Prisma integration), `INQUIRY_HASH_SECRET`, `ADMIN_PASSWORD_HASH` (scrypt; the password lives in the owner's Keychain), `CRON_SECRET`, `NOTIFY_TOKEN_SHA256` (read only notifier).
+- Optional `INQUIRY_ORIGINS`: comma separated `https://` origins for every other host that serves the site without redirecting to the production host (for example the apex and `www.`, a second domain, or `energiawebsite.vercel.app`). Unset today; there is no custom domain yet. An entry with a path, query or credentials is ignored.
+- Release gate for origins: `node scripts/check-origins.mjs https://host-a https://host-b` (or `CHECK_ORIGINS=...`, or `--share-file` for a protected preview). For each host it POSTs `/api/challenge` with that host's own `Origin`, with and without Fetch Metadata (expects 200), and from a foreign origin (expects 403). Run it against every served host before promoting.
+- The challenge is a `POST` with an empty JSON body, so browsers without Fetch Metadata (Safari before 16.4) still send `Origin` and can use the form.
 - Notifications: `~/.hermes/scripts/energia_inquiry_notify.py` polls `GET /api/admin?action=notify` with the notify token and prints new inquiries. No email.
 
 ## Run locally

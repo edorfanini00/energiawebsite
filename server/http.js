@@ -62,18 +62,13 @@ export async function readBody(req) {
 }
 
 // The origin a request comes from, only if it is one of the exact allowed
-// origins. Same origin GETs carry no Origin header, so the Host is used then,
-// but only together with Sec-Fetch-Site: same-origin.
-export function requestOrigin(req, origins, { requireHeader = false, env = process.env } = {}) {
+// origins. Both intake endpoints are POSTs, and browsers send Origin on every
+// POST (including Safari versions without Fetch Metadata), so it is required.
+export function requestOrigin(req, origins) {
   const site = req.headers["sec-fetch-site"];
   if (site !== undefined && site !== "same-origin") return null;
   const header = req.headers.origin;
-  if (header !== undefined) return origins.includes(header) ? header : null;
-  if (requireHeader || site !== "same-origin") return null;
-  const host = String(req.headers.host ?? "").toLowerCase();
-  if (!/^[a-z0-9.-]+(?::\d+)?$/.test(host)) return null;
-  const derived = `${env.VERCEL === "1" ? "https" : "http"}://${host}`;
-  return origins.includes(derived) ? derived : null;
+  return typeof header === "string" && origins.includes(header) ? header : null;
 }
 
 export const keyedHash = (secret, kind, value) => createHmac("sha256", secret).update(`${kind}:${value}`).digest("hex");

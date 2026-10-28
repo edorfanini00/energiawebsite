@@ -64,13 +64,16 @@ test("a synthetic inquiry travels from the form to the dashboard and is erased",
   await page.keyboard.type("Synthetic E2E Buildings");
   await page.selectOption("#inquiry-building-type", "Mixed use");
   await page.selectOption("#inquiry-floor-area", "Under 50,000 sq ft");
+  await page.locator("[data-more] > summary").click();
   await page.selectOption("#inquiry-role", "Property manager");
   await page.selectOption("#inquiry-building-count", "More than 20");
   await page.fill("#inquiry-improve", "Synthetic end to end test.");
   await page.locator("[data-submit]").click();
   await page.locator("[data-done]").waitFor({ timeout: 30000 });
-  const reference = await page.locator("[data-reference]").textContent();
-  assert.match(reference, /^EA-[0-9A-HJKMNP-TV-Z]{8}$/);
+  // Shown with a space (no dashes for visitors); stored with its hyphen.
+  const shown = await page.locator("[data-reference]").textContent();
+  assert.match(shown, /^EA [0-9A-HJKMNP-TV-Z]{8}$/);
+  const reference = shown.replace(" ", "-");
   assert.deepEqual(problems, []);
 
   const row = (await pool.query("SELECT * FROM inquiries WHERE reference = $1", [reference])).rows[0];

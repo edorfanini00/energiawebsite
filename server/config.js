@@ -43,10 +43,12 @@ export function databaseUrl(raw, vercel = process.env.VERCEL === "1", purpose = 
   }
 }
 
+// A bare origin. Case and one trailing slash are normalized; a path, query,
+// fragment or credentials make the entry invalid, and it is dropped.
 function exactOrigin(value, vercel) {
   try {
+    if (!/^https?:\/\/[a-z0-9.-]+(?::\d+)?\/?$/i.test(value)) return null;
     const url = new URL(value);
-    if (url.origin !== value) return null;
     if (url.protocol === "https:") return url.origin;
     if (!vercel && url.protocol === "http:" && url.hostname === "127.0.0.1") return url.origin;
     return null;
@@ -57,7 +59,10 @@ function exactOrigin(value, vercel) {
 
 // The exact origins allowed to post. On Vercel: this deployment's own URL
 // (which its share link opens), its branch alias, the production hostname
-// for production deployments, plus any explicit INQUIRY_ORIGINS.
+// for production deployments, plus INQUIRY_ORIGINS: an optional comma
+// separated list for every other host that serves the site without a
+// redirect (www and the apex, a second domain). scripts/check-origins.mjs is
+// the release gate that proves each served host is allowed.
 export function allowedOrigins(env = process.env) {
   const vercel = env.VERCEL === "1";
   const hosts = [];

@@ -5,6 +5,10 @@ import { database } from "./db.js";
 import { equalSecret, sendJson } from "./http.js";
 import { cleanup } from "./store.js";
 
+// Maintenance runs over the direct host, as the migrations do; app traffic
+// stays on the pooler.
+export const cleanupDatabaseUrl = (env = process.env) => databaseUrl(env.DATABASE_URL, env.VERCEL === "1", "direct");
+
 export function createCleanupHandler(deps = {}) {
   return async (req, res) => {
     const env = deps.env ?? process.env;
@@ -14,7 +18,7 @@ export function createCleanupHandler(deps = {}) {
     const auth = req.headers.authorization;
     if (typeof auth !== "string" || !/^Bearer [a-f0-9]{64,128}$/.test(auth) || !equalSecret(auth.slice(7), env.CRON_SECRET))
       return sendJson(res, 401, { status: "unauthorized" });
-    const url = databaseUrl(env.DATABASE_URL, env.VERCEL === "1");
+    const url = cleanupDatabaseUrl(env);
     if (!url) return sendJson(res, 503, { status: "unavailable" });
     try {
       const removed = await cleanup(deps.pool ?? database(url));
