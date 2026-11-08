@@ -278,12 +278,14 @@ test.describe("CSP", () => {
   });
 
   test("only the home and privacy pages allow Meta's hosts; everything else keeps the strict policy", async ({ request }) => {
-    for (const path of ["/", "/privacy"]) expect((await request.get(path)).headers()["content-security-policy"], path).toBe(PUBLIC);
+    // The SEO suite independently verifies each exact JSON-LD hash against built bytes.
+    const withoutHash = policy => policy.replace(/ 'sha256-[A-Za-z0-9+/=]+'/g, "");
+    for (const path of ["/", "/privacy"]) expect(withoutHash((await request.get(path)).headers()["content-security-policy"]), path).toBe(PUBLIC);
     for (const path of ["/admin", "/admin.js", "/styles.css", "/robots.txt", "/missing"]) expect((await request.get(path)).headers()["content-security-policy"], path).toBe(STRICT);
     // The site-wide default is exactly the policy production had before.
     expect(vercel.headers[0].source).toBe("/(.*)");
     expect(headersFor("/x")["Content-Security-Policy"]).toBe(STRICT);
-    for (const path of ["/", "/privacy"]) expect(headersFor(path)["Content-Security-Policy"], path).toBe(PUBLIC);
+    for (const path of ["/", "/privacy"]) expect(withoutHash(headersFor(path)["Content-Security-Policy"]), path).toBe(PUBLIC);
     // Vercel also serves the dashboard at /admin/ (and the privacy page at
     // /privacy/): those variants must fall back to the strict policy, and the
     // dashboard keeps no-store, no-referrer and noindex on every variant.
@@ -364,16 +366,16 @@ test.describe("indexing", () => {
   test("robots allows the site, keeps /admin and /api out, and names the sitemap", async ({ request }) => {
     const robots = await request.get("/robots.txt");
     expect(robots.status()).toBe(200);
-    expect(await robots.text()).toBe("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: https://www.energiaigroup.com/sitemap.xml\n");
+    expect(await robots.text()).toBe("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: https://predictivehvaccontrol.com/sitemap.xml\n");
     const sitemap = await request.get("/sitemap.xml");
     expect(sitemap.status()).toBe(200);
     expect(sitemap.headers()["content-type"]).toMatch(/^application\/xml/);
     const locs = [...(await sitemap.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-    expect(locs).toEqual(["https://www.energiaigroup.com/", "https://www.energiaigroup.com/privacy"]);
+    expect(locs).toEqual(["https://predictivehvaccontrol.com/", "https://predictivehvaccontrol.com/privacy", "https://predictivehvaccontrol.com/hvac-optimization"]);
   });
 
   test("public pages are indexable with a canonical; /admin and /api stay noindex", async ({ request }) => {
-    for (const [path, canonical] of [["/", "https://www.energiaigroup.com/"], ["/privacy", "https://www.energiaigroup.com/privacy"]]) {
+    for (const [path, canonical] of [["/", "https://predictivehvaccontrol.com/"], ["/privacy", "https://predictivehvaccontrol.com/privacy"]]) {
       const res = await request.get(path);
       expect(res.headers()["x-robots-tag"], path).toBeUndefined();
       const html = await res.text();

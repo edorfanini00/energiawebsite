@@ -8,7 +8,8 @@ import { extname, join, normalize, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { cleanUrls, publicFile } from "./public-files.mjs";
 
-const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
+const sourceRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
+const root = process.env.SERVE_DIST === "1" ? join(sourceRoot, "dist") : sourceRoot;
 const port = Number(process.env.PORT || 4173);
 const types = {
   ".html": "text/html; charset=utf-8",
@@ -21,7 +22,7 @@ const types = {
   ".txt": "text/plain; charset=utf-8",
   ".xml": "application/xml; charset=utf-8",
 };
-const vercel = JSON.parse(await readFile(join(root, "vercel.json"), "utf8"));
+const vercel = JSON.parse(await readFile(join(sourceRoot, "vercel.json"), "utf8"));
 const headersFor = (path) => {
   const out = {};
   for (const rule of vercel.headers) {

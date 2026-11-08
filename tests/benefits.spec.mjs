@@ -28,10 +28,10 @@ test.describe("benefits pass copy", () => {
     await expect(page.locator(".bar__cta")).toHaveText("Discuss a pilot");
     // The contact section now holds the inquiry form; its button sends it.
     await expect(page.locator(".contact .button")).toHaveText("Send");
-    await expect(page).toHaveTitle("Energia AI · Lower HVAC operating costs");
-    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /AI control platform for commercial HVAC\. It learns building response to evaluate adaptive control\. Discuss a measured building pilot/);
+    await expect(page).toHaveTitle("Predictive HVAC Control for Commercial Buildings · Energia AI");
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /Energia AI learns how commercial buildings respond to weather, occupancy and control changes\. Explore predictive HVAC control through a measured building pilot/);
     await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://www.energiaigroup.com/");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://predictivehvaccontrol.com/");
   });
 
   test("benefits sit between the hero and the day, with a heading for assistive tech", async ({ page }) => {

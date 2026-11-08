@@ -263,14 +263,15 @@ async function ringContrast(page, probe) {
 // Script contract: exactly one tiny synchronous same-origin bootstrap in
 // <head> before the stylesheet (so the header state is set before first
 // paint), then the deferred main.js and the deferred same-origin Meta pixel
-// loader. No inline script or handler attributes. The site-wide CSP allows
+// loader. Only hashed JSON-LD data is inline; no executable inline script or
+// handler attributes. The site-wide CSP allows
 // same-origin scripts only; the home and privacy pages add Meta's script host.
-test("scripts: synchronous boot.js before CSS, deferred main.js and pixel.js, no inline; CSP self, plus Meta on public pages", async () => {
+test("scripts: synchronous boot.js before CSS, deferred main.js and pixel.js, hashed JSON-LD only; CSP self, plus Meta on public pages", async () => {
   const { readFileSync, statSync } = await import("node:fs");
   const html = readFileSync("index.html", "utf8");
   const tags = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].map((m) => ({ attrs: m[1].trim(), body: m[2].trim() }));
-  expect(tags.map((t) => t.attrs)).toEqual(['src="boot.js"', 'src="main.js" defer', 'src="pixel.js" defer']);
-  for (const t of tags) expect(t.body).toBe("");
+  expect(tags.filter((t) => !t.attrs.includes("application/ld+json")).map((t) => t.attrs)).toEqual(['src="boot.js"', 'src="main.js" defer', 'src="pixel.js" defer']);
+  for (const t of tags.filter((t) => !t.attrs.includes("application/ld+json"))) expect(t.body).toBe("");
   expect(html.indexOf('src="boot.js"')).toBeLessThan(html.indexOf('rel="stylesheet"'));
   expect(html).not.toMatch(/\son[a-z]+\s*=/i);
   const boot = readFileSync("boot.js", "utf8");
@@ -280,8 +281,8 @@ test("scripts: synchronous boot.js before CSS, deferred main.js and pixel.js, no
   const csp = (source) => rules.find((r) => r.source === source).headers.find((h) => h.key === "Content-Security-Policy").value;
   expect(rules[0].source).toBe("/(.*)");
   expect(csp("/(.*)")).toMatch(/script-src 'self';/);
-  for (const page of ["/", "/privacy"]) expect(csp(page)).toMatch(/script-src 'self' https:\/\/connect\.facebook\.net;/);
-  for (const page of ["/(.*)", "/", "/privacy"]) expect(csp(page)).not.toMatch(/sha256-|unsafe-inline|unsafe-eval/);
+  for (const page of ["/", "/privacy"]) expect(csp(page)).toMatch(/script-src 'self' 'sha256-[A-Za-z0-9+/=]+' https:\/\/connect\.facebook\.net;/);
+  for (const page of ["/(.*)", "/", "/privacy"]) expect(csp(page)).not.toMatch(/unsafe-inline|unsafe-eval/);
 });
 
 // The local preview server is tooling, not the deployed site. It must answer
@@ -514,7 +515,7 @@ for (const vp of viewports) {
           expect(await page.locator(`[id="${id}"]`).count(), `anchor ${href}`).toBe(1);
         } else if (href.startsWith("mailto:")) {
           expect(href.split("?")[0]).toBe(`mailto:${MAIL}`);
-        } else if (href === "/privacy") {
+        } else if (["/privacy", "/hvac-optimization"].includes(href)) {
           expect((await request.get(href)).status(), href).toBe(200);
         } else {
           expect(href, "only the published LinkedIn page is external").toBe(LINKEDIN);
@@ -598,7 +599,7 @@ for (const vp of viewports) {
         expect(text, String(banned)).not.toMatch(banned);
       }
       await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
-      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://www.energiaigroup.com/");
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://predictivehvaccontrol.com/");
       // The day is an example of possible control, not deployed behavior.
       expect(text).not.toMatch(/treat every day the same/i);
       expect(text).toContain("This example shows how predictive control could help as weather and occupancy change.");

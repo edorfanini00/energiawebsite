@@ -9,6 +9,7 @@
 !/scripts
 !/index.html
 !/privacy.html
+!/hvac-optimization.html
 !/admin.html
 !/styles.css
 !/admin.css
@@ -24,6 +25,7 @@
 /scripts/*
 !/scripts/build-static.mjs
 !/scripts/public-files.mjs
+!/scripts/validate-jsonld.mjs
 # Credentials never cross the upload boundary, at any depth.
 **/.*
 **/*credential*

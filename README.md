@@ -1,10 +1,11 @@
 # Energia AI landing preview
 
 A static landing page for Energia AI, an AI control platform for commercial HVAC.
-It is plain HTML, CSS and JavaScript with no framework. The only measurement is the Meta pixel (dataset “Energia AI Web”, `2313981812785333`) on the public pages. The contact section holds an inquiry form that stores answers in the site's own private database (Prisma Postgres through Vercel), read by the owner at `/admin`. The selected B implementation uses a paper headline over a panorama, a keyboard/touch four-state building day, a plan cut, operator limits, an assessment sequence and FAQ.
+It is plain HTML, CSS and JavaScript with no framework. The only measurement is the Meta pixel (dataset “Energia AI Web”, `2313981812785333`) on the home and privacy pages. The contact section holds an inquiry form that stores answers in the site's own private database (Prisma Postgres through Vercel), read by the owner at `/admin`. The selected B implementation uses a paper headline over a panorama, a keyboard/touch four-state building day, a plan cut, operator limits, an assessment sequence and FAQ.
 
-**Status: published** at `https://energiawebsite.vercel.app` (owner approved); the custom domain `www.energiaigroup.com` is the canonical host. API mode for local runs: `API=1 DATABASE_URL=... INQUIRY_ORIGINS=http://127.0.0.1:4173 INQUIRY_HASH_SECRET=... ADMIN_PASSWORD_HASH=... npm run serve`. The home and privacy pages are indexable, with canonical links to `https://www.energiaigroup.com`, `robots.txt` and `sitemap.xml`; `/admin` and `/api` stay `noindex`.
-Do not change domains without owner approval.
+**Domain change prepared for review:** the owner selected `https://predictivehvaccontrol.com` as the canonical site. `commercialhvacoptimization.com` stays parked with no redirect, binding or DNS changes. The existing `energiaigroup.com` site and email DNS stay untouched. This branch does not establish that the new hostname is live. Parent owns domain binding, configuration, review and release.
+
+Home, `/hvac-optimization` and `/privacy` use the selected canonical hostname and are in the sitemap. `/admin` and `/api` retain their existing exclusions. The guide uses the existing page styling and does not add tracking. See [SEO-RELEASE.md](SEO-RELEASE.md) for configuration, testing and rollback.
 
 ## Files
 
@@ -18,9 +19,11 @@ Do not change domains without owner approval.
 | `assets/fonts/` | Self-hosted Satoshi woff2 (300 Light, 400, 700) |
 | `assets/brand/` | Official wordmark recolored to ink, and the favicon |
 | `assets/img/` | Responsive AVIF and WebP exports of the V3 Blender renders: hero, the four moments of the day and the floor plan, each with its own phone render |
-| `vercel.json` | Security headers (strict same origin CSP on every path; only `/` and `/privacy` add `https://connect.facebook.net` for scripts and `https://www.facebook.com` for the pixel's images and beacons, so `/admin`, `/admin/` and any other path stay same origin only; `form-action 'self'`, nosniff, frame deny; `noindex`, `no-store` and `no-referrer` on every `/admin` path and every percent-encoded path (Vercel can resolve encoded admin filenames before serving them, but matches headers against the encoded URL); `noindex` on `/api`), asset caching, static build into `dist/`, functions and the daily cleanup cron |
+| `vercel.json` | Security headers (strict same origin CSP by default, with exact JSON-LD hashes on the three clean public routes; only `/` and `/privacy` add `https://connect.facebook.net` for scripts and `https://www.facebook.com` for the pixel's images and beacons, so `/admin`, `/admin/` and any other path stay same origin only; `form-action 'self'`, nosniff, frame deny; `noindex`, `no-store` and `no-referrer` on every `/admin` path and every percent-encoded path (Vercel can resolve encoded admin filenames before serving them, but matches headers against the encoded URL); `noindex` on `/api`), asset caching, static build into `dist/`, functions and the daily cleanup cron |
 | `robots.txt`, `sitemap.xml` | Allow indexing of the public pages, keep `/admin` and `/api/` out, list the canonical URLs |
 | `privacy.html` | Privacy page linked from the form |
+| `hvac-optimization.html` | Buyer guide linked from the landing FAQ |
+| `scripts/validate-jsonld.mjs` | Build gate for structured identity and exact CSP hashes |
 | `admin.html`, `admin.js`, `admin.css` | Private dashboard at `/admin` (never linked): list newest first, detail, CSV export, mark contacted, erase one record, sign out |
 | `api/` | Vercel functions: `inquiry` (POST), `challenge` (POST, ALTCHA), `admin`, `cleanup` (cron) |
 | `server/` | Field contract, validation, ALTCHA, Postgres pool with transaction local timeouts, store, admin auth, CSV |
