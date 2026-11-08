@@ -9,9 +9,14 @@ import { issueChallenge, verifyProof } from "../server/challenge.js";
 import { validate } from "../server/fields.js";
 
 const SECRET = "c".repeat(64);
-const MAIL = "edo.orfanini@energiaigroup.com";
 const SHOT_DIR = process.env.INQUIRY_SHOT_DIR;
 if (SHOT_DIR) mkdirSync(SHOT_DIR, { recursive: true });
+// Ordinary viewport evidence for contact states; no capture-only styling.
+const captureContact = async (page, name) => {
+  if (!process.env.BUYER_SCREENSHOTS) return;
+  mkdirSync(process.env.BUYER_SCREENSHOTS, { recursive: true });
+  await page.screenshot({ path: `${process.env.BUYER_SCREENSHOTS}/${name}.png` });
+};
 // Element captures are stitched while scrolling, so the fixed header would
 // land mid image. Hide it for the capture only.
 const shoot = async (page, name) => {
@@ -213,6 +218,8 @@ for (const vp of VIEWPORTS) {
         idempotencyKey: "",
       });
       expect(sent.idempotencyKey).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+      await expect(page.locator("[data-done]")).toContainText("Keep this reference for your records.");
+      await captureContact(page, `contact-success-${vp.width}`);
       if (SHOT_DIR && [390, 1440].includes(vp.width)) await shoot(page, `success-${vp.width}`);
     });
 
@@ -292,12 +299,13 @@ for (const vp of VIEWPORTS) {
       await page.locator("[data-submit]").click();
       // First attempt reaches the server, then its response is lost.
       const failure = page.locator("[data-failure]");
-      await expect(failure).toContainText("Your details could not be sent. Please try again, or email");
-      await expect(failure.locator(`a[href="mailto:${MAIL}"]`)).toHaveText(MAIL);
+      await expect(failure).toContainText("Your details could not be sent. Your answers are still in the form. Please try Send again.");
+      await expect(failure.locator('a[href^="mailto:"]')).toHaveCount(0);
       await expect(page.locator("[data-submit]")).toBeEnabled();
       await expect(page.locator("[data-submit]")).toBeFocused();
       await expect(page.locator("#inquiry-name")).toHaveValue("Synthetic Tester");
       await expect(page.locator("#inquiry-floor-area")).toHaveValue("Over 500,000 sq ft");
+      await captureContact(page, `contact-retry-${vp.width}`);
       // Retry: held server side so the sending state can be read.
       await page.locator("[data-submit]").click();
       await expect(page.locator("[data-submit]")).toBeDisabled();
@@ -322,7 +330,7 @@ for (const vp of VIEWPORTS) {
       await page.waitForFunction(() => document.querySelector("[data-inquiry][data-ready]"));
       await fill(page);
       await page.locator("[data-submit]").click();
-      await expect(page.locator("[data-failure]")).toContainText("Your details were not sent. Please try again, or email");
+      await expect(page.locator("[data-failure]")).toContainText("Your details were not sent. Your answers are still in the form. Please try Send again.");
       await expect(page.locator("#inquiry-company")).toHaveValue("Synthetic Test Buildings LLC");
       await page.locator("[data-submit]").click();
       await expect(page.locator("[data-failure]")).toContainText("Your details were not sent.");
@@ -431,7 +439,7 @@ for (const vp of VIEWPORTS) {
 
     test("consent line and privacy link", async ({ page, request }) => {
       await page.goto("/");
-      await expect(page.locator(".inquiry__consent")).toHaveText("We use these details only to reply about your building. Privacy");
+      await expect(page.locator(".inquiry__consent")).toHaveText("We use these details only to reply to your inquiry. Privacy");
       const link = page.locator(".inquiry__privacy");
       await expect(link).toHaveAttribute("href", "/privacy");
       const box = await link.boundingBox();
@@ -450,7 +458,8 @@ for (const vp of VIEWPORTS) {
       expect(res.status()).toBe(200);
       const html = await res.text();
       expect(html).toContain("We keep inquiries until we no longer need them or you ask us to delete them.");
-      expect(html).toContain(`mailto:${MAIL}`);
+      expect(html).toContain('<a href="/#contact">inquiry form</a>');
+      expect(html).not.toContain("mailto:");
       expect(html).not.toContain("noindex");
       expect(html).toContain('<link rel="canonical" href="https://predictivehvaccontrol.com/privacy">');
     });
@@ -465,7 +474,8 @@ test.describe("privacy page", () => {
     await page.goto("/privacy");
     const text = await page.locator("body").innerText();
     expect(text).toContain("We keep inquiries until we no longer need them or you ask us to delete them.");
-    expect(text).toContain(`To request deletion, email ${MAIL}.`);
+    expect(text).toContain("For a privacy request, use our inquiry form.");
+    expect(text).toContain("What would you like to improve?");
     expect(text).not.toMatch(/365|retention period|automatically delete(d)? (after|within) \d/i);
     expect(text.match(/.{0,20}[-‐-―−].{0,20}/g)).toBeNull();
     expect(problems).toEqual([]);
@@ -487,24 +497,31 @@ test.describe("admin page", () => {
 });
 
 test.describe("contact without the form", () => {
-  test("no JavaScript: one email line, no Prefer email?", async ({ browser }) => {
+  test("no JavaScript: browser and retry guidance without a personal email", async ({ browser }) => {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, javaScriptEnabled: false });
     const page = await ctx.newPage();
     await page.goto("/");
-    await expect(page.locator(".contact__alt")).toBeHidden();
+    await expect(page.locator('a[href^="mailto:"]')).toHaveCount(0);
     await expect(page.locator(".contact__fallback")).toBeVisible();
+    await expect(page.locator(".contact__fallback")).toContainText("reload this page to try again");
     expect(await page.locator("#contact").innerText()).not.toContain("Prefer email?");
+    await page.locator(".contact__fallback").scrollIntoViewIfNeeded();
+    await captureContact(page, "contact-no-js-390");
     await ctx.close();
   });
 
-  test("form off after a failed start: one email line, no Prefer email?", async ({ page }) => {
+  test("form off after a failed start: browser and retry guidance", async ({ page }) => {
     await page.goto("/");
     await page.waitForFunction(() => document.querySelector("[data-inquiry][data-ready]"));
-    await expect(page.locator(".contact__alt")).toBeVisible();
-    await page.evaluate(() => document.querySelector("#contact").setAttribute("data-form-off", ""));
-    await expect(page.locator(".contact__alt")).toBeHidden();
+    await page.addInitScript(() => { window.fetch = undefined; });
+    await page.reload();
+    await expect(page.locator("#contact")).toHaveAttribute("data-form-off", "");
+    await expect(page.locator('a[href^="mailto:"]')).toHaveCount(0);
     await expect(page.locator(".contact__fallback")).toBeVisible();
+    await expect(page.locator(".contact__fallback")).toContainText("reload this page to try again");
     await expect(page.locator("[data-inquiry]")).toBeHidden();
+    await page.locator(".contact__fallback").scrollIntoViewIfNeeded();
+    await captureContact(page, "contact-unsupported-browser");
   });
 });
 

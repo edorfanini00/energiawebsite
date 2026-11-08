@@ -167,13 +167,12 @@
     try {
       setupInquiry(contact, form);
     } catch (error) {
-      // Never leave a form that cannot send: fall back to the email link.
+      // Never leave a form that cannot send: show browser and retry guidance.
       contact.setAttribute("data-form-off", "");
     }
   }
 
   function setupInquiry(contact, form) {
-    var MAIL = "edo.orfanini@energiaigroup.com";
     var submit = form.querySelector("[data-submit]");
     var submitLabel = form.querySelector("[data-submit-label]");
     var status = form.querySelector("[data-status]");
@@ -340,13 +339,7 @@
       status.textContent = on ? "Sending your details." : "";
     }
     function fail(message) {
-      failure.textContent = "";
-      failure.appendChild(document.createTextNode(message + " Please try again, or email "));
-      var link = document.createElement("a");
-      link.href = "mailto:" + MAIL;
-      link.textContent = MAIL;
-      failure.appendChild(link);
-      failure.appendChild(document.createTextNode("."));
+      failure.textContent = message + " Your answers are still in the form. Please try Send again. If the problem continues, try again later.";
     }
 
     // One Meta Lead per newly stored inquiry, with its reference as the event
@@ -458,24 +451,27 @@
       send(answers);
     });
 
-    // Every "Discuss savings" link brings the form into view and puts the
+    // Every pilot link brings the form into view and puts the
     // cursor in the first field. Without this script they are plain anchors.
     var firstField = control("name");
+    function focusContact() {
+      var target = form.hidden ? doneTitle : firstField;
+      var barHeight = bar.getBoundingClientRect().height;
+      var sectionTop = contact.getBoundingClientRect().top + window.scrollY - barHeight - 8;
+      var fieldBox = target.getBoundingClientRect();
+      var fieldBottom = fieldBox.bottom + window.scrollY;
+      // Show the section heading too when the field still fits below it.
+      var top = fieldBottom - sectionTop <= window.innerHeight - barHeight - 24 ? sectionTop : fieldBox.top + window.scrollY - barHeight - 48;
+      var smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: Math.max(0, top), behavior: smooth ? "smooth" : "auto" });
+      target.focus({ preventScroll: true });
+      if (location.hash !== "#contact" && history.pushState) history.pushState(null, "", "#contact");
+    }
     document.querySelectorAll("a[data-cta]").forEach(function (link) {
       link.addEventListener("click", function (event) {
         if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
-        var target = form.hidden ? doneTitle : firstField;
-        var barHeight = bar.getBoundingClientRect().height;
-        var sectionTop = contact.getBoundingClientRect().top + window.scrollY - barHeight - 8;
-        var fieldBox = target.getBoundingClientRect();
-        var fieldBottom = fieldBox.bottom + window.scrollY;
-        // Show the section heading too when the field still fits below it.
-        var top = fieldBottom - sectionTop <= window.innerHeight - barHeight - 24 ? sectionTop : fieldBox.top + window.scrollY - barHeight - 48;
-        var smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        window.scrollTo({ top: Math.max(0, top), behavior: smooth ? "smooth" : "auto" });
-        target.focus({ preventScroll: true });
-        if (location.hash !== "#contact" && history.pushState) history.pushState(null, "", "#contact");
+        focusContact();
       });
     });
 
@@ -483,6 +479,8 @@
     // script runs is never lost or sent as a page navigation).
     submit.disabled = false;
     form.setAttribute("data-ready", "");
+    // Resource pages arrive through a normal /#contact link.
+    if (location.hash === "#contact") requestAnimationFrame(focusContact);
   }
 
   // Section reveals. Content is visible by default; it is only hidden for

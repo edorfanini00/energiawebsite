@@ -371,7 +371,7 @@ test.describe("indexing", () => {
     expect(sitemap.status()).toBe(200);
     expect(sitemap.headers()["content-type"]).toMatch(/^application\/xml/);
     const locs = [...(await sitemap.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-    expect(locs).toEqual(["https://predictivehvaccontrol.com/", "https://predictivehvaccontrol.com/privacy", "https://predictivehvaccontrol.com/hvac-optimization"]);
+    expect(locs).toEqual(["https://predictivehvaccontrol.com/", "https://predictivehvaccontrol.com/privacy", "https://predictivehvaccontrol.com/hvac-optimization", "https://predictivehvaccontrol.com/hvac-optimization-pilot", "https://predictivehvaccontrol.com/hvac-optimization-companies"]);
   });
 
   test("public pages are indexable with a canonical; /admin and /api stay noindex", async ({ request }) => {
@@ -413,7 +413,7 @@ test.describe("privacy wording", () => {
     // Unchanged promises.
     expect(text).toContain("We do not sell them, share them for marketing or add you to a mailing list.");
     expect(text).toContain("We keep inquiries until we no longer need them or you ask us to delete them.");
-    expect(text.trim()).toMatch(/Updated October 28, 2026$/);
+    expect(text.trim()).toMatch(/Updated November 8, 2026$/);
     // American spelling, no dashes, no invented entities.
     expect(text).not.toMatch(/[‐-―−–—]| - |\b(Inc|Ltd|LLC|Limited|Ireland)\b|recognise|organisation|analyse/);
     await expect(page.locator("h2#tracking")).toHaveText("Meta pixel");

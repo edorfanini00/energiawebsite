@@ -8,8 +8,6 @@ import { mkdirSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { request as httpRequest } from "node:http";
 
-const MAIL = "edo.orfanini@energiaigroup.com";
-const CTA_HREF = `mailto:${MAIL}?subject=Energia%20AI%3A%20our%20building`;
 const LINKEDIN = "https://www.linkedin.com/company/energia-ai/";
 const SHOTS = process.env.SHOTS === "1";
 const SHOT_DIR = process.env.SHOT_DIR || "test-results/shots";
@@ -505,7 +503,7 @@ for (const vp of viewports) {
       expect(fails).toEqual([]);
     });
 
-    test("links resolve, the CTAs open the inquiry form and mailtos are real", async ({ page, request }) => {
+    test("links resolve and all contact links open the inquiry form", async ({ page, request }) => {
       await page.goto("/");
       const links = await page.$$eval("a[href]", (as) => as.map((a) => a.getAttribute("href")));
       expect(links.length).toBeGreaterThan(5);
@@ -513,9 +511,7 @@ for (const vp of viewports) {
         if (href.startsWith("#")) {
           const id = href.slice(1);
           expect(await page.locator(`[id="${id}"]`).count(), `anchor ${href}`).toBe(1);
-        } else if (href.startsWith("mailto:")) {
-          expect(href.split("?")[0]).toBe(`mailto:${MAIL}`);
-        } else if (["/privacy", "/hvac-optimization"].includes(href)) {
+        } else if (["/privacy", "/hvac-optimization", "/hvac-optimization-pilot", "/hvac-optimization-companies"].includes(href)) {
           expect((await request.get(href)).status(), href).toBe(200);
         } else {
           expect(href, "only the published LinkedIn page is external").toBe(LINKEDIN);
@@ -528,7 +524,7 @@ for (const vp of viewports) {
       }
       await expect(page.locator("form")).toHaveCount(1);
       await expect(page.locator(".contact .button")).toHaveAttribute("type", "submit");
-      await expect(page.locator(".contact__alt .contact__mail")).toHaveAttribute("href", `mailto:${MAIL}`);
+      await expect(page.locator('a[href^="mailto:"]')).toHaveCount(0);
 
       // Every local asset referenced by the markup is served.
       const assets = await page.evaluate(() => {
@@ -1018,7 +1014,6 @@ for (const vp of viewports) {
       expect(names).toContain("dayline__tab");
       expect(names).toContain("ARTICLE.moment");
       expect(names).toContain("SUMMARY");
-      expect(names).toContain("contact__mail");
       expect(names).toContain("field__input");
 
       // Sampler control: a pale ring on paper must measure under 3:1.

@@ -3,8 +3,6 @@
 // covers. Copy, hierarchy and layout checks at the review widths.
 import { test, expect } from "@playwright/test";
 
-const MAIL = "edo.orfanini@energiaigroup.com";
-const CTA_HREF = `mailto:${MAIL}?subject=Energia%20AI%3A%20our%20building`;
 const BENEFITS = ["Lower operating costs", "Comfort for occupants", "Less routine adjustment"];
 const IMAGE_META = /illustrati(?:ve|on)|fictional|renderings?|rendered|\bdemo\b|\bconcept\b|simulated visual|sample imagery|artist'?s impression|not a real (building|site)|not readings from a real site|not a client installation/i;
 
@@ -126,17 +124,10 @@ test.describe("benefits pass copy", () => {
     expect(copy).not.toMatch(/practis|colour|centre|metre|optimis|behaviour|organis|analys(e|ing)|favour|licen[cs]e|pavement|\blift\b|storey/i);
   });
 
-  test("mailtos are exactly the established addresses and subjects", async ({ page }) => {
+  test("the public contact route is the inquiry form without personal mail links", async ({ page }) => {
     await page.goto("/");
-    const mailtos = await page.locator('a[href^="mailto:"]').evaluateAll((as) => as.map((a) => [a.className, a.getAttribute("href")]));
-    // The CTAs now open the form; email stays as text links (the success
-    // note and the no-JavaScript fallback are hidden until needed).
-    expect(mailtos).toEqual([
-      ["contact__mail", `mailto:${MAIL}`],
-      ["contact__mail", `mailto:${MAIL}`],
-      ["contact__mail", CTA_HREF],
-      ["", `mailto:${MAIL}`],
-    ]);
+    await expect(page.locator('a[href^="mailto:"]')).toHaveCount(0);
+    await expect(page.locator(".foot__links").getByRole("link", { name: "Contact" })).toHaveAttribute("href", "#contact");
   });
 });
 
