@@ -22,14 +22,14 @@ test.describe("benefits pass copy", () => {
 
   test("hero leads with the outcome and an outcome CTA", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("#top h1")).toHaveText("Spend less on HVAC. Keep people comfortable.");
-    await expect(page.locator(".hero__line")).toHaveText("Energia AI is an AI control platform for commercial HVAC, designed to reduce wasted heating and cooling and the routine adjustments your team handles every day.");
-    await expect(page.locator(".hero__cta")).toHaveText("Discuss your savings");
-    await expect(page.locator(".bar__cta")).toHaveText("Discuss savings");
+    await expect(page.locator("#top h1")).toHaveText("Lower HVAC operating costs. Keep your team in control.");
+    await expect(page.locator(".hero__line")).toHaveText("Energia AI is an AI control platform for commercial HVAC. We work with your team to identify avoidable energy use and evaluate better control within your building’s comfort and operating requirements.");
+    await expect(page.locator(".hero__cta")).toHaveText("Discuss a pilot");
+    await expect(page.locator(".bar__cta")).toHaveText("Discuss a pilot");
     // The contact section now holds the inquiry form; its button sends it.
     await expect(page.locator(".contact .button")).toHaveText("Send");
-    await expect(page).toHaveTitle("Energia AI · Spend less on commercial HVAC");
-    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /AI control platform for commercial HVAC, designed to reduce wasted heating and cooling/);
+    await expect(page).toHaveTitle("Energia AI · Lower HVAC operating costs");
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /AI control platform for commercial HVAC\. Discuss a measured building pilot/);
     await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://www.energiaigroup.com/");
   });
@@ -41,16 +41,16 @@ test.describe("benefits pass copy", () => {
     // A real H2 names the region for screen readers; it adds no visible eyebrow.
     const section = page.locator("#benefits");
     await expect(section).toHaveAttribute("aria-labelledby", "benefits-title");
-    await expect(page.locator("#benefits-title")).toHaveText("What your building gains");
+    await expect(page.locator("#benefits-title")).toHaveText("What a pilot aims to improve");
     await expect(page.locator("#benefits-title")).toHaveClass("visually-hidden");
     expect(await page.locator("#benefits-title").evaluate((el) => el.tagName)).toBe("H2");
-    await expect(page.getByRole("region", { name: "What your building gains" })).toHaveCount(1);
+    await expect(page.getByRole("region", { name: "What a pilot aims to improve" })).toHaveCount(1);
     await expect(section.locator("dt")).toHaveText(BENEFITS);
     const dd = section.locator("dd");
     await expect(dd).toHaveCount(3);
-    await expect(dd.nth(0)).toContainText("less energy goes to empty rooms");
-    await expect(dd.nth(1)).toContainText("keep rooms in use within the comfort range your team sets");
-    await expect(dd.nth(2)).toContainText("keeps oversight, limits and manual override");
+    await expect(dd.nth(0)).toContainText("measure whether an agreed control change reduces them");
+    await expect(dd.nth(1)).toContainText("occupied comfort, within the operating limits your team approves");
+    await expect(dd.nth(2)).toContainText("check whether approved control changes reduce that work");
     // No controls inside, so the keyboard path from the hero to the day is unchanged.
     await expect(section.locator("a, button, input, summary, [tabindex]")).toHaveCount(0);
     // Benefits are stated before any mechanism section.
@@ -63,18 +63,18 @@ test.describe("benefits pass copy", () => {
     await page.goto("/");
     const actions = await page.locator(".moment__part--do p").allInnerTexts();
     expect(actions).toEqual([
-      "Starts each zone only as early as it needs to be ready when people arrive, not hours ahead on a fixed schedule.",
-      "Keeps occupied rooms comfortable inside your approved setpoint range, with fresh air at or above your ventilation minimums.",
-      "Began cooling the west rooms before the sun reached them, so they stay comfortable instead of overheating.",
-      "Stops spending energy on empty rooms by moving them to your wider unoccupied range, while rooms still in use stay comfortable.",
+      "Time the morning start around expected arrivals and how quickly each zone heats or cools.",
+      "Adjust occupied zones within approved comfort limits, subject to ventilation requirements verified with your engineer.",
+      "Plan cooling before the sun reaches the west rooms, aiming to avoid an afternoon comfort problem.",
+      "Move empty rooms to an agreed unoccupied range while keeping occupied rooms within their approved limits.",
     ]);
   });
 
   test("contact names the opportunity and what a first conversation covers", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("#contact-title")).toHaveText("Find the savings opportunity in your building.");
+    await expect(page.locator("#contact-title")).toHaveText("Start with one building.");
     const lede = page.locator(".contact .lede");
-    for (const part of ["building type", "current HVAC", "operating schedules", "where energy may be wasted", "fits your equipment and BMS", "how integration and savings measurement would work"]) {
+    for (const part of ["costly operating issue", "your engineer", "check compatibility", "what a measured pilot would need to prove"]) {
       await expect(lede).toContainText(part);
     }
     // No promise of an instant estimate, free audit, report or booking tool.
@@ -93,7 +93,7 @@ test.describe("benefits pass copy", () => {
     await expect(item).toHaveAttribute("open", "");
     const answer = item.locator("p");
     await expect(answer).toBeVisible();
-    for (const factor of ["how your building runs today", "equipment", "weather", "occupancy", "energy prices", "savings potential and comfort together"]) {
+    for (const factor of ["measured pilot", "weather", "occupancy", "energy prices", "cost and comfort together", "not measured field savings"]) {
       await expect(answer).toContainText(factor);
     }
     await expect(answer).not.toContainText(/\d/);
@@ -106,7 +106,7 @@ test.describe("benefits pass copy", () => {
     // owner asked for) are inputs, not claims; set them aside for this check.
     const formText = new Set((await page.locator("#inquiry option, #inquiry .field__hint").allInnerTexts()).map((t) => t.trim()));
     copy = copy.split("\n").filter((line) => !formText.has(line.trim())).join("\n");
-    // The only digits are the four day times, ASHRAE 62.1 and the copyright year.
+    // The only digits are the illustrative day times and copyright year.
     const digits = copy.replace(/\b\d{2}:\d{2}\b/g, "").replace("ASHRAE 62.1", "").replace("© 2026", "");
     expect(digits.match(/.{0,20}\d.{0,20}/g)).toBeNull();
     for (const banned of [/%|percent/i, /[$€£]/, /\bROI\b|return on investment|payback/i, /customers?\b|clients?\b|case stud|testimonial|trusted by|deployed (in|at|across)|installed in/i, /free (audit|assessment|estimate)/i, /no hardware/i, /within \w+ (days|weeks|months)/i]) {
@@ -248,24 +248,24 @@ for (const [width, height] of [[320, 740], [360, 780], [375, 812], [390, 844], [
       }, selector);
       // Hero: each promise starts its own line; no line holds the end of one and the start of the other.
       const h1 = page.locator("#top h1");
-      await expect(h1).toHaveText("Spend less on HVAC. Keep people comfortable.");
+      await expect(h1).toHaveText("Lower HVAC operating costs. Keep your team in control.");
       const parts = h1.locator(".hero__title-line");
-      await expect(parts).toHaveText(["Spend less on HVAC.", "Keep people comfortable."]);
+      await expect(parts).toHaveText(["Lower HVAC operating costs.", "Keep your team in control."]);
       expect(await parts.evaluateAll((els) => els.map((el) => getComputedStyle(el).display))).toEqual(["block", "block"]);
       const h1Lines = await lines("#top h1");
       expect(h1Lines.some((l) => /\.\s+\S/.test(l)), h1Lines.join(" / ")).toBe(false);
       expect(h1Lines.findIndex((l) => l.startsWith("Keep"))).toBeGreaterThan(0);
       expect(h1Lines.length).toBeGreaterThanOrEqual(2);
       expect(h1Lines.length).toBeLessThanOrEqual(4);
+      for (const line of h1Lines) expect(line.split(/\s+/).length, h1Lines.join(" / ")).toBeGreaterThan(1);
       // Day: "your building" stays together and the bold phrase starts a line.
       const dayLines = await lines("#day-title");
       expect(dayLines.some((l) => /your building/.test(l)), dayLines.join(" / ")).toBe(true);
       expect(dayLines.some((l) => l.startsWith("changes by the")), dayLines.join(" / ")).toBe(true);
-      // Contact: "savings opportunity" stays together from 360 up, and the
-      // bold phrase is its own line at every width.
+      // Contact: both short phrases stay intact at every review width.
       const contactLines = await lines("#contact-title");
-      expect(contactLines[contactLines.length - 1], contactLines.join(" / ")).toBe("in your building.");
-      if (width >= 360) expect(contactLines.some((l) => /savings opportunity/.test(l)), contactLines.join(" / ")).toBe(true);
+      expect(contactLines[contactLines.length - 1], contactLines.join(" / ")).toBe("one building.");
+      expect(contactLines).toEqual(["Start with", "one building."]);
     });
 
     test("keyboard moves from the hero straight into the day", async ({ page }) => {

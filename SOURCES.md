@@ -2,6 +2,18 @@
 
 Where each brand asset, image, font, design reference and product claim comes from.
 
+## Buyer value update · 2026-11-08
+
+Current wording follows `/Users/edorfanini/.hermes/workspace/energia-market-entry-research/LANDING-BUILD.md` and its `STRATEGY.md`. The strategy is desk research and a first offer hypothesis, not customer validation or Energia field proof. It authorizes no survey, competitor or simulation percentage as an Energia result. This section supersedes historical wording notes below.
+
+- Primary grounding rechecked in the preserved `sources/core-mvp.txt` and relevant sections of `sources/tech-doc.txt` under the V3 evidence root. These describe simulation objectives, thermal response learning and proposed controls architecture, with explicit simulator limitations. They do not establish universal equipment support or field savings.
+- Hero and benefits describe a cost opportunity and the goals of a measured pilot. Repetitive work reduction is something to evaluate. There are no testimonials, guarantees, percentages, fixed pilot durations or prices.
+- The retained four day scenes now explicitly illustrate how predictive control could help. Each describes a possible action, not telemetry or a deployed outcome. The floorplan and its caption remain explanatory artwork; available plans and data inform the model without a universal reconstruction prerequisite.
+- Operator approvals, visibility, fallback, manual override, ventilation and life safety are site checks before equipment control. Loss of connectivity is not claimed to release a command. BACnet/Modbus compatibility and permissions are assessed with the existing provider before commitment. No certification, universal compatibility or no-hardware claim is made.
+- The reused start section qualifies concrete operating issues in existing centrally controlled commercial buildings. Building fit, metering, current provider and who retains bill savings precede an agreed baseline, boundaries and permissions. A suitable field comparison accounts for weather and occupancy and evaluates cost and comfort together. Simulation is preparation, not measured savings.
+- Existing artwork/crops, fonts, inquiry schema and stored flow, contact addresses, consent/privacy, admin, notification safeguards, pixel behavior, canonical URLs, robots and security configuration are retained. Evidence: `landing-build/` beside the brief; independent reviews and production release remain parent-owned.
+
+
 ## Brand
 
 | Item | Source | How it is used |

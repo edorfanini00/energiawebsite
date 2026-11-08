@@ -6,10 +6,10 @@ const evidence = process.env.COPY_EVIDENCE_DIR || "test-results/copy-correction"
 const forbidden = /illustrati(?:ve|on)|fictional|renderings?|rendered|\bdemo\b|\bconcept\b|simulated visual|sample imagery|not readings from a real site|not a client installation/i;
 const caption = "The dark area is the building core. Outlines divide the floor into zones. The fine grid represents the control volumes used to calculate heat flow.";
 const actions = {
-  dawn: "Starts each zone only as early as it needs to be ready when people arrive",
-  morning: "Keeps occupied rooms comfortable inside your approved setpoint range",
-  afternoon: "Began cooling the west rooms before the sun reached them",
-  dusk: "Stops spending energy on empty rooms",
+  dawn: "Time the morning start around expected arrivals",
+  morning: "Adjust occupied zones within approved comfort limits",
+  afternoon: "Plan cooling before the sun reaches the west rooms",
+  dusk: "Move empty rooms to an agreed unoccupied range",
 };
 
 for (const [width, height] of [[1440, 900], [768, 1024], [390, 844], [375, 812], [320, 740]]) {
@@ -35,10 +35,10 @@ for (const [width, height] of [[1440, 900], [768, 1024], [390, 844], [375, 812],
         }
         await document.fonts.ready;
       });
-      await expect(page.locator("#day .lede")).toContainText("Energia AI plans for both, hour by hour.");
+      await expect(page.locator("#day .lede")).toContainText("This example shows how predictive control could help as weather and occupancy change.");
       await expect(page.locator(".plan figcaption")).toHaveText(caption);
       await expect(page.locator(".day__caption, .foot__note")).toHaveCount(0);
-      await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /designed to/);
+      await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /measured building pilot/);
       // Indexable since the Meta pixel release: no robots meta, one canonical.
       await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://www.energiaigroup.com/");

@@ -103,7 +103,7 @@ for (const vp of VIEWPORTS) {
       await expect(page.locator(".contact__fallback")).toBeHidden();
     });
 
-    test("every Discuss savings CTA scrolls to the form and focuses the first field", async ({ page }) => {
+    test("every Discuss a pilot CTA scrolls to the form and focuses the first field", async ({ page }) => {
       await page.goto("/");
       await page.waitForFunction(() => document.querySelector("[data-inquiry][data-ready]"));
       const ctas = vp.width > 860 ? [".bar__cta"] : [".hero__cta", "menu"];
@@ -116,7 +116,7 @@ for (const vp of VIEWPORTS) {
           await page.locator(".bar__cta").click();
           await expect(page.locator("[data-toggle]")).toHaveAttribute("aria-expanded", "false");
         } else {
-          await expect(page.locator(cta)).toHaveText(cta === ".bar__cta" ? "Discuss savings" : "Discuss your savings");
+          await expect(page.locator(cta)).toHaveText("Discuss a pilot");
           await page.locator(cta).click();
         }
         await expect(page.locator("#inquiry-name")).toBeFocused();
