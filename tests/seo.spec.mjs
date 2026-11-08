@@ -37,7 +37,9 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
       expect(graph["@graph"][0]).toMatchObject({ name: "Energia AI", url: SITE + "/" });
       expect(graph["@graph"][1]).toMatchObject({ name: "Energia AI", url: SITE + "/", publisher: { "@id": SITE + "/#organization" } });
       expect(graph["@graph"][2]).toMatchObject({ url: SITE + path, name: await page.title(), description: await page.locator('meta[name="description"]').getAttribute("content") });
-      expect(block).not.toMatch(/rating|price|review|sameAs|dateModified|datePublished|SearchAction/);
+      expect(graph["@graph"][0].sameAs).toEqual(["https://www.linkedin.com/company/energia-ai/"]);
+      expect(graph["@graph"][0].founder).toEqual({ "@type": "Person", "@id": SITE + "/about#founder", name: "Edoardo Orfanini", sameAs: ["https://www.linkedin.com/in/edoardo-orfanini/"] });
+      expect(block).not.toMatch(/rating|price|review|alternateName|dateModified|datePublished|SearchAction/);
       const hash = "'sha256-" + createHash("sha256").update(block).digest("base64") + "'";
       const csp = response.headers()["content-security-policy"];
       expect(csp.match(/'sha256-[^']+'/g)).toEqual([hash]);

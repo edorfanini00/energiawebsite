@@ -62,7 +62,9 @@ test('research retains denominators, methods, limitations and explicit third-par
   const graph = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent())['@graph'];
   expect(graph[2].citation).toEqual(citations);
   expect(graph[2].publisher).toEqual({ '@id': 'https://predictivehvaccontrol.com/#organization' });
-  expect(JSON.stringify(graph)).not.toMatch(/Person|reviewedBy|credential|award/);
+  // The publisher's founder is identity context, not an author or reviewer.
+  expect(JSON.stringify(graph[2])).not.toMatch(/Person|author|reviewedBy/);
+  expect(JSON.stringify(graph)).not.toMatch(/reviewedBy|credential|award/);
   await page.goto('/about');
   const about = await page.locator('main').innerText();
   expect(about).toContain('A simulation is preparation, not a customer result');

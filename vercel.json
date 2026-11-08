@@ -49,7 +49,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'none'; script-src 'self' 'sha256-EXXSgSTVyYGAsTy/80x/0oBudawUrzAMPBgwp8ucpEs=' https://connect.facebook.net; style-src 'self'; img-src 'self' https://www.facebook.com; font-src 'self'; connect-src 'self' https://www.facebook.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
+          "value": "default-src 'none'; script-src 'self' 'sha256-tlyFHuQSIchTjm1Fie33CE/id1rNadLa1TqV2CBqVvc=' https://connect.facebook.net; style-src 'self'; img-src 'self' https://www.facebook.com; font-src 'self'; connect-src 'self' https://www.facebook.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
         }
       ]
     },
@@ -58,7 +58,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'none'; script-src 'self' 'sha256-wTTfl+lpwtj3wq91SNxPV8fXx+KGTpfaBMjs4wAMcOE=' https://connect.facebook.net; style-src 'self'; img-src 'self' https://www.facebook.com; font-src 'self'; connect-src 'self' https://www.facebook.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
+          "value": "default-src 'none'; script-src 'self' 'sha256-t0hO8x3YgxfrKmrnH3GkbM6xw2aKsuWYOLZOMCyb7Hk=' https://connect.facebook.net; style-src 'self'; img-src 'self' https://www.facebook.com; font-src 'self'; connect-src 'self' https://www.facebook.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
         }
       ]
     },
@@ -67,7 +67,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'none'; script-src 'self' 'sha256-rCXvWuC1sFZR2UspH+uQM56+RbpAYeRvYkoB4wCaYlk='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
+          "value": "default-src 'none'; script-src 'self' 'sha256-/ntIuPFbOb2pzoeNyQ3n/hY729Ngqk6Onxh9zso9xqc='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
         }
       ]
     },
@@ -76,7 +76,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'none'; script-src 'self' 'sha256-hifUHAgpRQvJCaDLhhBzoMf8X1j6zSTFq/xQFNuF/Dc='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
+          "value": "default-src 'none'; script-src 'self' 'sha256-Z6TILJ3ni/QZrfGRmsKf4wDDGG4mT7Iof35+Fyz+AQs='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
         }
       ]
     },
@@ -85,7 +85,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'none'; script-src 'self' 'sha256-rC2CdTRyEsKYTWAejVutDTLnR1Y3NsXnGu1urrW5WoE='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
+          "value": "default-src 'none'; script-src 'self' 'sha256-JRlivJAKhXC96wfNFXA0xovjrvZ3TRAOgt5NxL/CbVs='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
         }
       ]
     },
@@ -94,7 +94,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'none'; script-src 'self' 'sha256-L8ul2uNqYKQfJL6WWfFHQwA2PmpkTFZkklmqSXoD5iE='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
+          "value": "default-src 'none'; script-src 'self' 'sha256-8AkmUps4AICTRUQfKRhpoQHaIG9NiF3yRzBublLwbDU='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
         }
       ]
     },
@@ -103,7 +103,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'none'; script-src 'self' 'sha256-JvNzOClfET5j0w+0J3S/UVtQp3sb31Uzu6+Ey02jHNc='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
+          "value": "default-src 'none'; script-src 'self' 'sha256-A7IeJyylaI8PHWoiH2n1SkQQfkeAQHEfyD360Jud404='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
         }
       ]
     },
