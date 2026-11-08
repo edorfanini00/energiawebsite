@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test("pilot invitation preserves contact focus and describes a bounded measured offer", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("[data-cta]")).toHaveText(["Discuss a pilot", "Discuss a pilot"]);
+  await expect(page.locator("[data-cta]")).toHaveText(["Discuss a pilot", "Discuss a pilot", "Contact"]);
   for (const cta of await page.locator("[data-cta]").all()) await expect(cta).toHaveAttribute("href", "#contact");
   await expect(page.locator("#contact-title")).toHaveText("Start with one building.");
   await expect(page.locator("#inquiry-title")).toHaveText("Request a pilot discussion");

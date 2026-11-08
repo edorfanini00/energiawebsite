@@ -135,3 +135,29 @@ test("a synthetic inquiry travels from the form to the dashboard and is erased",
   assert.equal(after, 401);
   assert.deepEqual(problems, []);
 });
+
+test("privacy instructions lead to a stored synthetic request through the existing form", async () => {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  try {
+    await page.goto(origin + "/privacy");
+    await page.getByRole("link", { name: "inquiry form", exact: true }).click();
+    await page.waitForFunction(() => document.activeElement?.id === "inquiry-name");
+    await page.fill("#inquiry-name", "Synthetic Privacy Tester");
+    await page.fill("#inquiry-email", "synthetic.privacy@example.com");
+    await page.fill("#inquiry-company", "Privacy request");
+    await page.selectOption("#inquiry-building-type", "Other");
+    await page.selectOption("#inquiry-floor-area", "Not sure");
+    await page.locator("[data-more] > summary").click();
+    await page.fill("#inquiry-improve", "Synthetic privacy request: please show or delete my prior inquiry details.");
+    await page.locator("[data-submit]").click();
+    await page.locator("[data-done]").waitFor({ timeout: 30000 });
+    const shown = await page.locator("[data-reference]").textContent();
+    const reference = shown.replace(" ", "-");
+    const row = (await pool.query("SELECT * FROM inquiries WHERE reference = $1", [reference])).rows[0];
+    assert.equal(row.company, "Privacy request");
+    assert.equal(row.improve, "Synthetic privacy request: please show or delete my prior inquiry details.");
+    assert.equal(await page.locator('a[href^="mailto:"]').count(), 0);
+    assert.match(await page.locator("[data-done]").innerText(), /Keep this reference for your records/);
+    await pool.query("DELETE FROM inquiries WHERE reference = $1", [reference]);
+  } finally { await page.close(); }
+});

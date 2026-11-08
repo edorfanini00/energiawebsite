@@ -4,7 +4,7 @@ import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const SITE = "https://predictivehvaccontrol.com";
-const pages = [["/", "index.html"], ["/privacy", "privacy.html"], ["/hvac-optimization", "hvac-optimization.html"]];
+const pages = [["/", "index.html"], ["/privacy", "privacy.html"], ["/hvac-optimization", "hvac-optimization.html"], ["/hvac-optimization-pilot", "hvac-optimization-pilot.html"], ["/hvac-optimization-companies", "hvac-optimization-companies.html"]];
 
 for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844 }]) {
   for (const [path, file] of pages) {
@@ -43,7 +43,7 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
       expect(csp.match(/'sha256-[^']+'/g)).toEqual([hash]);
       expect(csp).not.toMatch(/unsafe-inline|unsafe-eval/);
       expect(csp).toContain("form-action 'self'");
-      if (path === "/hvac-optimization") expect(csp).not.toContain("facebook");
+      if (path.startsWith("/hvac-optimization")) expect(csp).not.toContain("facebook");
       const imageUrl = await page.locator('meta[property="og:image"]').getAttribute("content");
       expect(imageUrl.startsWith(SITE + "/assets/")).toBe(true);
       const image = await request.get(new URL(imageUrl).pathname);
