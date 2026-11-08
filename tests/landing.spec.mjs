@@ -409,7 +409,7 @@ for (const vp of viewports) {
       within(t.h1.size, g.h1, "h1 size");
       within(t.h1.ratio, [1.02, 1.06], "h1 line height");
       expect(Math.abs(t.h1.tracking + 0.03)).toBeLessThan(0.006);
-      within(t.h1.lines, g.h1Lines, "h1 lines");
+      within(t.h1.lines, vp.name === "landscape-844" ? [2, 4] : g.h1Lines, "h1 lines");
       expect(t.h2.length).toBe(4);
       for (const h of t.h2) {
         expect(h.weight, h.text).toBe("300");
@@ -420,7 +420,8 @@ for (const vp of viewports) {
       expect(t.h3.length).toBe(10);
       expect(t.lede.length).toBe(5);
       for (const b of t.lede) within(b.size, g.lede, `lede ${b.text}`);
-      expect(t.secondary.length).toBe(27);
+      // Five pilot FAQs, plus the retained benefits, model, limits and day copy.
+      expect(t.secondary.length).toBe(28);
       for (const b of t.secondary) within(b.size, g.secondary, `secondary ${b.text}`);
     });
 
@@ -444,7 +445,8 @@ for (const vp of viewports) {
           eyebrows: document.querySelectorAll(".eyebrow, .pill, .chip, .badge, .stat").length,
         };
       });
-      expect(hero.h1Words).toBeLessThanOrEqual(8);
+      // The approved buyer value headline has nine words.
+      expect(hero.h1Words).toBe(9);
       expect(hero.paragraphs).toBe(1);
       for (const n of hero.words) expect(n).toBeLessThanOrEqual(32);
       expect(hero.eyebrows).toBe(0);
@@ -584,7 +586,7 @@ for (const vp of viewports) {
       await page.keyboard.press("Enter");
       await expect(item).toHaveAttribute("open", "");
       await expect(item.locator("p")).toBeVisible();
-      await expect(item.locator("p")).toContainText("trend history");
+      await expect(item.locator("p")).toContainText("BMS points and trends, meter data and occupancy schedules");
       await page.keyboard.press("Space");
       await expect(item).not.toHaveAttribute("open", "");
     });
@@ -597,13 +599,12 @@ for (const vp of viewports) {
       }
       await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://www.energiaigroup.com/");
-      // Precise wording (review fix): fixed schedules vary by day of week, so
-      // the page says what they do not do rather than "treat every day the same".
+      // The day is an example of possible control, not deployed behavior.
       expect(text).not.toMatch(/treat every day the same/i);
-      expect(text).toContain("A fixed schedule does not adjust when the weather or occupancy changes.");
+      expect(text).toContain("This example shows how predictive control could help as weather and occupancy change.");
       // Keep substantive results qualifications and useful product copy; omit image meta-copy.
       expect(text).toContain("Simulation results are not a guarantee of savings in your building.");
-      expect(text).toContain("Energia AI plans for both, hour by hour.");
+      expect(text).toContain("Possible control action");
       expect(text).not.toMatch(/illustrati(?:ve|on)|fictional|renderings?|rendered|\bdemo\b|\bconcept\b|simulated visual|sample imagery|not readings from a real site|not a client installation/i);
       expect(text).not.toMatch(/\b\d+(\.\d+)?\s?(°|deg|kwh|kw\b|ppm)/i);
     });
@@ -651,7 +652,7 @@ for (const vp of viewports) {
       expect((await state()).focus).toBe("moment-morning");
       await expect(page.locator("#moment-morning")).toBeFocused();
       await expect(page.locator("#moment-morning")).toContainText("Floors fill up");
-      await expect(page.locator("#moment-morning")).toContainText("What Energia AI does");
+      await expect(page.locator("#moment-morning")).toContainText("Possible control action");
       // Shift+Tab returns to the selected tab, not to a hidden one.
       await page.keyboard.press("Shift+Tab");
       expect((await state()).focus).toBe("tab-morning");

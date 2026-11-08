@@ -1,6 +1,12 @@
-# Energia V3 copy
+# Energia AI landing copy
 
-Selected B. Source of truth: `index.html`. Audience: commercial building owners and facilities teams. Purpose: show owners what they gain (lower HVAC costs, comfort in occupied rooms, less routine adjustment), explain how the control design delivers it, and invite a specific first conversation via the existing mailto. The day is a scenario explaining the mechanism, not live product UI.
+Current buyer value update, November 8, 2026. Source of truth: `index.html`. Audience: commercial building owners and facilities teams. Invite a measured pilot for an existing building with compatible central controls. Benefits are goals to evaluate, not field results. Day actions are hypothetical examples. Existing inquiry fields, consent, privacy, confirmation and failure behavior remain unchanged.
+
+## Metadata
+
+Title: Energia AI · Lower HVAC operating costs
+
+Description: Energia AI is an AI control platform for commercial HVAC. It learns building response to evaluate adaptive control. Discuss a measured building pilot within your team’s operating limits.
 
 ## Page text in DOM order
 
@@ -14,33 +20,33 @@ Limits
 
 Questions
 
-Discuss savings
+Discuss a pilot
 
 Menu
 
-Spend less on HVAC. Keep people comfortable.
+Lower HVAC operating costs. Keep your team in control.
 
-Energia AI is an AI control platform for commercial HVAC, designed to reduce wasted heating and cooling and the routine adjustments your team handles every day.
+Energia AI is an AI control platform for commercial HVAC. It learns your building’s response to weather, occupancy and control changes. Start with a measured pilot within your team’s operating limits.
 
-Discuss your savings
+Discuss a pilot
 
-What your building gains  *(screen reader heading, not shown)*
+What a pilot aims to improve
 
 Lower operating costs
 
-Heating and cooling run when and where spaces are in use, so less energy goes to empty rooms and unneeded runtime.
+Find avoidable heating and cooling costs, then measure whether an agreed control change reduces them.
 
 Comfort for occupants
 
-Energia AI plans ahead for weather and the day’s schedule to keep rooms in use within the comfort range your team sets.
+Evaluate energy use alongside occupied comfort, within the operating limits your team approves.
 
 Less routine adjustment
 
-Your team spends less time changing setpoints by hand and keeps oversight, limits and manual override.
+Target repeated manual adjustments and check whether approved control changes reduce that work.
 
 The load on your building changes by the hour.
 
-A fixed schedule does not adjust when the weather or occupancy changes. Energia AI plans for both, hour by hour.
+This example shows how predictive control could help as weather and occupancy change.
 
 06:30 Dawn
 
@@ -50,9 +56,9 @@ A fixed schedule does not adjust when the weather or occupancy changes. Energia 
 
 19:30 Evening
 
-What Energia AI does
+Possible control action
 
-Starts each zone only as early as it needs to be ready when people arrive, not hours ahead on a fixed schedule.
+Time the morning start around expected arrivals and how quickly each zone heats or cools.
 
 06:30 Before anyone arrives
 
@@ -60,9 +66,9 @@ What changes
 
 The building is empty. The forecast shows a warm afternoon.
 
-What Energia AI does
+Possible control action
 
-Keeps occupied rooms comfortable inside your approved setpoint range, with fresh air at or above your ventilation minimums.
+Adjust occupied zones within approved comfort limits, subject to ventilation requirements verified with your engineer.
 
 10:00 Floors fill up
 
@@ -70,9 +76,9 @@ What changes
 
 People arrive, and the morning sun moves onto the south face.
 
-What Energia AI does
+Possible control action
 
-Began cooling the west rooms before the sun reached them, so they stay comfortable instead of overheating.
+Plan cooling before the sun reaches the west rooms, aiming to avoid an afternoon comfort problem.
 
 15:30 Sun on the west glass
 
@@ -80,9 +86,9 @@ What changes
 
 West windows catch the afternoon sun. Those rooms gain heat fastest.
 
-What Energia AI does
+Possible control action
 
-Stops spending energy on empty rooms by moving them to your wider unoccupied range, while rooms still in use stay comfortable.
+Move empty rooms to an agreed unoccupied range while keeping occupied rooms within their approved limits.
 
 19:30 The building empties
 
@@ -92,105 +98,213 @@ Most people have gone home. A few rooms are still in use.
 
 It starts with a model of your building.
 
-Your floor plans become thermal zones. Energia AI then learns how each zone responds to sun, people and your HVAC.
-
-West zone
-
-Corner
-
-South zone
-
-Interior
-
-West zone
-
-Corner
-
-South zone
-
-Interior
+Energia AI learns how your building responds to weather, occupancy and HVAC changes, using available plans and operating data.
 
 The dark area is the building core. Outlines divide the floor into zones. The fine grid represents the control volumes used to calculate heat flow.
 
 Model
 
-Floor plans, HVAC data and operating history become a thermal model of how heat moves through your building.
+Available plans, equipment details and trend history inform a model of building response. The scope depends on the control issue and data available.
 
 Train
 
-The AI practices across simulated weather and occupancy, learning to balance comfort and energy use before it controls any equipment.
+The AI practices across simulated weather and occupancy to prepare control strategies. Simulation results are not a guarantee of savings in your building.
 
 Control
 
-It proposes setpoints from current conditions and the forecast. Your limits check each one before it reaches your building management system (BMS).
+The learned building response helps evaluate adaptive HVAC setpoints. We agree permitted changes and verify limits with your engineer and BMS provider before equipment control.
 
 Your team sets the limits.
 
-The control design puts your facilities team in charge of operating boundaries, with checks before every setpoint reaches your BMS.
+Your team approves the operating boundaries and can review control changes. Before control begins, we verify permissions, manual override and fallback with your engineer and existing controls provider.
 
 Setpoint range
 
-Setpoints stay inside the range you approve, with a deadband to avoid simultaneous heating and cooling.
+We agree permitted setpoint ranges and verify the heating and cooling deadband with your engineer.
 
 Fresh air
 
-Your site’s outdoor air minimums, based on standards such as ASHRAE 62.1, are control constraints. Ventilation is not reduced below them to save energy.
+We agree ventilation requirements with your engineer and verify how the pilot will preserve them.
 
 Equipment
 
-Your facilities team agrees equipment limits before control is enabled.
+We agree equipment limits and permitted changes with your facilities team and controls provider.
 
 Fallback
 
-If the connection drops or a reading looks wrong, control returns to your existing sequences.
+We test the return to existing controls and manual override on site, including connection loss and unreliable readings.
 
 Life safety
 
-Fire, smoke and critical equipment alarms take priority. Energia AI steps back and your building’s own systems and manual override take over.
+We verify the pilot’s control boundaries against your site’s fire, smoke and critical equipment protections.
 
 Your BMS
 
-We connect through open protocols such as BACnet and Modbus, and confirm compatibility with your team during the assessment.
+We assess BACnet or Modbus compatibility, available points and access permissions with your existing provider before committing to a pilot.
 
-What it takes to start.
+A pilot for a real operating issue.
 
-Find the opportunity, compare control strategies, then plan the integration.
+HVAC running beyond occupancy, recurring manual adjustments or unexplained energy use? Start with an existing commercial building with compatible central controls.
 
-Assessment
+Review the building
 
-We review HVAC equipment, BMS points and trend history with your team to identify waste and confirm compatibility.
+With your engineer and existing controls provider, review equipment fit, available data, metering and who pays and retains the bill savings.
 
-Model and comparison
+Agree the pilot
 
-We compare proposed control with current operation in a model of your building, evaluating cost and comfort together. Simulation results are not a guarantee of savings in your building.
+Choose a bounded operating issue. Agree the baseline, comfort and operating limits, control permissions and what the pilot must prove.
 
-Gateway
+Measure the result
 
-A gateway beside your BMS reads data and writes setpoints. Your security requirements decide whether the AI runs on the gateway or in our cloud.
+Use a suitable field comparison that accounts for weather and occupancy. Evaluate cost and comfort together over a period suited to the building.
 
 Questions
 
 Which buildings is Energia AI for?
 
-Commercial buildings with central HVAC and a building management system. An assessment confirms suitability.
+Existing commercial buildings with central HVAC controls. We review the operating issue, equipment, data and access with your engineer to confirm fit before a pilot.
 
 How much could my building save?
 
-It depends on how your building runs today, its equipment, local weather, occupancy and energy prices. An assessment of your site looks at savings potential and comfort together.
+Savings must be established by a measured pilot, accounting for weather, occupancy and energy prices. We assess cost and comfort together. Simulated savings are preparation, not measured field savings.
 
 What data do you need?
 
-Floor plans, HVAC equipment details, BMS points with trend history, and your occupancy schedules. Weather forecasts come from public sources.
+We review available plans, equipment details, BMS points and trends, meter data and occupancy schedules. Integration and any additional requirements are assessed with your existing provider before commitment.
 
 Can operators take control back?
 
-Yes. Operators keep manual override and your existing control sequences. If the connection drops or data looks wrong, control returns to those sequences.
+Your team retains control authority. Before enabling equipment control, we agree approvals and visibility, then verify manual override and fallback on site with your engineer and existing controls provider.
 
-Find the savings opportunity in your building.
+What does a pilot include?
 
-Tell us your building type, current HVAC and operating schedules. A first conversation covers where energy may be wasted, whether Energia AI fits your equipment and BMS, and how integration and savings measurement would work.
+A building review, an agreed operating issue and baseline, verified control permissions and a field comparison of cost and comfort. Scope, measurement period and responsibilities are agreed with your team before starting.
 
-Discuss your savings
+Start with one building.
+
+We’ll review a costly operating issue with you and your engineer, check compatibility and agree what a measured pilot would need to prove.
+
+Prefer email? edo.orfanini@energiaigroup.com
+
+edo.orfanini@energiaigroup.com
+
+Request a pilot discussion
+
+Name
+
+Work email
+
+Company
+
+Building type
+
+Select
+
+Office
+
+Retail
+
+Healthcare
+
+Education
+
+Hotel
+
+Industrial or warehouse
+
+Mixed use
+
+Other
+
+Total floor area
+
+Select
+
+Under 50,000 sq ft
+
+50,000 to 200,000 sq ft
+
+200,000 to 500,000 sq ft
+
+Over 500,000 sq ft
+
+Not sure
+
+Add optional details role, buildings, BMS, energy spend
+
+Role
+
+Select
+
+Owner or executive
+
+Facilities or engineering
+
+Energy or sustainability
+
+Property manager
+
+Other
+
+Phone
+
+Number of buildings
+
+Select
+
+1
+
+2 to 5
+
+6 to 20
+
+More than 20
+
+Annual energy spend
+
+Select
+
+Under $100,000
+
+$100,000 to $500,000
+
+$500,000 to $1M
+
+Over $1M
+
+Prefer not to say
+
+Building management system
+
+Select
+
+Yes
+
+No
+
+Not sure
+
+Which one?
+
+What would you like to improve?
+
+Up to 1,000 characters.
+
+Leave this field empty
+
+Send
+
+We use these details only to reply about your building. Privacy
+
+Privacy
+
+Thanks. We’ll be in touch shortly.
+
+Your reference is . If anything changes, email edo.orfanini@energiaigroup.com .
+
+edo.orfanini@energiaigroup.com
+
+Email us about your building at edo.orfanini@energiaigroup.com .
 
 edo.orfanini@energiaigroup.com
 
@@ -199,6 +313,18 @@ Email
 LinkedIn (opens in a new tab)
 
 © 2026 Energia AI
+
+## Review copy refinement
+
+Both reviews and parent notes are addressed in the current page text above: explicit building-response learning and adaptive control evaluation, with a measured pilot; collaborative limits rows and a consolidated verification gate before control. Operator approval/visibility and engineer/provider participation remain explicit. Fallback is tested on site for connection loss and unreliable readings, never promised universally. Metadata and model/control copy use the same product mechanism. No additional simulation disclaimers or behavioral changes.
+
+## Buyer value editing record
+
+The November 8 brief supersedes earlier outcome wording and the removal of the illustrative day context. Both primary links say “Discuss a pilot” and retain `#contact`. “Start with one building.” introduces the existing form. Its hidden heading reads “Request a pilot discussion”; the submit label stays “Send”, preserving its sending/retry states without script changes.
+
+Available plans and operating data inform building response learning. Simulation prepares strategies; field measurement must establish savings. Fallback, override, ventilation, life safety and protocol compatibility are explicit site prerequisites. The pilot sequence covers the operating trigger, existing engineer/provider, bill savings recipient, baseline, permissions and weather/occupancy adjusted field comparison. No price, timeline, savings percentage, field proof or universal compatibility is asserted.
+
+Historical notes below describe earlier versions and are not the current copy or authority for new claims.
 
 ## Editing record
 

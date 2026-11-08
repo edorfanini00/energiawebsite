@@ -105,7 +105,7 @@ for (const [width, height] of [[1440, 900], [768, 1024], [859, 1024], [860, 1024
         expect(geometry.unobscured).toBe(true);
         expect(geometry.beforeArt, "source order follows visible action → artwork").toBe(true);
         await expect(panel.locator(".moment__part--do")).toHaveCount(1);
-        await expect(page.locator("#day .lede")).toContainText("Energia AI plans for both, hour by hour.");
+        await expect(page.locator("#day .lede")).toContainText("This example shows how predictive control could help as weather and occupancy change.");
         await page.locator(`#tab-${moment}`).focus();
         await page.keyboard.press("Tab");
         await expect(panel).toBeFocused();
@@ -136,6 +136,6 @@ test("R1 disclosure resets across 860/861 and still closes on outside click", as
 
 test("R1 metadata qualifies design intent and the plan explains its core", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /designed to/);
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /measured building pilot/);
   await expect(page.locator(".plan figcaption")).toContainText("dark area is the building core");
 });

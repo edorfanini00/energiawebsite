@@ -346,6 +346,8 @@ html:not(.js) .bar { position: absolute; }
 }
 /* Each promise on its own line, so a narrow wrap never lands mid sentence. */
 .hero__title-line { display: block; }
+/* Keep each short phrase intact as the two sentences wrap on phones. */
+.hero__phrase { white-space: nowrap; }
 .hero__line {
   max-width: 30ch;
   color: var(--ink-soft);

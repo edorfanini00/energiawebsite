@@ -2,6 +2,24 @@
 
 Where each brand asset, image, font, design reference and product claim comes from.
 
+## Review copy refinement · 2026-11-08
+
+Addresses both independent reviews (A1/B1 and A2/B2) and PARENT-COPY-NOTES.md. Hero and model copy now explicitly explain learning building response to weather, occupancy and control changes; the Control step describes evaluating adaptive HVAC setpoints. This maps to thermal-response learning and simulation/control objectives in the same technical/MVP sources, not evidence of deployed autonomy or field savings. The measured pilot, model simulation qualification and field-measurement FAQ remain.
+
+The limits introduction retains operator approval, visibility and verification of permissions, manual override and fallback before control with the engineer and existing provider. Rows describe collaborative pilot steps: agreed setpoint/deadband, ventilation and equipment limits; on-site return-to-controls/manual-override testing for connection loss and unreliable readings; and site fire/smoke/critical-equipment boundaries. These are proposed pilot-process commitments, not universal certified protection or obligations shifted to the buyer. The operator FAQ preserves the same gate. BMS compatibility wording is unchanged. No asset, runtime, integration or safety implementation claim was added.
+
+## Buyer value update · 2026-11-08
+
+Current wording follows `/Users/edorfanini/.hermes/workspace/energia-market-entry-research/LANDING-BUILD.md` and its `STRATEGY.md`. The strategy is desk research and a first offer hypothesis, not customer validation or Energia field proof. It authorizes no survey, competitor or simulation percentage as an Energia result. This section supersedes historical wording notes below.
+
+- Primary grounding rechecked in the preserved `sources/core-mvp.txt` and relevant sections of `sources/tech-doc.txt` under the V3 evidence root. These describe simulation objectives, thermal response learning and proposed controls architecture, with explicit simulator limitations. They do not establish universal equipment support or field savings.
+- Hero and benefits describe a cost opportunity and the goals of a measured pilot. Repetitive work reduction is something to evaluate. There are no testimonials, guarantees, percentages, fixed pilot durations or prices.
+- The retained four day scenes now explicitly illustrate how predictive control could help. Each describes a possible action, not telemetry or a deployed outcome. The floorplan and its caption remain explanatory artwork; available plans and data inform the model without a universal reconstruction prerequisite.
+- Operator approvals, visibility, fallback, manual override, ventilation and life safety are site checks before equipment control. Loss of connectivity is not claimed to release a command. BACnet/Modbus compatibility and permissions are assessed with the existing provider before commitment. No certification, universal compatibility or no-hardware claim is made.
+- The reused start section qualifies concrete operating issues in existing centrally controlled commercial buildings. Building fit, metering, current provider and who retains bill savings precede an agreed baseline, boundaries and permissions. A suitable field comparison accounts for weather and occupancy and evaluates cost and comfort together. Simulation is preparation, not measured savings.
+- Existing artwork/crops, fonts, inquiry schema and stored flow, contact addresses, consent/privacy, admin, notification safeguards, pixel behavior, canonical URLs, robots and security configuration are retained. Evidence: `landing-build/` beside the brief; independent reviews and production release remain parent-owned.
+
+
 ## Brand
 
 | Item | Source | How it is used |
