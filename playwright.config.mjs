@@ -21,9 +21,9 @@ export default defineConfig({
     headless: true,
   },
   webServer: {
-    command: "node scripts/serve.mjs",
+    command: "node scripts/build-static.mjs && node scripts/serve.mjs",
     url: `http://127.0.0.1:${port}/`,
     reuseExistingServer: false,
-    env: { PORT: String(port) },
+    env: { PORT: String(port), SERVE_DIST: "1" },
   },
 });

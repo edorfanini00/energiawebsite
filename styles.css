@@ -1077,3 +1077,6 @@ html:not(.js) .contact__alt,
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Contextual guide link, using the existing landing type and spacing. */
+.faq__guide { margin-top: 24px; font-size: 16px; }

@@ -452,7 +452,7 @@ for (const vp of VIEWPORTS) {
       expect(html).toContain("We keep inquiries until we no longer need them or you ask us to delete them.");
       expect(html).toContain(`mailto:${MAIL}`);
       expect(html).not.toContain("noindex");
-      expect(html).toContain('<link rel="canonical" href="https://www.energiaigroup.com/privacy">');
+      expect(html).toContain('<link rel="canonical" href="https://predictivehvaccontrol.com/privacy">');
     });
   });
 }

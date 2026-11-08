@@ -1,9 +1,10 @@
 // Vercel build: copy exactly the public files into dist/. Functions in api/
 // are bundled separately and are never served as files.
-import { cp, mkdir, readdir, rm, stat } from "node:fs/promises";
+import { cp, mkdir, readFile, readdir, rm, stat } from "node:fs/promises";
 import { join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { publicFile } from "./public-files.mjs";
+import { validateJsonLd } from "./validate-jsonld.mjs";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const out = join(root, "dist");
@@ -29,4 +30,5 @@ for (const file of candidates) {
   await cp(file, join(out, path));
   count++;
 }
-console.log(`Copied ${count} public files to dist/`);
+await validateJsonLd(out, JSON.parse(await readFile(join(root, "vercel.json"), "utf8")));
+console.log(`Copied ${count} public files to dist/; JSON-LD and CSP hashes validated`);
