@@ -479,8 +479,29 @@
     // script runs is never lost or sent as a page navigation).
     submit.disabled = false;
     form.setAttribute("data-ready", "");
-    // Resource pages arrive through a normal /#contact link.
-    if (location.hash === "#contact") requestAnimationFrame(focusContact);
+    // Native fragment navigation can reset focus after deferred scripts run.
+    // Hand off once after load and the next rendering frame, unless the
+    // visitor has already interacted or chosen a different focus/fragment.
+    if (location.hash === "#contact") {
+      var initialContactPending = true;
+      var interactionEvents = ["pointerdown", "keydown", "wheel", "touchstart", "hashchange"];
+      function cancelInitialContact() { initialContactPending = false; }
+      function settleInitialContact() {
+        requestAnimationFrame(function () {
+          interactionEvents.forEach(function (type) {
+            window.removeEventListener(type, cancelInitialContact, true);
+          });
+          var active = document.activeElement;
+          if (initialContactPending && location.hash === "#contact" &&
+              (active === document.body || active === root || active === contact)) focusContact();
+        });
+      }
+      interactionEvents.forEach(function (type) {
+        window.addEventListener(type, cancelInitialContact, { capture: true, passive: true });
+      });
+      if (document.readyState === "complete") settleInitialContact();
+      else window.addEventListener("load", settleInitialContact, { once: true });
+    }
   }
 
   // Section reveals. Content is visible by default; it is only hidden for
