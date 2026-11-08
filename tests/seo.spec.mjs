@@ -4,7 +4,7 @@ import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const SITE = "https://predictivehvaccontrol.com";
-const pages = [["/", "index.html"], ["/privacy", "privacy.html"], ["/hvac-optimization", "hvac-optimization.html"], ["/hvac-optimization-pilot", "hvac-optimization-pilot.html"], ["/hvac-optimization-companies", "hvac-optimization-companies.html"]];
+const pages = [["/", "index.html"], ["/privacy", "privacy.html"], ["/hvac-optimization", "hvac-optimization.html"], ["/hvac-optimization-pilot", "hvac-optimization-pilot.html"], ["/hvac-optimization-companies", "hvac-optimization-companies.html"], ["/about", "about.html"], ["/hvac-optimization-evidence", "hvac-optimization-evidence.html"]];
 
 for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844 }]) {
   for (const [path, file] of pages) {
@@ -33,7 +33,7 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
       expect(await page.locator('script[type="application/ld+json"]').textContent()).toBe(block);
       const graph = JSON.parse(block);
       expect(graph["@context"]).toBe("https://schema.org");
-      expect(graph["@graph"].map(n => n["@type"])).toEqual(["Organization", "WebSite", "WebPage"]);
+      expect(graph["@graph"].map(n => n["@type"])).toEqual(["Organization", "WebSite", path === "/about" ? "AboutPage" : path === "/hvac-optimization-evidence" ? "Article" : "WebPage"]);
       expect(graph["@graph"][0]).toMatchObject({ name: "Energia AI", url: SITE + "/" });
       expect(graph["@graph"][1]).toMatchObject({ name: "Energia AI", url: SITE + "/", publisher: { "@id": SITE + "/#organization" } });
       expect(graph["@graph"][2]).toMatchObject({ url: SITE + path, name: await page.title(), description: await page.locator('meta[name="description"]').getAttribute("content") });
@@ -72,7 +72,7 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
       if (path === "/hvac-optimization") {
         expect(await page.locator("main").innerText()).not.toMatch(/[-–—]/);
         await page.getByRole("link", { name: "Discuss a pilot", exact: true }).click();
-        await expect(page).toHaveURL(/\/#contact$/);
+        await expect(page).toHaveURL(/\/\?source_path=%2F[^#]*#contact$/);
         await expect(page.locator("#contact-title")).toBeInViewport();
         if (viewport.width < 700) {
           await page.locator("[data-toggle]").click();
@@ -133,7 +133,7 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
 test("built sitemap, public allowlist and private exclusions stay coherent", async ({ request }) => {
   const sitemap = await (await request.get("/sitemap.xml")).text();
   expect([...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1])).toEqual(pages.map(([path]) => SITE + path));
-  expect(sitemap).not.toContain("lastmod");
+  expect([...sitemap.matchAll(/<lastmod>(.*?)<\/lastmod>/g)].map(m => m[1])).toEqual(pages.map(() => "2026-11-08"));
   const robots = await (await request.get("/robots.txt")).text();
   expect(robots).toBe(`User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: ${SITE}/sitemap.xml\n`);
   const admin = await request.get("/admin");

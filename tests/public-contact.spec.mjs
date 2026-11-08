@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { readFile, readdir, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
-const pages = ["/", "/privacy", "/hvac-optimization", "/hvac-optimization-pilot", "/hvac-optimization-companies"];
+const pages = ["/", "/privacy", "/hvac-optimization", "/hvac-optimization-pilot", "/hvac-optimization-companies", "/about", "/hvac-optimization-evidence"];
 const privateAddress = /edo\.orfanini@energiaigroup\.com|mailto:/i;
 
 test("built public files contain no personal address or mail link, including display assets", async () => {

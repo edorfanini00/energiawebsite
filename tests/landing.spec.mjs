@@ -268,7 +268,7 @@ test("scripts: synchronous boot.js before CSS, deferred main.js and pixel.js, ha
   const { readFileSync, statSync } = await import("node:fs");
   const html = readFileSync("index.html", "utf8");
   const tags = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)].map((m) => ({ attrs: m[1].trim(), body: m[2].trim() }));
-  expect(tags.filter((t) => !t.attrs.includes("application/ld+json")).map((t) => t.attrs)).toEqual(['src="boot.js"', 'src="main.js" defer', 'src="pixel.js" defer']);
+  expect(tags.filter((t) => !t.attrs.includes("application/ld+json")).map((t) => t.attrs)).toEqual(['src="boot.js"', 'type="module" src="main.js"', 'src="pixel.js" defer']);
   for (const t of tags.filter((t) => !t.attrs.includes("application/ld+json"))) expect(t.body).toBe("");
   expect(html.indexOf('src="boot.js"')).toBeLessThan(html.indexOf('rel="stylesheet"'));
   expect(html).not.toMatch(/\son[a-z]+\s*=/i);
@@ -511,7 +511,7 @@ for (const vp of viewports) {
         if (href.startsWith("#")) {
           const id = href.slice(1);
           expect(await page.locator(`[id="${id}"]`).count(), `anchor ${href}`).toBe(1);
-        } else if (["/privacy", "/hvac-optimization", "/hvac-optimization-pilot", "/hvac-optimization-companies"].includes(href)) {
+        } else if (["/privacy", "/hvac-optimization", "/hvac-optimization-pilot", "/hvac-optimization-companies", "/about", "/hvac-optimization-evidence"].includes(href)) {
           expect((await request.get(href)).status(), href).toBe(200);
         } else {
           expect(href, "only the published LinkedIn page is external").toBe(LINKEDIN);

@@ -161,3 +161,80 @@ test("privacy instructions lead to a stored synthetic request through the existi
     await pool.query("DELETE FROM inquiries WHERE reference = $1", [reference]);
   } finally { await page.close(); }
 });
+
+// Every inquiry goes through the actual HTTP handler, ALTCHA solver and a
+// disposable local PostgreSQL. No browser request may leave loopback.
+for (const path of ['/', '/hvac-optimization', '/hvac-optimization-pilot', '/hvac-optimization-companies', '/about', '/hvac-optimization-evidence', '/privacy']) {
+  for (const tagged of [false, true]) {
+    test(`real persistence: ${path} to contact, ${tagged ? 'tagged' : 'untagged'}`, async () => {
+      await pool.query('TRUNCATE rate_limits, used_proofs');
+      const page = await browser.newPage({ viewport: { width: tagged ? 390 : 1440, height: 900 } });
+      const external = [];
+      await page.route('**/*', route => {
+        if (new URL(route.request().url()).origin !== origin) { external.push(route.request().url()); return route.abort(); }
+        return route.continue();
+      });
+      await page.addInitScript(() => {
+        for (const key of ['localStorage', 'sessionStorage']) Object.defineProperty(window, key, { get() { throw new Error('unavailable'); } });
+      });
+      try {
+        await page.goto(origin + path + (tagged ? '?utm_source=synthetic_search&utm_medium=organic&utm_campaign=source_proof&utm_term=building&utm_content=resource&email=PRIVATE&_vercel_share=SECRET' : ''));
+        if (path !== '/') await page.locator('main a[data-contact-source]').first().click();
+        else await page.locator(tagged ? '.hero__cta' : '.bar__cta').click();
+        await page.waitForFunction(() => document.activeElement?.id === 'inquiry-name');
+        await page.fill('#inquiry-name', 'Synthetic Provenance Tester');
+        await page.fill('#inquiry-email', `source.${crypto.randomUUID()}@example.com`);
+        await page.fill('#inquiry-company', 'Synthetic Source Buildings');
+        await page.selectOption('#inquiry-building-type', 'Office');
+        await page.selectOption('#inquiry-floor-area', 'Not sure');
+        await page.locator('[data-submit]').click();
+        await page.locator('[data-done]').waitFor({ timeout: 30000 });
+        const reference = (await page.locator('[data-reference]').textContent()).replace(' ', '-');
+        const row = (await pool.query('SELECT * FROM inquiries WHERE reference = $1', [reference])).rows[0];
+        assert.equal(row.source_url, origin + path);
+        for (const [key, value] of Object.entries({ utm_source: 'synthetic_search', utm_medium: 'organic', utm_campaign: 'source_proof', utm_term: 'building', utm_content: 'resource' })) assert.equal(row[key], tagged ? value : null);
+        assert.ok(!JSON.stringify(row).match(/PRIVATE|SECRET/));
+        assert.deepEqual(external, []);
+      } finally { await page.close(); }
+    });
+  }
+}
+
+test('source attribution survives actual failed submission, stored response loss and idempotent retry', async () => {
+  await pool.query('TRUNCATE rate_limits, used_proofs');
+  const page = await browser.newPage();
+  const posts = [];
+  try {
+    await page.goto(origin + '/hvac-optimization-pilot?utm_source=synthetic_retry');
+    await page.locator('main a[data-contact-source]').click();
+    await page.fill('#inquiry-name', 'Synthetic Retry Tester');
+    await page.fill('#inquiry-email', 'synthetic.retry@example.com');
+    await page.fill('#inquiry-company', 'Synthetic Retry Building');
+    await page.selectOption('#inquiry-building-type', 'Office');
+    await page.selectOption('#inquiry-floor-area', 'Not sure');
+    await page.evaluate(() => { window.__leads = []; window.fbq = (...args) => window.__leads.push(args); });
+    await page.route('**/api/inquiry', async route => {
+      posts.push(route.request().postDataJSON());
+      if (posts.length === 1) return route.fulfill({ status: 503, json: { status: 'unavailable' } });
+      if (posts.length === 2) { const response = await route.fetch(); assert.equal(response.status(), 200); return route.abort('timedout'); }
+      return route.continue();
+    });
+    for (let i = 0; i < 2; i++) {
+      await page.locator('[data-submit]').click();
+      await page.getByText(/Your answers are still in the form/).waitFor();
+      await page.locator('[data-submit]:enabled').waitFor();
+      assert.equal(await page.inputValue('#inquiry-name'), 'Synthetic Retry Tester');
+    }
+    await page.locator('[data-submit]').click();
+    await page.locator('[data-done]').waitFor({ timeout: 30000 });
+    assert.equal(posts.length, 3);
+    assert.equal(new Set(posts.map(p => p.idempotencyKey)).size, 1);
+    for (const post of posts) { assert.equal(post.sourcePath, '/hvac-optimization-pilot'); assert.equal(post.utm, 'utm_source=synthetic_retry'); }
+    const rows = (await pool.query('SELECT * FROM inquiries WHERE idempotency_key = $1', [posts[0].idempotencyKey])).rows;
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].source_url, origin + '/hvac-optimization-pilot');
+    assert.equal(rows[0].utm_source, 'synthetic_retry');
+    assert.equal((await pool.query('SELECT count(*) FROM inquiry_events WHERE reference = $1 AND action = $2', [rows[0].reference, 'received'])).rows[0].count, '1');
+    assert.deepEqual(await page.evaluate(() => window.__leads), []);
+  } finally { await page.close(); }
+});

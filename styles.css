@@ -1002,7 +1002,7 @@ html:not(.js) .inquiry,
   row-gap: 16px;
 }
 .foot__mark { width: 112px; }
-.foot__links { display: flex; gap: 24px; }
+.foot__links { display: flex; flex-wrap: wrap; gap: 8px 24px; }
 .foot__links a {
   display: inline-flex;
   align-items: center;

@@ -81,7 +81,7 @@ describe("field validation", () => {
 
   test("UTM parameters are cleaned and everything else, like a share token, is dropped", () => {
     assert.deepEqual(readUtm("?utm_source=linkedin&utm_campaign=q4%0Atest&_vercel_share=secret&x=1"), { utm_source: "linkedin", utm_campaign: "q4 test" });
-    assert.equal(readUtm("?utm_term=" + "y".repeat(300)).utm_term.length, 100);
+    assert.deepEqual(readUtm("?utm_term=" + "y".repeat(300)), {});
     assert.equal(readSourcePath("/"), "/");
     assert.equal(readSourcePath("/?_vercel_share=x"), "/");
     assert.equal(readSourcePath("https://evil.example/"), "/");

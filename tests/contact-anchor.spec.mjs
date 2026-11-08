@@ -15,7 +15,7 @@ test("cross-page contact focus survives a delayed deferred resource", async ({ p
   const gate = new Promise(resolve => { release = resolve; });
   await page.route("**/pixel.js", async route => { await gate; await route.continue(); });
   try {
-    await page.locator('main a[href="/#contact"]').click({ noWaitAfter: true });
+    await page.locator('main a[data-contact-source]').click({ noWaitAfter: true });
     await expect(page.locator("[data-inquiry]")).toHaveAttribute("data-ready", "");
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     expect(await page.evaluate(() => document.readyState)).toBe("interactive");
@@ -69,7 +69,7 @@ for (const width of [320, 390, 1440]) {
         await page.goto(path);
         const release = await holdResource(page, "**/pixel.js");
         try {
-          await page.locator('main a[href="/#contact"]').click({ noWaitAfter: true });
+          await page.locator('main a[data-contact-source]').click({ noWaitAfter: true });
           await expect(page.locator("[data-inquiry]")).toHaveAttribute("data-ready", "");
           await nextFrames(page);
           expect(await page.evaluate(() => document.readyState)).toBe("interactive");
@@ -114,13 +114,13 @@ for (const width of [320, 390, 1440]) {
   test(`ordinary contact arrival and history at ${width}`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width, height: width === 1440 ? 1000 : 844 });
     await page.goto("/hvac-optimization-pilot");
-    await page.locator('main a[href="/#contact"]').click();
+    await page.locator('main a[data-contact-source]').click();
     // No intercepted or substituted resources in the visual evidence.
     await settledContact(page, testInfo.outputPath(`contact-${width}.png`));
     await page.goBack();
     await expect(page).toHaveURL(/\/hvac-optimization-pilot$/);
     await page.goForward();
-    await expect(page).toHaveURL(/\/#contact$/);
+    await expect(page).toHaveURL(/\/\?source_path=%2F[^#]*#contact$/);
     await page.locator('.foot__links a[href="#contact"]').click();
     await settledContact(page);
   });
@@ -129,11 +129,11 @@ for (const width of [320, 390, 1440]) {
 test("modified contact link opens a new tab without navigating its source", async ({ page }) => {
   await page.goto("/hvac-optimization-companies");
   const opened = page.context().waitForEvent("page", { timeout: 10000 });
-  await page.locator('main a[href="/#contact"]').click({ modifiers: ["ControlOrMeta"] });
+  await page.locator('main a[data-contact-source]').click({ modifiers: ["ControlOrMeta"] });
   const popup = await opened;
   try {
     await expect(page).toHaveURL(/\/hvac-optimization-companies$/);
-    await expect(popup).toHaveURL(/\/#contact$/);
+    await expect(popup).toHaveURL(/\/\?source_path=%2F[^#]*#contact$/);
     // A modified click opens a background tab; select it before expecting
     // its rendering-frame focus handoff or sending it keyboard input.
     await popup.bringToFront();
@@ -146,8 +146,8 @@ test("privacy contact remains a native anchor without JavaScript", async ({ brow
   try {
     const page = await context.newPage();
     await page.goto(baseURL + "/privacy");
-    await page.locator('main a[href="/#contact"]').click();
-    await expect(page).toHaveURL(/\/#contact$/);
+    await page.locator('main a[data-contact-source]').click();
+    await expect(page).toHaveURL(/\/\?source_path=%2F[^#]*#contact$/);
     await expect(page.locator("#contact-title")).toBeInViewport();
     await expect(page.locator(".contact__fallback")).toBeVisible();
   } finally { await context.close(); }

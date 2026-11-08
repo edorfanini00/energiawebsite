@@ -21,6 +21,7 @@
   <link rel="preload" href="/assets/fonts/satoshi-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css">
   <script src="/pixel.js" defer></script>
+  <script type="module" src="/contact-links.js"></script>
 </head>
 <body class="legal-page">
   <a class="skip" href="#main">Skip to content</a>
@@ -37,7 +38,8 @@
     <section class="legal__part" aria-labelledby="collect">
       <h2 id="collect">What we collect</h2>
       <p>The answers you give in the form: your name, work email, company, building type and total floor area, and any optional details you choose to add, such as your role, number of buildings, building management system, annual energy spend, what you would like to improve and a phone number.</p>
-      <p>We also record when you sent the form, the page you sent it from and any campaign tags (UTM parameters) in the link you followed to reach us.</p>
+      <p>We also record when you sent the form. When you follow a contact link from one of our resource pages or this privacy page, the link carries that page’s path and, when JavaScript is available, supported campaign tags (UTM parameters) from its current URL. A direct visit to the homepage can also supply campaign tags. We save this source information with your inquiry to understand its context when replying. Only approved page paths and campaign fields are accepted; other query fields are discarded.</p>
+      <p>This source handling uses no cookies or browser storage. It does not retain your earlier browsing journey or identify an external referring website. Missing sources remain unknown; the homepage path alone does not mean you arrived directly. With JavaScript disabled, contact links still work, but campaign tags are not carried and the form cannot be submitted. Please do not put personal information in campaign tags.</p>
     </section>
 
     <section class="legal__part" aria-labelledby="use">
@@ -70,7 +72,7 @@
 
     <section class="legal__part" aria-labelledby="choices">
       <h2 id="choices">Your choices</h2>
-      <p>You can ask us to show you or delete the details you sent at any time. For a privacy request, use our <a href="/#contact">inquiry form</a>. Open “Add optional details” and describe your request in “What would you like to improve?” Include the reference of your earlier inquiry if you have it. If the building questions do not apply, enter “Privacy request” for company, choose “Other” for building type and “Not sure” for total floor area.</p>
+      <p>You can ask us to show you or delete the details you sent at any time. For a privacy request, use our <a href="/?source_path=%2Fprivacy#contact" data-contact-source>inquiry form</a>. Open “Add optional details” and describe your request in “What would you like to improve?” Include the reference of your earlier inquiry if you have it. If the building questions do not apply, enter “Privacy request” for company, choose “Other” for building type and “Not sure” for total floor area.</p>
     </section>
 
     <p class="legal__updated">Updated November 8, 2026</p>
@@ -81,7 +83,7 @@
       <img class="foot__mark" src="/assets/brand/energia-ai-wordmark-ink.png" width="424" height="48" alt="Energia AI">
       <ul class="foot__links">
         <li><a href="/">Home</a></li>
-        <li><a href="/#contact">Contact</a></li>
+        <li><a href="/?source_path=%2Fprivacy#contact" data-contact-source>Contact</a></li>
       </ul>
       <p class="foot__copy">© 2026 Energia AI</p>
     </div>

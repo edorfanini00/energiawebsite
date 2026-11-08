@@ -1,3 +1,5 @@
+import { readAttribution } from './attribution.js';
+
 // Energia AI landing preview: header state, mobile menu, the day tabs, the
 // inquiry form and section reveals. The form talks only to this site's own
 // /api endpoints; after a newly stored inquiry it adds one Meta Lead through
@@ -381,8 +383,8 @@
         if (!sent || sent.body !== body) sent = { body: body, key: uuid() };
         var payload = Object.assign({}, answers, {
           idempotencyKey: sent.key,
-          sourcePath: location.pathname,
-          utm: location.search.slice(0, 2000),
+          sourcePath: readAttribution(location.pathname, location.search).sourcePath,
+          utm: readAttribution(location.pathname, location.search).utm,
           website: control("website").value,
           altcha: await freshProof()
         });
