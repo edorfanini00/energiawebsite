@@ -25,23 +25,35 @@ test("pilot invitation preserves contact focus and describes a bounded measured 
 test("control, fallback and integrations remain site prerequisites", async ({ page }) => {
   await page.goto("/");
   const row = label => page.locator(".ledger__row").filter({ has: page.locator("dt", { hasText: label }) });
-  await expect(page.locator("#limits .lede")).toContainText("permissions, visibility into control changes and your team’s approval");
-  await expect(row("Fallback")).toContainText("Fallback to existing controls and manual override must be verified with your engineer before a pilot can control equipment");
-  await expect(row("Fallback")).toContainText("connection loss and bad data");
-  await expect(row("Fresh air")).toContainText("engineer must approve ventilation requirements and verify how they are enforced");
-  await expect(row("Life safety")).toContainText("engineer must verify");
+  const intro = page.locator("#limits .lede");
+  await expect(intro).toContainText("Your team approves the operating boundaries and can review control changes");
+  await expect(intro).toContainText("Before control begins, we verify permissions, manual override and fallback with your engineer and existing controls provider");
+  await expect(row("Setpoint range")).toContainText("We agree permitted setpoint ranges and verify the heating and cooling deadband with your engineer");
+  await expect(row("Fresh air")).toContainText("We agree ventilation requirements with your engineer and verify how the pilot will preserve them");
+  await expect(row("Equipment")).toContainText("We agree equipment limits and permitted changes with your facilities team and controls provider");
+  await expect(row("Fallback")).toContainText("We test the return to existing controls and manual override on site");
+  await expect(row("Fallback")).toContainText("connection loss and unreliable readings");
+  await expect(row("Life safety")).toContainText("We verify the pilot’s control boundaries against your site’s fire, smoke and critical equipment protections");
   await expect(row("Your BMS")).toContainText("assess BACnet or Modbus compatibility");
   await expect(row("Your BMS")).toContainText("before committing to a pilot");
+  // Consolidate the gate in the introduction without shifting work to the buyer.
+  await expect(page.locator("#limits")).not.toContainText(/your engineer must|must approve|before a pilot can control equipment/i);
   const control = page.locator(".faq__item").filter({ hasText: "Can operators take control back?" });
-  await expect(control).toContainText("Manual control is a pilot prerequisite");
-  await expect(control).toContainText("verify manual override and fallback on site before enabling equipment control");
+  await expect(control).toContainText("Your team retains control authority");
+  await expect(control).toContainText("Before enabling equipment control, we agree approvals and visibility");
+  await expect(control).toContainText("verify manual override and fallback on site with your engineer and existing controls provider");
 });
 
 test("all scenarios and collapsed FAQs distinguish preparation from field evidence", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("#day .lede")).toContainText("This example shows how predictive control could help");
   await expect(page.locator(".moment__action-label")).toHaveText(Array(4).fill("Possible control action"));
+  await expect(page.locator(".hero__line")).toContainText("It learns your building’s response to weather, occupancy and control changes");
+  await expect(page.locator(".hero__line")).toContainText("measured pilot within your team’s operating limits");
+  await expect(page.locator("#model .lede")).toContainText("learns how your building responds to weather, occupancy and HVAC changes");
   await expect(page.locator("#model .lede")).toContainText("available plans and operating data");
+  await expect(page.locator(".steps li").last()).toContainText("learned building response helps evaluate adaptive HVAC setpoints");
+  await expect(page.locator(".steps li").last()).toContainText("verify limits with your engineer and BMS provider before equipment control");
   await expect(page.locator(".steps")).toContainText("scope depends on the control issue and data available");
   const savings = page.locator(".faq__item").filter({ hasText: "How much could my building save?" });
   await expect(savings).toContainText("Savings must be established by a measured pilot");

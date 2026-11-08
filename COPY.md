@@ -6,7 +6,7 @@ Current buyer value update, November 8, 2026. Source of truth: `index.html`. Aud
 
 Title: Energia AI · Lower HVAC operating costs
 
-Description: Energia AI is an AI control platform for commercial HVAC. Discuss a measured building pilot to evaluate operating costs and comfort, with your team in control.
+Description: Energia AI is an AI control platform for commercial HVAC. It learns building response to evaluate adaptive control. Discuss a measured building pilot within your team’s operating limits.
 
 ## Page text in DOM order
 
@@ -26,7 +26,7 @@ Menu
 
 Lower HVAC operating costs. Keep your team in control.
 
-Energia AI is an AI control platform for commercial HVAC. We work with your team to identify avoidable energy use and evaluate better control within your building’s comfort and operating requirements.
+Energia AI is an AI control platform for commercial HVAC. It learns your building’s response to weather, occupancy and control changes. Start with a measured pilot within your team’s operating limits.
 
 Discuss a pilot
 
@@ -98,7 +98,7 @@ Most people have gone home. A few rooms are still in use.
 
 It starts with a model of your building.
 
-We use available plans and operating data to model how your building responds to weather, occupancy and HVAC changes.
+Energia AI learns how your building responds to weather, occupancy and HVAC changes, using available plans and operating data.
 
 The dark area is the building core. Outlines divide the floor into zones. The fine grid represents the control volumes used to calculate heat flow.
 
@@ -112,31 +112,31 @@ The AI practices across simulated weather and occupancy to prepare control strat
 
 Control
 
-Before any equipment control, we agree permitted changes and verify the site’s limits with your engineer and building management system (BMS) provider.
+The learned building response helps evaluate adaptive HVAC setpoints. We agree permitted changes and verify limits with your engineer and BMS provider before equipment control.
 
 Your team sets the limits.
 
-A pilot starts with agreed permissions, visibility into control changes and your team’s approval. These checks come before equipment control.
+Your team approves the operating boundaries and can review control changes. Before control begins, we verify permissions, manual override and fallback with your engineer and existing controls provider.
 
 Setpoint range
 
-Agree permitted setpoint ranges and verify the deadband that separates heating and cooling with your engineer.
+We agree permitted setpoint ranges and verify the heating and cooling deadband with your engineer.
 
 Fresh air
 
-Your engineer must approve ventilation requirements and verify how they are enforced before a pilot can control equipment.
+We agree ventilation requirements with your engineer and verify how the pilot will preserve them.
 
 Equipment
 
-Your facilities team and controls provider must approve equipment limits and permitted changes before control is enabled.
+We agree equipment limits and permitted changes with your facilities team and controls provider.
 
 Fallback
 
-Fallback to existing controls and manual override must be verified with your engineer before a pilot can control equipment, including connection loss and bad data.
+We test the return to existing controls and manual override on site, including connection loss and unreliable readings.
 
 Life safety
 
-Your engineer must verify that proposed control changes respect the site’s fire, smoke and critical equipment protections before approving a pilot.
+We verify the pilot’s control boundaries against your site’s fire, smoke and critical equipment protections.
 
 Your BMS
 
@@ -174,7 +174,7 @@ We review available plans, equipment details, BMS points and trends, meter data 
 
 Can operators take control back?
 
-Manual control is a pilot prerequisite. We agree approvals and visibility with your team and existing engineer or BMS provider, then verify manual override and fallback on site before enabling equipment control.
+Your team retains control authority. Before enabling equipment control, we agree approvals and visibility, then verify manual override and fallback on site with your engineer and existing controls provider.
 
 What does a pilot include?
 
@@ -313,6 +313,10 @@ Email
 LinkedIn (opens in a new tab)
 
 © 2026 Energia AI
+
+## Review copy refinement
+
+Both reviews and parent notes are addressed in the current page text above: explicit building-response learning and adaptive control evaluation, with a measured pilot; collaborative limits rows and a consolidated verification gate before control. Operator approval/visibility and engineer/provider participation remain explicit. Fallback is tested on site for connection loss and unreliable readings, never promised universally. Metadata and model/control copy use the same product mechanism. No additional simulation disclaimers or behavioral changes.
 
 ## Buyer value editing record
 

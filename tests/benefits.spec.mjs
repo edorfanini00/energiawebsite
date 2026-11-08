@@ -23,13 +23,13 @@ test.describe("benefits pass copy", () => {
   test("hero leads with the outcome and an outcome CTA", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("#top h1")).toHaveText("Lower HVAC operating costs. Keep your team in control.");
-    await expect(page.locator(".hero__line")).toHaveText("Energia AI is an AI control platform for commercial HVAC. We work with your team to identify avoidable energy use and evaluate better control within your building’s comfort and operating requirements.");
+    await expect(page.locator(".hero__line")).toHaveText("Energia AI is an AI control platform for commercial HVAC. It learns your building’s response to weather, occupancy and control changes. Start with a measured pilot within your team’s operating limits.");
     await expect(page.locator(".hero__cta")).toHaveText("Discuss a pilot");
     await expect(page.locator(".bar__cta")).toHaveText("Discuss a pilot");
     // The contact section now holds the inquiry form; its button sends it.
     await expect(page.locator(".contact .button")).toHaveText("Send");
     await expect(page).toHaveTitle("Energia AI · Lower HVAC operating costs");
-    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /AI control platform for commercial HVAC\. Discuss a measured building pilot/);
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /AI control platform for commercial HVAC\. It learns building response to evaluate adaptive control\. Discuss a measured building pilot/);
     await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://www.energiaigroup.com/");
   });

@@ -2,6 +2,12 @@
 
 Where each brand asset, image, font, design reference and product claim comes from.
 
+## Review copy refinement · 2026-11-08
+
+Addresses both independent reviews (A1/B1 and A2/B2) and PARENT-COPY-NOTES.md. Hero and model copy now explicitly explain learning building response to weather, occupancy and control changes; the Control step describes evaluating adaptive HVAC setpoints. This maps to thermal-response learning and simulation/control objectives in the same technical/MVP sources, not evidence of deployed autonomy or field savings. The measured pilot, model simulation qualification and field-measurement FAQ remain.
+
+The limits introduction retains operator approval, visibility and verification of permissions, manual override and fallback before control with the engineer and existing provider. Rows describe collaborative pilot steps: agreed setpoint/deadband, ventilation and equipment limits; on-site return-to-controls/manual-override testing for connection loss and unreliable readings; and site fire/smoke/critical-equipment boundaries. These are proposed pilot-process commitments, not universal certified protection or obligations shifted to the buyer. The operator FAQ preserves the same gate. BMS compatibility wording is unchanged. No asset, runtime, integration or safety implementation claim was added.
+
 ## Buyer value update · 2026-11-08
 
 Current wording follows `/Users/edorfanini/.hermes/workspace/energia-market-entry-research/LANDING-BUILD.md` and its `STRATEGY.md`. The strategy is desk research and a first offer hypothesis, not customer validation or Energia field proof. It authorizes no survey, competitor or simulation percentage as an Energia result. This section supersedes historical wording notes below.
