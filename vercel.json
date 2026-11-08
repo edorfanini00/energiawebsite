@@ -90,6 +90,24 @@
       ]
     },
     {
+      "source": "/hvac-optimization-evidence",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'none'; script-src 'self' 'sha256-L8ul2uNqYKQfJL6WWfFHQwA2PmpkTFZkklmqSXoD5iE='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
+        }
+      ]
+    },
+    {
+      "source": "/about",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'none'; script-src 'self' 'sha256-JvNzOClfET5j0w+0J3S/UVtQp3sb31Uzu6+Ey02jHNc='; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'"
+        }
+      ]
+    },
+    {
       "source": "/admin(.*)",
       "headers": [
         {

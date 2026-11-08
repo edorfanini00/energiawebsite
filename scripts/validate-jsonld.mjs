@@ -1,12 +1,13 @@
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
+import { cleanUrls } from "./public-files.mjs";
 
 // Fail the build if a content edit leaves a stale CSP hash. The default
 // policy and private routes never need permission for inline scripts.
 export async function validateJsonLd(root, vercel) {
-  for (const [file, path] of [["index.html", "/"], ["privacy.html", "/privacy"], ["hvac-optimization.html", "/hvac-optimization"], ["hvac-optimization-pilot.html", "/hvac-optimization-pilot"], ["hvac-optimization-companies.html", "/hvac-optimization-companies"]]) {
-    const html = await readFile(join(root, file), "utf8");
+  for (const [path, file] of Object.entries(cleanUrls).filter(([path]) => path !== "/admin")) {
+    const html = await readFile(join(root, file.slice(1)), "utf8");
     const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
     if (blocks.length !== 1) throw new Error(`${file}: expected one JSON-LD block`);
     const data = JSON.parse(blocks[0][1]);

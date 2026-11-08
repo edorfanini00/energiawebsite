@@ -1,6 +1,6 @@
 // The Meta pixel, the widened CSP and indexing. pixel.js never loads on a
 // loopback host, so these tests reach the local server through a stand-in
-// hostname (energia.pixel.test, mapped to 127.0.0.1 in Chrome). Meta's
+// hostname (energia.pixel.localhost, mapped to 127.0.0.1 in Chrome). Meta's
 // script is answered here by a recorder, so nothing is ever sent to Meta;
 // its host still has to pass the real CSP from vercel.json. /api is answered
 // with the server's own validation and ALTCHA code.
@@ -12,15 +12,16 @@ import { validate } from "../server/fields.js";
 const PIXEL_ID = "2313981812785333";
 const FBEVENTS = "https://connect.facebook.net/en_US/fbevents.js";
 const PORT = Number(process.env.PORT || 4173);
-const HOST = `http://energia.pixel.test:${PORT}`;
+const HOST = `http://energia.pixel.localhost:${PORT}`;
 const SECRET = "d".repeat(64);
 const STRICT = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'";
 const PUBLIC = "default-src 'none'; script-src 'self' https://connect.facebook.net; style-src 'self'; img-src 'self' https://www.facebook.com; font-src 'self'; connect-src 'self' https://www.facebook.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; manifest-src 'none'";
 
 test.use({
   launchOptions: {
-    // The form needs a secure context for Web Crypto, as on the real https host.
-    args: ["--host-resolver-rules=MAP energia.pixel.test 127.0.0.1", `--unsafely-treat-insecure-origin-as-secure=${HOST}`],
+    // .localhost is a trustworthy loopback origin for Web Crypto. This avoids
+    // relying on Chromium's legacy insecure-origin override flag.
+    args: ["--host-resolver-rules=MAP energia.pixel.localhost 127.0.0.1"],
   },
 });
 
@@ -38,7 +39,7 @@ async function watchMeta(page, { block = false } = {}) {
   const seen = { offsite: [], finished: [], failed: {}, errors: [], fbevents: 0 };
   page.on("request", (r) => {
     const url = new URL(r.url());
-    if (url.hostname !== "energia.pixel.test" && url.hostname !== "127.0.0.1") seen.offsite.push(r.url());
+    if (url.hostname !== "energia.pixel.localhost" && url.hostname !== "127.0.0.1") seen.offsite.push(r.url());
   });
   page.on("requestfinished", (r) => seen.finished.push(r.url()));
   page.on("requestfailed", (r) => (seen.failed[r.url()] = r.failure()?.errorText));
@@ -371,7 +372,7 @@ test.describe("indexing", () => {
     expect(sitemap.status()).toBe(200);
     expect(sitemap.headers()["content-type"]).toMatch(/^application\/xml/);
     const locs = [...(await sitemap.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-    expect(locs).toEqual(["https://predictivehvaccontrol.com/", "https://predictivehvaccontrol.com/privacy", "https://predictivehvaccontrol.com/hvac-optimization", "https://predictivehvaccontrol.com/hvac-optimization-pilot", "https://predictivehvaccontrol.com/hvac-optimization-companies"]);
+    expect(locs).toEqual(["https://predictivehvaccontrol.com/", "https://predictivehvaccontrol.com/privacy", "https://predictivehvaccontrol.com/hvac-optimization", "https://predictivehvaccontrol.com/hvac-optimization-pilot", "https://predictivehvaccontrol.com/hvac-optimization-companies", "https://predictivehvaccontrol.com/about", "https://predictivehvaccontrol.com/hvac-optimization-evidence"]);
   });
 
   test("public pages are indexable with a canonical; /admin and /api stay noindex", async ({ request }) => {

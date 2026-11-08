@@ -79,22 +79,5 @@ export function validate(input) {
   return { data, errors };
 }
 
-export const utmKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"];
-
-// Campaign parameters from the page query string, cleaned and capped. Every
-// other parameter (including any preview share token) is discarded.
-export function readUtm(search) {
-  const params = new URLSearchParams(typeof search === "string" ? search.slice(0, 2000) : "");
-  const utm = {};
-  for (const key of utmKeys) {
-    const value = params.get(key)?.replace(new RegExp(CONTROL.source, "g"), "").replace(new RegExp(LINE_BREAK.source, "g"), " ").trim().slice(0, 100);
-    if (value) utm[key] = value;
-  }
-  return utm;
-}
-
-// Only a same-site path is kept as the source page; never a query or hash.
-export function readSourcePath(value) {
-  if (typeof value !== "string" || value.length > 200 || !/^\/[A-Za-z0-9/._~-]*$/.test(value) || value.includes("..")) return "/";
-  return value;
-}
+// The same bounded URL parser is used by the public contact links.
+export { utmKeys, readUtm, readSourcePath } from '../attribution.js';

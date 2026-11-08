@@ -321,7 +321,7 @@ for (const vp of VIEWPORTS) {
       const reference = [...api.store.values()][0].reference;
       expect(reference).toMatch(/^EA-/);
       await expect(page.locator("[data-reference]")).toHaveText(reference.replace("-", " "));
-      expect(api.posts[0].utm).toBe("?utm_source=synthetic&utm_campaign=retry");
+      expect(api.posts[0].utm).toBe("utm_source=synthetic&utm_campaign=retry");
     });
 
     test("a server failure keeps the answers; changed answers get a new key", async ({ page }) => {
@@ -458,7 +458,7 @@ for (const vp of VIEWPORTS) {
       expect(res.status()).toBe(200);
       const html = await res.text();
       expect(html).toContain("We keep inquiries until we no longer need them or you ask us to delete them.");
-      expect(html).toContain('<a href="/#contact">inquiry form</a>');
+      expect(html).toContain('<a href="/?source_path=%2Fprivacy#contact" data-contact-source>inquiry form</a>');
       expect(html).not.toContain("mailto:");
       expect(html).not.toContain("noindex");
       expect(html).toContain('<link rel="canonical" href="https://predictivehvaccontrol.com/privacy">');

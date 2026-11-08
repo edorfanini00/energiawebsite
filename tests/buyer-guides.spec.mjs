@@ -34,7 +34,8 @@ for (const width of [1440, 390, 320]) {
       const text = await page.locator("main").innerText();
       expect(text).not.toMatch(/[-–—]|Editorial handoff|Customer facing draft|Publish only|Proposed path|unpublished draft/);
       expect(text.split(/\s+/).length).toBeGreaterThan(1400);
-      expect(await page.locator('script[src]')).toHaveCount(0);
+      await expect(page.locator('script[src]')).toHaveCount(1);
+      await expect(page.locator('script[src]')).toHaveAttribute('src', '/contact-links.js');
       expect(await page.locator('main a[href^="https:"]').evaluateAll(links => links.map(a => a.href))).toEqual(sources[path]);
       // Check the actual text boxes throughout the page, not just the viewport top.
       expect(await page.locator("main :is(p, li, h1, h2, h3)").evaluateAll(elements => elements.filter(el => {
@@ -74,8 +75,8 @@ for (const width of [1440, 390, 320]) {
         await expect(page.locator(href)).toBeInViewport();
       }
       // A cross-page anchor must focus the real form on arrival, without a second click.
-      await page.locator('main a[href="/#contact"]').click();
-      await expect(page).toHaveURL(/\/#contact$/);
+      await page.locator('main a[data-contact-source]').click();
+      await expect(page).toHaveURL(/\/\?source_path=%2F[^#]*#contact$/);
       await expect(page.locator("#inquiry-name")).toBeFocused();
       await expect(page.locator("#inquiry-name")).toBeInViewport();
       await page.keyboard.press("Tab");
@@ -94,7 +95,7 @@ for (const path of guides) {
       const href = await link.getAttribute("href");
       await link.click();
       await expect(page.locator(href)).toBeInViewport();
-      await page.locator('main a[href="/#contact"]').click();
+      await page.locator('main a[data-contact-source]').click();
       await expect(page.locator(".contact__fallback")).toBeVisible();
       await expect(page.locator(".contact__fallback")).toContainText("reload this page to try again");
       await expect(page.locator('a[href^="mailto:"]')).toHaveCount(0);

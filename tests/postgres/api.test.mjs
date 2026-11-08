@@ -461,3 +461,22 @@ describe("pooled transaction limits", () => {
     assert.equal((await query(s.pool, "SELECT 1 AS ok")).rows[0].ok, 1);
   });
 });
+
+for (const [sourcePath, utm, expectedSource, expectedUtm] of [
+  ['/about', '?utm_source=one&utm_source=two&utm_campaign=valid', '/about', null],
+  ['//evil.example', '?utm_source=valid', '/', 'valid'],
+  ['https://evil.example', '?utm_source=' + 'x'.repeat(101), '/', null],
+  ['/about?email=PRIVATE', '?utm_source=valid&x=' + 'x'.repeat(2000), '/', null],
+  ['/admin', '?utm_source=&utm_source=second', '/', null],
+  ['/hvac-optimization-evidence', '?utm_source=valid&email=PRIVATE', '/hvac-optimization-evidence', 'valid'],
+]) {
+  test(`HTTP parser persists only approved provenance: ${sourcePath}`, async () => {
+    const body = { ...await payload(), sourcePath, utm };
+    const response = await s.submit(body);
+    assert.equal(response.status, 200);
+    const row = (await s.q('SELECT * FROM inquiries WHERE reference = $1', [response.json.reference])).rows[0];
+    assert.equal(row.source_url, s.origin + expectedSource);
+    assert.equal(row.utm_source, expectedUtm);
+    assert.ok(!JSON.stringify(row).includes('PRIVATE'));
+  });
+}

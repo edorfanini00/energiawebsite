@@ -8,7 +8,7 @@ import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/pr
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { publicFile } from "../../scripts/public-files.mjs";
+import { publicFile, cleanUrls } from "../../scripts/public-files.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 
@@ -18,7 +18,9 @@ test("deployment upload retains every public file and builds without internal or
     const tracked = execFileSync("git", ["ls-files", "-z"], { cwd: root, encoding: "utf8" }).split("\0").filter(Boolean);
     // Synthetic names only: never read a real .env or credential file.
     const denied = [".env", "assets/.env.local", "assets/nested/token.secret", "assets/nested/private.key", "assets/nested/client.pem", "server/credentials.json", "server/.private/config.json", "RESULT.md", "untracked.txt", "scripts/shots.mjs", "tests/node/unit.test.mjs", "migrations/001_inquiries.up.sql", "BUYER-PAGES-RELEASE.md"];
-    const candidates = [...new Set([...tracked, ...denied])];
+    const requiredPublic = [...Object.values(cleanUrls).map(path => path.slice(1)), "attribution.js", "contact-links.js"];
+    for (const path of requiredPublic) assert.ok(tracked.includes(path), `${path} must be tracked for deployment`);
+    const candidates = [...new Set([...tracked, ...requiredPublic, ...denied])];
     execFileSync("git", ["init", "--quiet", fixture]);
     await writeFile(join(fixture, ".gitignore"), await readFile(join(root, ".vercelignore")));
     const ignored = spawnSync("git", ["-c", "core.excludesFile=/dev/null", "check-ignore", "--no-index", "--stdin", "-z"], {
@@ -26,7 +28,7 @@ test("deployment upload retains every public file and builds without internal or
     });
     assert.ok([0, 1].includes(ignored.status), ignored.stderr);
     const excluded = new Set(ignored.stdout.split("\0").filter(Boolean));
-    for (const path of denied) assert.ok(excluded.has(path), `${path} must stay outside the upload`);
+    for (const path of [...denied, ...tracked.filter(path => path.startsWith("docs/search-implementation/"))]) assert.ok(excluded.has(path), `${path} must stay outside the upload`);
     const included = tracked.filter(path => !excluded.has(path));
     for (const path of included) {
       await mkdir(dirname(join(fixture, path)), { recursive: true });
@@ -41,6 +43,6 @@ test("deployment upload retains every public file and builds without internal or
     for (const path of ["api/inquiry.js", "server/inquiry.js", "scripts/validate-jsonld.mjs"]) assert.ok(included.includes(path), `${path} is needed by the deployment`);
     const publicRoots = await readdir(join(fixture, "dist"));
     for (const path of ["api", "server", "scripts", "tests", "migrations", "RESULT.md", "BUYER-PAGES-RELEASE.md", ".env"]) assert.ok(!publicRoots.includes(path), `${path} must not become public`);
-    for (const path of ["hvac-optimization-pilot.html", "hvac-optimization-companies.html"]) assert.ok(publicRoots.includes(path), path);
+    for (const path of ["hvac-optimization-pilot.html", "hvac-optimization-companies.html", "about.html", "hvac-optimization-evidence.html", "attribution.js", "contact-links.js"]) assert.ok(publicRoots.includes(path), path);
   } finally { await rm(fixture, { recursive: true, force: true }); }
 });
